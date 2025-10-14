@@ -52,6 +52,7 @@ const UFO_SPRITE = [
 // --- Game variables ---
 let score = 0;
 let highScore = 0;
+let consecutiveShots = 0;
 let gameOver = false;
 let gameWon = false;
 let alienDirection = 1;
@@ -161,6 +162,7 @@ playAgainBtn.addEventListener('click', resetGame);
 
 function resetGame() {
   score = 0;
+  consecutiveShots = 0;
   gameOver = false;
   gameWon = false;
   alienDirection = 1;
@@ -252,7 +254,10 @@ function update() {
     playerProjectiles.forEach(p => {
         if (p.status === 1) {
             p.y -= p.speed;
-            if (p.y < 0) p.status = 0;
+            if (p.y < 0) {
+                p.status = 0;
+                consecutiveShots = 0;
+            }
         }
     });
 
@@ -302,6 +307,10 @@ function update() {
                     alien.status = 0;
                     p.status = 0;
                     score += 10;
+                    consecutiveShots++;
+                    if (consecutiveShots > 0 && consecutiveShots % 5 === 0) {
+                        alienSpeed *= 1.2;
+                    }
                     explosionSound.play();
                 }
             });
