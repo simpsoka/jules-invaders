@@ -57,6 +57,7 @@ let gameOver = false;
 let gameWon = false;
 let alienDirection = 1;
 let alienSpeed = 0.5;
+let alienFireRate = 0.0005;
 
 const keys = {
     ArrowRight: false,
@@ -164,6 +165,7 @@ function resetGame() {
   score = 0;
   level = 1;
   alienSpeed = 0.5;
+  alienFireRate = 0.0005;
   gameOver = false;
   gameWon = false;
   alienDirection = 1;
@@ -203,7 +205,8 @@ function resetGame() {
 }
 
 function resetAliensForNextLevel() {
-  alienSpeed = 0.4 + (level * 0.1);
+  alienSpeed = 0.5 * Math.pow(1.2, level - 1);
+  alienFireRate = 0.0005 + (level - 1) * 0.0002;
   aliens.length = 0;
   for (let c = 0; c < alienColumnCount; c++) {
     aliens[c] = [];
@@ -307,7 +310,7 @@ function update() {
             alien.x += alienSpeed * alienDirection;
             if (alien.x + alienWidth > canvas.width || alien.x < 0) changeDirection = true;
             if (alien.y + alienHeight >= player.y) gameOver = true;
-            if (Math.random() < 0.0005) fireAlienProjectile(alien);
+            if (Math.random() < alienFireRate) fireAlienProjectile(alien);
         }
     });
 
