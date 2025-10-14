@@ -119,15 +119,8 @@ for (let i = 0; i < bunkerCount; i++) {
 
 
 // Projectiles
-const projectile = {
-  x: 0,
-  y: 0,
-  width: 5,
-  height: 10,
-  speed: 10,
-  status: 0
-};
-const alienProjectiles = [];
+let playerProjectiles = [];
+let alienProjectiles = [];
 
 // --- Event listeners & Key handlers ---
 document.addEventListener('keydown', keyDown);
@@ -145,12 +138,16 @@ function keyUp(e) {
 
 // --- Game Functions ---
 function fireProjectile() {
-  if (projectile.status === 0) {
-    projectile.status = 1;
-    projectile.x = player.x + player.width / 2 - 2.5;
-    projectile.y = player.y;
+    const p = {
+        x: player.x + player.width / 2 - 2.5,
+        y: player.y,
+        width: 5,
+        height: 10,
+        speed: 10,
+        status: 1
+    };
+    playerProjectiles.push(p);
     shootSound.play();
-  }
 }
 
 function fireAlienProjectile(alien) {
@@ -173,10 +170,12 @@ function update() {
     if (player.x < 0) player.x = 0;
     if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
 
-    if (projectile.status === 1) {
-        projectile.y -= projectile.speed;
-        if (projectile.y < 0) projectile.status = 0;
-    }
+    playerProjectiles.forEach(p => {
+        if (p.status === 1) {
+            p.y -= p.speed;
+            if (p.y < 0) p.status = 0;
+        }
+    });
 
     alienProjectiles.forEach(p => {
         if (p.status === 1) {
@@ -215,25 +214,27 @@ function update() {
     }
 
     // --- Collision Detection ---
-    if (projectile.status === 1) {
-        // Player projectile vs Aliens
-        aliens.flat().forEach(alien => {
-            if (alien.status === 1 && projectile.x > alien.x && projectile.x < alien.x + alienWidth && projectile.y > alien.y && projectile.y < alien.y + alienHeight) {
-                alien.status = 0;
-                projectile.status = 0;
-                score += 10;
+    playerProjectiles.forEach(p => {
+        if (p.status === 1) {
+            // Player projectile vs Aliens
+            aliens.flat().forEach(alien => {
+                if (alien.status === 1 && p.x > alien.x && p.x < alien.x + alienWidth && p.y > alien.y && p.y < alien.y + alienHeight) {
+                    alien.status = 0;
+                    p.status = 0;
+                    score += 10;
+                    explosionSound.play();
+                }
+            });
+
+            // Player projectile vs UFO
+            if (ufo.status === 1 && p.x > ufo.x && p.x < ufo.x + ufo.width && p.y > ufo.y && p.y < ufo.y + ufo.height) {
+                ufo.status = 0;
+                p.status = 0;
+                score += 100;
                 explosionSound.play();
             }
-        });
-
-        // Player projectile vs UFO
-        if (ufo.status === 1 && projectile.x > ufo.x && projectile.x < ufo.x + ufo.width && projectile.y > ufo.y && projectile.y < ufo.y + ufo.height) {
-            ufo.status = 0;
-            projectile.status = 0;
-            score += 100;
-            explosionSound.play();
         }
-    }
+    });
 
 
     // Alien projectiles vs Player
@@ -245,7 +246,7 @@ function update() {
     });
 
     // Projectiles vs Bunkers
-    const allProjectiles = [projectile, ...alienProjectiles];
+    const allProjectiles = [...playerProjectiles, ...alienProjectiles];
     allProjectiles.forEach(p => {
         if (p.status === 1) {
             bunkers.forEach(bunker => {
@@ -268,6 +269,10 @@ function update() {
         gameWon = true;
         gameOver = true;
     }
+
+    // Filter out inactive projectiles
+    playerProjectiles = playerProjectiles.filter(p => p.status === 1);
+    alienProjectiles = alienProjectiles.filter(p => p.status === 1);
 }
 
 // --- Drawing Functions ---
@@ -316,11 +321,10 @@ function draw() {
     });
 
 
-    if (projectile.status === 1) {
-        ctx.fillStyle = '#FFF';
-        ctx.fillRect(projectile.x, projectile.y, projectile.width, projectile.height);
-    }
     ctx.fillStyle = '#FFF';
+    playerProjectiles.forEach(p => {
+        if (p.status === 1) ctx.fillRect(p.x, p.y, p.width, p.height);
+    });
     alienProjectiles.forEach(p => {
         if (p.status === 1) ctx.fillRect(p.x, p.y, p.width, p.height);
     });
