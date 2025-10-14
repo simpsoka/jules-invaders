@@ -67,7 +67,9 @@ const player = {
   width: PLAYER_SPRITE[0].length * PIXEL_SIZE,
   height: PLAYER_SPRITE.length * PIXEL_SIZE,
   speed: 5,
-  dx: 0
+  dx: 0,
+  canShoot: true,
+  shootCooldown: 500 // Cooldown in milliseconds
 };
 
 // UFO
@@ -124,17 +126,25 @@ let playerProjectiles = [];
 let alienProjectiles = [];
 
 // --- Event listeners & Key handlers ---
+const keys = {
+    ArrowRight: false,
+    ArrowLeft: false,
+    ' ': false
+};
+
 document.addEventListener('keydown', keyDown);
 document.addEventListener('keyup', keyUp);
 
 function keyDown(e) {
-  if (e.key === 'Right' || e.key === 'ArrowRight') player.dx = player.speed;
-  else if (e.key === 'Left' || e.key === 'ArrowLeft') player.dx = -player.speed;
-  else if (e.key === ' ' || e.key === 'Spacebar') fireProjectile();
+    if (e.key in keys) {
+        keys[e.key] = true;
+    }
 }
 
 function keyUp(e) {
-  if (e.key === 'Right' || e.key === 'ArrowRight' || e.key === 'Left' || e.key === 'ArrowLeft') player.dx = 0;
+    if (e.key in keys) {
+        keys[e.key] = false;
+    }
 }
 
 // --- Reset Game ---
@@ -147,7 +157,6 @@ function resetGame() {
   alienDirection = 1;
 
   player.x = canvas.width / 2 - (PLAYER_SPRITE[0].length * PIXEL_SIZE) / 2;
-  player.dx = 0;
 
   aliens.length = 0;
   for (let c = 0; c < alienColumnCount; c++) {
@@ -211,9 +220,21 @@ function fireAlienProjectile(alien) {
 function update() {
     if (gameOver) return;
 
-    player.x += player.dx;
-    if (player.x < 0) player.x = 0;
-    if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+    // Handle player movement
+    if (keys.ArrowRight && player.x < canvas.width - player.width) {
+        player.x += player.speed;
+    } else if (keys.ArrowLeft && player.x > 0) {
+        player.x -= player.speed;
+    }
+
+    // Handle shooting
+    if (keys[' '] && player.canShoot) {
+        fireProjectile();
+        player.canShoot = false;
+        setTimeout(() => {
+            player.canShoot = true;
+        }, player.shootCooldown);
+    }
 
     playerProjectiles.forEach(p => {
         if (p.status === 1) {
