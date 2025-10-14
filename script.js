@@ -56,6 +56,12 @@ let gameWon = false;
 let alienDirection = 1;
 let alienSpeed = 0.5;
 
+const keys = {
+  ArrowLeft: false,
+  ArrowRight: false,
+};
+let canShoot = true;
+
 // Sound effects
 const shootSound = new Audio('assets/shoot.wav');
 const explosionSound = new Audio('assets/explosion.wav');
@@ -128,13 +134,28 @@ document.addEventListener('keydown', keyDown);
 document.addEventListener('keyup', keyUp);
 
 function keyDown(e) {
-  if (e.key === 'Right' || e.key === 'ArrowRight') player.dx = player.speed;
-  else if (e.key === 'Left' || e.key === 'ArrowLeft') player.dx = -player.speed;
-  else if (e.key === ' ' || e.key === 'Spacebar') fireProjectile();
+  if (e.key === 'ArrowLeft' || e.key === 'Left') {
+    keys.ArrowLeft = true;
+  } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+    keys.ArrowRight = true;
+  }
+
+  if ((e.key === ' ' || e.key === 'Spacebar') && canShoot) {
+    fireProjectile();
+    canShoot = false;
+  }
 }
 
 function keyUp(e) {
-  if (e.key === 'Right' || e.key === 'ArrowRight' || e.key === 'Left' || e.key === 'ArrowLeft') player.dx = 0;
+  if (e.key === 'ArrowLeft' || e.key === 'Left') {
+    keys.ArrowLeft = false;
+  } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+    keys.ArrowRight = false;
+  }
+
+  if (e.key === ' ' || e.key === 'Spacebar') {
+    canShoot = true;
+  }
 }
 
 // --- Reset Game ---
@@ -210,6 +231,14 @@ function fireAlienProjectile(alien) {
 // --- Main Game Loop ---
 function update() {
     if (gameOver) return;
+
+    if (keys.ArrowLeft) {
+        player.dx = -player.speed;
+    } else if (keys.ArrowRight) {
+        player.dx = player.speed;
+    } else {
+        player.dx = 0;
+    }
 
     player.x += player.dx;
     if (player.x < 0) player.x = 0;
