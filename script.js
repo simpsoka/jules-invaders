@@ -58,10 +58,10 @@ let alienDirection = 1;
 let alienSpeed = 0.5;
 
 const keys = {
-  ArrowLeft: false,
-  ArrowRight: false,
+    ArrowRight: false,
+    ArrowLeft: false,
+    ' ': false,
 };
-let canShoot = true;
 
 // Sound effects
 const shootSound = new Audio('assets/shoot.wav');
@@ -77,12 +77,6 @@ const player = {
   dx: 0,
   shootCooldown: 100, // Milliseconds
   lastShotTime: 0,
-};
-
-const keys = {
-    ArrowRight: false,
-    ArrowLeft: false,
-    ' ': false,
 };
 
 // UFO
@@ -147,11 +141,8 @@ function keyDown(e) {
     keys.ArrowLeft = true;
   } else if (e.key === 'ArrowRight' || e.key === 'Right') {
     keys.ArrowRight = true;
-  }
-
-  if ((e.key === ' ' || e.key === 'Spacebar') && canShoot) {
-    fireProjectile();
-    canShoot = false;
+  } else if (e.key === ' ' || e.key === 'Spacebar') {
+    keys[' '] = true;
   }
 }
 
@@ -160,10 +151,8 @@ function keyUp(e) {
     keys.ArrowLeft = false;
   } else if (e.key === 'ArrowRight' || e.key === 'Right') {
     keys.ArrowRight = false;
-  }
-
-  if (e.key === ' ' || e.key === 'Spacebar') {
-    canShoot = true;
+  } else if (e.key === ' ' || e.key === 'Spacebar') {
+    keys[' '] = false;
   }
 }
 
@@ -247,6 +236,13 @@ function update() {
         player.dx = player.speed;
     } else {
         player.dx = 0;
+    }
+
+    // Shooting logic
+    const currentTime = Date.now();
+    if (keys[' '] && currentTime - player.lastShotTime > player.shootCooldown) {
+        fireProjectile();
+        player.lastShotTime = currentTime;
     }
 
     player.x += player.dx;
