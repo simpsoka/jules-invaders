@@ -67,7 +67,15 @@ const player = {
   width: PLAYER_SPRITE[0].length * PIXEL_SIZE,
   height: PLAYER_SPRITE.length * PIXEL_SIZE,
   speed: 5,
-  dx: 0
+  dx: 0,
+  shootCooldown: 100, // Milliseconds
+  lastShotTime: 0,
+};
+
+const keys = {
+    ArrowRight: false,
+    ArrowLeft: false,
+    ' ': false,
 };
 
 // UFO
@@ -128,13 +136,19 @@ document.addEventListener('keydown', keyDown);
 document.addEventListener('keyup', keyUp);
 
 function keyDown(e) {
-  if (e.key === 'Right' || e.key === 'ArrowRight') player.dx = player.speed;
-  else if (e.key === 'Left' || e.key === 'ArrowLeft') player.dx = -player.speed;
-  else if (e.key === ' ' || e.key === 'Spacebar') fireProjectile();
+    if (keys.hasOwnProperty(e.key)) {
+        keys[e.key] = true;
+    } else if (e.key === 'Spacebar') {
+        keys[' '] = true;
+    }
 }
 
 function keyUp(e) {
-  if (e.key === 'Right' || e.key === 'ArrowRight' || e.key === 'Left' || e.key === 'ArrowLeft') player.dx = 0;
+    if (keys.hasOwnProperty(e.key)) {
+        keys[e.key] = false;
+    } else if (e.key === 'Spacebar') {
+        keys[' '] = false;
+    }
 }
 
 // --- Reset Game ---
@@ -210,6 +224,18 @@ function fireAlienProjectile(alien) {
 // --- Main Game Loop ---
 function update() {
     if (gameOver) return;
+
+    // --- Player Movement & Shooting ---
+    const currentTime = Date.now();
+    if (keys['ArrowRight']) player.dx = player.speed;
+    else if (keys['ArrowLeft']) player.dx = -player.speed;
+    else player.dx = 0;
+
+    if (keys[' '] && currentTime - player.lastShotTime > player.shootCooldown) {
+        fireProjectile();
+        player.lastShotTime = currentTime;
+    }
+
 
     player.x += player.dx;
     if (player.x < 0) player.x = 0;
