@@ -73,7 +73,15 @@ const player = {
   width: PLAYER_SPRITE[0].length * PIXEL_SIZE,
   height: PLAYER_SPRITE.length * PIXEL_SIZE,
   speed: 5,
-  dx: 0
+  dx: 0,
+  shootCooldown: 100, // Milliseconds
+  lastShotTime: 0,
+};
+
+const keys = {
+    ArrowRight: false,
+    ArrowLeft: false,
+    ' ': false,
 };
 
 // UFO
