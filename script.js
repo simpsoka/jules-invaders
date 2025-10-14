@@ -51,6 +51,7 @@ const UFO_SPRITE = [
 
 // --- Game variables ---
 let score = 0;
+let highScore = 0;
 let gameOver = false;
 let gameWon = false;
 let alienDirection = 1;
@@ -353,6 +354,13 @@ function update() {
         gameOver = true;
     }
 
+    if (gameOver) {
+        if (score > highScore) {
+            highScore = score;
+            localStorage.setItem('spaceInvadersHighScore', highScore);
+        }
+    }
+
     // Filter out inactive projectiles
     playerProjectiles = playerProjectiles.filter(p => p.status === 1);
     alienProjectiles = alienProjectiles.filter(p => p.status === 1);
@@ -420,6 +428,9 @@ function draw() {
     ctx.fillStyle = '#fff';
     ctx.font = '20px "Press Start 2P"';
     ctx.fillText('Score: ' + score, 10, 25);
+    ctx.textAlign = 'right';
+    ctx.fillText('High Score: ' + highScore, canvas.width - 10, 25);
+    ctx.textAlign = 'left';
 
     if (gameOver) {
         ctx.font = '50px "Press Start 2P"';
@@ -437,4 +448,12 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
+function loadHighScore() {
+    const storedHighScore = localStorage.getItem('spaceInvadersHighScore');
+    if (storedHighScore) {
+        highScore = parseInt(storedHighScore);
+    }
+}
+
+loadHighScore();
 gameLoop();
