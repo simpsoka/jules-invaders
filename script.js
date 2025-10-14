@@ -52,6 +52,7 @@ const UFO_SPRITE = [
 // --- Game variables ---
 let score = 0;
 let highScore = 0;
+let level = 1;
 let gameOver = false;
 let gameWon = false;
 let alienDirection = 1;
@@ -161,6 +162,8 @@ playAgainBtn.addEventListener('click', resetGame);
 
 function resetGame() {
   score = 0;
+  level = 1;
+  alienSpeed = 0.5;
   gameOver = false;
   gameWon = false;
   alienDirection = 1;
@@ -197,6 +200,27 @@ function resetGame() {
   ufo.x = -ufo.width;
 
   playAgainBtn.style.display = 'none';
+}
+
+function resetAliensForNextLevel() {
+  alienSpeed = 0.4 + (level * 0.1);
+  aliens.length = 0;
+  for (let c = 0; c < alienColumnCount; c++) {
+    aliens[c] = [];
+    for (let r = 0; r < alienRowCount; r++) {
+      const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
+      const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
+      let alienType;
+      if (r === 0) alienType = 1;
+      else if (r < 3) alienType = 2;
+      else alienType = 3;
+      aliens[c][r] = { x: alienX, y: alienY, status: 1, type: alienType };
+    }
+  }
+  playerProjectiles.length = 0;
+  alienProjectiles.length = 0;
+  ufo.status = 0;
+  ufo.x = -ufo.width;
 }
 
 
@@ -346,8 +370,8 @@ function update() {
 
 
     if (aliens.flat().every(a => a.status === 0)) {
-        gameWon = true;
-        gameOver = true;
+        level++;
+        resetAliensForNextLevel();
     }
 
     if (gameOver) {
@@ -424,6 +448,8 @@ function draw() {
     ctx.fillStyle = '#fff';
     ctx.font = '20px "Press Start 2P"';
     ctx.fillText('Score: ' + score, 10, 25);
+    ctx.textAlign = 'center';
+    ctx.fillText('Level: ' + level, canvas.width / 2, 25);
     ctx.textAlign = 'right';
     ctx.fillText('High Score: ' + highScore, canvas.width - 10, 25);
     ctx.textAlign = 'left';
