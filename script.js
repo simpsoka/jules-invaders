@@ -1,5 +1,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const playAgainBtn = document.getElementById('playAgainBtn');
 
 // --- Sprite & Asset Definitions ---
 const PIXEL_SIZE = 4;
@@ -142,6 +143,50 @@ function keyDown(e) {
 function keyUp(e) {
   if (e.key === 'Right' || e.key === 'ArrowRight' || e.key === 'Left' || e.key === 'ArrowLeft') player.dx = 0;
 }
+
+// --- Reset Game ---
+playAgainBtn.addEventListener('click', resetGame);
+
+function resetGame() {
+  score = 0;
+  gameOver = false;
+  gameWon = false;
+  alienDirection = 1;
+
+  player.x = canvas.width / 2 - (PLAYER_SPRITE[0].length * PIXEL_SIZE) / 2;
+  player.dx = 0;
+
+  aliens.length = 0;
+  for (let c = 0; c < alienColumnCount; c++) {
+    aliens[c] = [];
+    for (let r = 0; r < alienRowCount; r++) {
+      const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
+      const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
+      let alienType;
+      if (r === 0) alienType = 1;
+      else if (r < 3) alienType = 2;
+      else alienType = 3;
+      aliens[c][r] = { x: alienX, y: alienY, status: 1, type: alienType };
+    }
+  }
+
+  bunkers.length = 0;
+  for (let i = 0; i < bunkerCount; i++) {
+    bunkers.push({
+      x: bunkerPadding + i * (bunkerWidth + bunkerPadding),
+      y: player.y - bunkerHeight - 30,
+      grid: BUNKER_SPRITE.map(row => row.slice())
+    });
+  }
+
+  projectile.status = 0;
+  alienProjectiles.length = 0;
+  ufo.status = 0;
+  ufo.x = -ufo.width;
+
+  playAgainBtn.style.display = 'none';
+}
+
 
 // --- Game Functions ---
 function fireProjectile() {
@@ -338,6 +383,7 @@ function draw() {
         ctx.font = '50px "Press Start 2P"';
         ctx.textAlign = 'center';
         ctx.fillText(gameWon ? 'YOU WIN!' : 'GAME OVER', canvas.width / 2, canvas.height / 2);
+        playAgainBtn.style.display = 'block';
     }
 }
 
