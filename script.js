@@ -34,6 +34,27 @@ const ALIEN_SPRITE_3 = [
   [1, 0, 0, 0, 0, 1],
 ];
 
+const ALIEN_SPRITE_1_B = [
+  [0, 0, 1, 1, 0, 0],
+  [0, 1, 1, 1, 1, 0],
+  [1, 1, 0, 0, 1, 1],
+  [0, 1, 1, 1, 1, 0],
+];
+
+const ALIEN_SPRITE_2_B = [
+  [0, 1, 0, 0, 1, 0],
+  [0, 0, 1, 1, 0, 0],
+  [1, 1, 1, 1, 1, 1],
+  [1, 0, 1, 1, 0, 1],
+];
+
+const ALIEN_SPRITE_3_B = [
+  [0, 0, 1, 1, 0, 0],
+  [1, 1, 1, 1, 1, 1],
+  [0, 1, 1, 1, 1, 0],
+  [0, 1, 0, 0, 1, 0],
+];
+
 const BUNKER_SPRITE = [
   [0, 1, 1, 1, 1, 1, 0],
   [1, 1, 1, 1, 1, 1, 1],
@@ -55,6 +76,7 @@ let gameOver = false;
 let gameWon = false;
 let alienDirection = 1;
 let alienSpeed = 0.5;
+let animationFrame = 0;
 
 // Sound effects
 const shootSound = new Audio('assets/shoot.wav');
@@ -211,6 +233,8 @@ function fireAlienProjectile(alien) {
 function update() {
     if (gameOver) return;
 
+    animationFrame++;
+
     player.x += player.dx;
     if (player.x < 0) player.x = 0;
     if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
@@ -346,9 +370,10 @@ function draw() {
     aliens.flat().forEach(alien => {
         if (alien.status === 1) {
             let sprite;
-            if (alien.type === 1) sprite = ALIEN_SPRITE_1;
-            else if (alien.type === 2) sprite = ALIEN_SPRITE_2;
-            else sprite = ALIEN_SPRITE_3;
+            const useBgrade = Math.floor(animationFrame / 30) % 2 === 0;
+            if (alien.type === 1) sprite = useBgrade ? ALIEN_SPRITE_1_B : ALIEN_SPRITE_1;
+            else if (alien.type === 2) sprite = useBgrade ? ALIEN_SPRITE_2_B : ALIEN_SPRITE_2;
+            else sprite = useBgrade ? ALIEN_SPRITE_3_B : ALIEN_SPRITE_3;
             drawPixelArt(sprite, alien.x, alien.y, '#ADFF2F', PIXEL_SIZE);
         }
     });
