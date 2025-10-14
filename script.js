@@ -56,6 +56,12 @@ let gameWon = false;
 let alienDirection = 1;
 let alienSpeed = 0.5;
 
+const keys = {
+  ArrowLeft: false,
+  ArrowRight: false,
+};
+let canShoot = true;
+
 // Sound effects
 const shootSound = new Audio('assets/shoot.wav');
 const explosionSound = new Audio('assets/explosion.wav');
@@ -136,19 +142,28 @@ document.addEventListener('keydown', keyDown);
 document.addEventListener('keyup', keyUp);
 
 function keyDown(e) {
-    if (keys.hasOwnProperty(e.key)) {
-        keys[e.key] = true;
-    } else if (e.key === 'Spacebar') {
-        keys[' '] = true;
-    }
+  if (e.key === 'ArrowLeft' || e.key === 'Left') {
+    keys.ArrowLeft = true;
+  } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+    keys.ArrowRight = true;
+  }
+
+  if ((e.key === ' ' || e.key === 'Spacebar') && canShoot) {
+    fireProjectile();
+    canShoot = false;
+  }
 }
 
 function keyUp(e) {
-    if (keys.hasOwnProperty(e.key)) {
-        keys[e.key] = false;
-    } else if (e.key === 'Spacebar') {
-        keys[' '] = false;
-    }
+  if (e.key === 'ArrowLeft' || e.key === 'Left') {
+    keys.ArrowLeft = false;
+  } else if (e.key === 'ArrowRight' || e.key === 'Right') {
+    keys.ArrowRight = false;
+  }
+
+  if (e.key === ' ' || e.key === 'Spacebar') {
+    canShoot = true;
+  }
 }
 
 // --- Reset Game ---
@@ -186,7 +201,7 @@ function resetGame() {
     });
   }
 
-  projectile.status = 0;
+  playerProjectiles.length = 0;
   alienProjectiles.length = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
@@ -225,17 +240,13 @@ function fireAlienProjectile(alien) {
 function update() {
     if (gameOver) return;
 
-    // --- Player Movement & Shooting ---
-    const currentTime = Date.now();
-    if (keys['ArrowRight']) player.dx = player.speed;
-    else if (keys['ArrowLeft']) player.dx = -player.speed;
-    else player.dx = 0;
-
-    if (keys[' '] && currentTime - player.lastShotTime > player.shootCooldown) {
-        fireProjectile();
-        player.lastShotTime = currentTime;
+    if (keys.ArrowLeft) {
+        player.dx = -player.speed;
+    } else if (keys.ArrowRight) {
+        player.dx = player.speed;
+    } else {
+        player.dx = 0;
     }
-
 
     player.x += player.dx;
     if (player.x < 0) player.x = 0;
@@ -415,6 +426,8 @@ function draw() {
         ctx.textAlign = 'center';
         ctx.fillText(gameWon ? 'YOU WIN!' : 'GAME OVER', canvas.width / 2, canvas.height / 2);
         playAgainBtn.style.display = 'block';
+    } else {
+        playAgainBtn.style.display = 'none';
     }
 }
 
