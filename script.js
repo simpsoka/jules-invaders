@@ -193,7 +193,7 @@ function resetGame() {
     });
   }
 
-  projectile.status = 0;
+  playerProjectiles.length = 0;
   alienProjectiles.length = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
@@ -418,6 +418,8 @@ function draw() {
         ctx.textAlign = 'center';
         ctx.fillText(gameWon ? 'YOU WIN!' : 'GAME OVER', canvas.width / 2, canvas.height / 2);
         playAgainBtn.style.display = 'block';
+    } else {
+        playAgainBtn.style.display = 'none';
     }
 }
 
