@@ -11,3 +11,23 @@ canvas {
   background-color: #000;
   border: 2px solid #fff;
 }
+
+#playAgainBtn {
+  display: none;
+  position: absolute;
+  top: 55%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #000;
+  color: #fff;
+  border: 2px solid #fff;
+  padding: 15px 30px;
+  font-family: 'Press Start 2P', cursive;
+  cursor: pointer;
+  font-size: 20px;
+}
+
+#playAgainBtn:hover {
+  background-color: #fff;
+  color: #000;
+}
