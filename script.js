@@ -34,6 +34,27 @@ const ALIEN_SPRITE_3 = [
   [1, 0, 0, 0, 0, 1],
 ];
 
+const ALIEN_SPRITE_1_DANCE = [
+  [0, 0, 1, 1, 0, 0],
+  [0, 1, 1, 1, 1, 0],
+  [1, 1, 0, 0, 1, 1],
+  [0, 1, 1, 1, 1, 0],
+];
+
+const ALIEN_SPRITE_2_DANCE = [
+  [0, 1, 0, 0, 1, 0],
+  [1, 0, 1, 1, 0, 1],
+  [1, 1, 1, 1, 1, 1],
+  [1, 0, 1, 1, 0, 1],
+];
+
+const ALIEN_SPRITE_3_DANCE = [
+  [0, 0, 1, 1, 0, 0],
+  [1, 1, 1, 1, 1, 1],
+  [0, 1, 1, 1, 1, 0],
+  [0, 1, 0, 0, 1, 0],
+];
+
 const BUNKER_SPRITE = [
   [0, 1, 1, 1, 1, 1, 0],
   [1, 1, 1, 1, 1, 1, 1],
@@ -55,6 +76,7 @@ let highScore = 0;
 let level = 1;
 let gameOver = false;
 let gameWon = false;
+let animationFrame = 0;
 let alienDirection = 1;
 let alienSpeed = 0.5;
 let alienFireRate = 0.0005;
@@ -257,6 +279,8 @@ function fireAlienProjectile(alien) {
 function update() {
     if (gameOver) return;
 
+    animationFrame++;
+
     if (keys.ArrowLeft) {
         player.dx = -player.speed;
     } else if (keys.ArrowRight) {
@@ -414,9 +438,14 @@ function draw() {
     aliens.flat().forEach(alien => {
         if (alien.status === 1) {
             let sprite;
-            if (alien.type === 1) sprite = ALIEN_SPRITE_1;
-            else if (alien.type === 2) sprite = ALIEN_SPRITE_2;
-            else sprite = ALIEN_SPRITE_3;
+            const isDancing = Math.floor(animationFrame / 30) % 2 === 0;
+            if (alien.type === 1) {
+                sprite = isDancing ? ALIEN_SPRITE_1_DANCE : ALIEN_SPRITE_1;
+            } else if (alien.type === 2) {
+                sprite = isDancing ? ALIEN_SPRITE_2_DANCE : ALIEN_SPRITE_2;
+            } else {
+                sprite = isDancing ? ALIEN_SPRITE_3_DANCE : ALIEN_SPRITE_3;
+            }
             drawPixelArt(sprite, alien.x, alien.y, '#ADFF2F', PIXEL_SIZE);
         }
     });
