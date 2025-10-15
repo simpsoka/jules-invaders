@@ -396,7 +396,7 @@ function update() {
     });
 
 
-    if (aliens.flat().every(a => a.status === 0)) {
+    if (aliens.flat().filter(a => a.status === 1).length <= 10) {
         level++;
         resetAliensForNextLevel();
     }
