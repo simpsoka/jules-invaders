@@ -227,8 +227,8 @@ function resetGame() {
 }
 
 function resetAliensForNextLevel() {
-  alienSpeed = 0.5 * Math.pow(1.2, level - 1);
-  alienFireRate = 0.0005 + (level - 1) * 0.0002;
+  alienSpeed = 0.5 * Math.pow(1.5, level - 1);
+  alienFireRate = 0.0005 + (level - 1) * 0.0005;
   aliens.length = 0;
   for (let c = 0; c < alienColumnCount; c++) {
     aliens[c] = [];
