@@ -340,7 +340,7 @@ function update() {
 
     if (changeDirection) {
         alienDirection *= -1;
-        alienSpeed *= 1.1;
+        alienSpeed *= 1.15;
         aliens.flat().forEach(alien => alien.y += alienHeight / 2);
     }
 
