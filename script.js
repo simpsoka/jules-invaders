@@ -90,6 +90,17 @@ const SQUID_SPRITE = [
 
 
 // --- Game variables ---
+const colors = {
+    player: { 1: '#708090', 2: '#FFD700' },
+    ufo: '#EE82EE',
+    squid: '#9370DB',
+    alien: '#ADFF2F',
+    bunker: '#ADFF2F',
+    projectile: '#FFF',
+    ground: '#ADFF2F',
+    text: '#FFF',
+    explosion: 'magenta'
+};
 let score = 0;
 let highScore = 0;
 let level = 1;
@@ -208,6 +219,19 @@ playAgainBtn.addEventListener('click', resetGame);
 function resetGame() {
   score = 0;
   level = 1;
+
+  // Reset colors to default
+  colors.player = { 1: '#708090', 2: '#FFD700' };
+  colors.ufo = '#EE82EE';
+  colors.squid = '#9370DB';
+  colors.alien = '#ADFF2F';
+  colors.bunker = '#ADFF2F';
+  colors.projectile = '#FFF';
+  colors.ground = '#ADFF2F';
+  colors.text = '#FFF';
+  colors.explosion = 'magenta';
+  canvas.style.borderColor = '#FFFFFF';
+
   alienSpeed = 0.5;
   alienFireRate = 0.0005;
   gameOver = false;
@@ -253,6 +277,16 @@ function resetGame() {
 function resetAliensForNextLevel() {
   alienSpeed = 0.5 * Math.pow(1.5, level - 1);
   alienFireRate = 0.0005 + (level - 1) * 0.0005;
+
+  // Update colors for the new level
+  colors.ufo = shiftColor('#EE82EE', level);
+  colors.squid = shiftColor('#9370DB', level);
+  colors.alien = shiftColor('#ADFF2F', level);
+  colors.bunker = shiftColor('#ADFF2F', level);
+  colors.ground = shiftColor('#ADFF2F', level);
+  canvas.style.borderColor = shiftColor('#FFFFFF', level);
+
+
   aliens.length = 0;
   for (let c = 0; c < alienColumnCount; c++) {
     aliens[c] = [];
@@ -276,6 +310,62 @@ function resetAliensForNextLevel() {
 
 
 // --- Game Functions ---
+function shiftColor(hex, level) {
+    // Convert hex to RGB
+    let r = parseInt(hex.slice(1, 3), 16),
+        g = parseInt(hex.slice(3, 5), 16),
+        b = parseInt(hex.slice(5, 7), 16);
+
+    // Convert RGB to HSL
+    r /= 255; g /= 255; b /= 255;
+    let max = Math.max(r, g, b), min = Math.min(r, g, b);
+    let h, s, l = (max + min) / 2;
+
+    if (max === min) {
+        h = s = 0; // achromatic
+    } else {
+        let d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+
+    // Apply level-based shift
+    h = (h + (level - 1) * 0.03) % 1; // Hue shift
+    l = Math.max(0.1, Math.min(0.9, l - (level - 1) * 0.01)); // Lightness shift
+
+    // Convert HSL to RGB
+    let r2, g2, b2;
+    if (s === 0) {
+        r2 = g2 = b2 = l; // achromatic
+    } else {
+        const hue2rgb = (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1/6) return p + (q - p) * 6 * t;
+            if (t < 1/2) return q;
+            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        };
+        let q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        let p = 2 * l - q;
+        r2 = hue2rgb(p, q, h + 1/3);
+        g2 = hue2rgb(p, q, h);
+        b2 = hue2rgb(p, q, h - 1/3);
+    }
+
+    // Convert RGB to hex
+    const toHex = x => {
+        const hex = Math.round(x * 255).toString(16);
+        return hex.length === 1 ? '0' + hex : hex;
+    };
+    return `#${toHex(r2)}${toHex(g2)}${toHex(b2)}`;
+}
+
 function fireProjectile() {
     const p = {
         x: player.x + player.width / 2 - 2.5,
@@ -382,7 +472,7 @@ function update() {
                     p.status = 0;
                     if (alien.isSquid) {
                         score += 50;
-                        explosions.push({ x: alien.x, y: alien.y, color: 'magenta', size: 30, timer: 10 });
+                        explosions.push({ x: alien.x, y: alien.y, color: colors.explosion, size: 30, timer: 10 });
                     } else {
                         score += 10;
                     }
@@ -484,22 +574,18 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const playerColorMap = {
-        1: '#708090', // Dark Steel
-        2: '#FFD700'  // Gold
-    };
     const playerSprite = Math.floor(animationFrame / 30) % 2 === 0 ? PLAYER_SPRITE_A : PLAYER_SPRITE_B;
-    drawPixelArt(playerSprite, player.x, player.y, playerColorMap, PIXEL_SIZE);
+    drawPixelArt(playerSprite, player.x, player.y, colors.player, PIXEL_SIZE);
 
     if (ufo.status === 1) {
-        drawPixelArt(UFO_SPRITE, ufo.x, ufo.y, '#EE82EE', PIXEL_SIZE);
+        drawPixelArt(UFO_SPRITE, ufo.x, ufo.y, colors.ufo, PIXEL_SIZE);
     }
 
 
     aliens.flat().forEach(alien => {
         if (alien.status === 1) {
             if (alien.isSquid) {
-                drawPixelArt(SQUID_SPRITE, alien.x, alien.y, '#9370DB', PIXEL_SIZE);
+                drawPixelArt(SQUID_SPRITE, alien.x, alien.y, colors.squid, PIXEL_SIZE);
             } else {
                 let sprite;
                 const isDancing = Math.floor(animationFrame / 30) % 2 === 0;
@@ -510,13 +596,13 @@ function draw() {
                 } else {
                     sprite = isDancing ? ALIEN_SPRITE_3_DANCE : ALIEN_SPRITE_3;
                 }
-                drawPixelArt(sprite, alien.x, alien.y, '#ADFF2F', PIXEL_SIZE);
+                drawPixelArt(sprite, alien.x, alien.y, colors.alien, PIXEL_SIZE);
             }
         }
     });
 
     bunkers.forEach(bunker => {
-        ctx.fillStyle = '#ADFF2F';
+        ctx.fillStyle = colors.bunker;
         const blockWidth = PIXEL_SIZE * 2;
         const blockHeight = PIXEL_SIZE * 2;
         for(let r = 0; r < bunker.grid.length; r++) {
@@ -529,7 +615,7 @@ function draw() {
     });
 
 
-    ctx.fillStyle = '#FFF';
+    ctx.fillStyle = colors.projectile;
     playerProjectiles.forEach(p => {
         if (p.status === 1) ctx.fillRect(p.x, p.y, p.width, p.height);
     });
@@ -538,11 +624,11 @@ function draw() {
     });
 
     // Draw Ground Line
-    ctx.fillStyle = '#ADFF2F';
+    ctx.fillStyle = colors.ground;
     ctx.fillRect(0, canvas.height - 10, canvas.width, 5);
 
 
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = colors.text;
     ctx.font = '20px "Press Start 2P"';
     ctx.fillText('Score: ' + score, 10, 25);
     ctx.textAlign = 'center';
@@ -552,6 +638,7 @@ function draw() {
     ctx.textAlign = 'left';
 
     if (gameOver && !gameConfig.isDemo) {
+        ctx.fillStyle = colors.text;
         ctx.font = '50px "Press Start 2P"';
         ctx.textAlign = 'center';
         ctx.fillText(gameWon ? 'YOU WIN!' : 'GAME OVER', canvas.width / 2, canvas.height / 2);
