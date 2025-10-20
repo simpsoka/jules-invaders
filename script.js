@@ -13,6 +13,13 @@ const PLAYER_SPRITE_A = [
     [0, 1, 0, 0, 0, 1, 0]
 ];
 
+const DEV_SHIP_SPRITE = [
+    [0, 0, 0, 2, 0, 0, 0],
+    [0, 0, 3, 1, 3, 0, 0],
+    [0, 4, 1, 1, 1, 4, 0],
+    [5, 1, 1, 1, 1, 1, 5],
+];
+
 const PLAYER_SPRITE_B = [
     [0, 0, 1, 1, 1, 0, 0],
     [0, 1, 1, 1, 1, 1, 0],
@@ -91,12 +98,17 @@ const SQUID_SPRITE = [
 
 // --- Color Management ---
 const colors = {
+    player: { 1: '#708090', 2: '#FFD700' },
+    dev: { 1: '#FFFFFF', 2: '#FF0000', 3: '#00FF00', 4: '#0000FF', 5: '#FFFF00' },
     ufo: '#EE82EE',
     squid: '#9370DB',
     alien: '#ADFF2F',
     bunker: '#ADFF2F',
+    projectile: '#FFF',
     ground: '#ADFF2F',
-    squidExplosion: 'magenta',
+    text: '#FFF',
+    explosion: 'magenta',
+    squidExplosion: 'magenta'
 };
 
 /**
@@ -158,17 +170,11 @@ function updateColorsForLevel(level) {
 
 
 // --- Game variables ---
-const colors = {
-    player: { 1: '#708090', 2: '#FFD700' },
-    ufo: '#EE82EE',
-    squid: '#9370DB',
-    alien: '#ADFF2F',
-    bunker: '#ADFF2F',
-    projectile: '#FFF',
-    ground: '#ADFF2F',
-    text: '#FFF',
-    explosion: 'magenta'
-};
+const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+let userInputSequence = [];
+let devMode = false;
+let devModeMessageTimer = 0;
+
 let score = 0;
 let highScore = 0;
 let level = 1;
@@ -189,6 +195,7 @@ const keys = {
 // Sound effects
 const shootSound = new Audio('assets/shoot.wav');
 const explosionSound = new Audio('assets/explosion.wav');
+const devSound = new Audio('assets/dev_mode.wav');
 
 // Player
 const player = {
@@ -269,6 +276,18 @@ function keyDown(e) {
   } else if (e.key === ' ' || e.key === 'Spacebar') {
     keys[' '] = true;
   }
+
+  // Konami code logic
+  userInputSequence.push(e.key);
+  if (userInputSequence.length > konamiCode.length) {
+    userInputSequence.shift();
+  }
+
+  if (JSON.stringify(userInputSequence) === JSON.stringify(konamiCode)) {
+    devMode = true;
+    devModeMessageTimer = 120; // 2 seconds at 60fps
+    devSound.play();
+  }
 }
 
 function keyUp(e) {
@@ -302,6 +321,7 @@ function resetGame() {
 
   alienSpeed = 0.5;
   alienFireRate = 0.0005;
+  devMode = false;
   gameOver = false;
   gameWon = false;
   alienDirection = 1;
@@ -623,6 +643,10 @@ function update() {
             explosions.splice(index, 1);
         }
     });
+
+    if (devModeMessageTimer > 0) {
+        devModeMessageTimer--;
+    }
 }
 
 // --- Drawing Functions ---
@@ -650,12 +674,12 @@ function draw() {
     ctx.fillStyle = `rgba(0, 0, 0, ${backgroundDarkness})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const playerColorMap = {
-        1: '#708090', // Dark Steel
-        2: '#FFD700'  // Gold
-    };
-    const playerSprite = Math.floor(animationFrame / 30) % 2 === 0 ? PLAYER_SPRITE_A : PLAYER_SPRITE_B;
-    drawPixelArt(playerSprite, player.x, player.y, colors.player, PIXEL_SIZE);
+    if (devMode) {
+        drawPixelArt(DEV_SHIP_SPRITE, player.x, player.y, colors.dev, PIXEL_SIZE);
+    } else {
+        const playerSprite = Math.floor(animationFrame / 30) % 2 === 0 ? PLAYER_SPRITE_A : PLAYER_SPRITE_B;
+        drawPixelArt(playerSprite, player.x, player.y, colors.player, PIXEL_SIZE);
+    }
 
     if (ufo.status === 1) {
         drawPixelArt(UFO_SPRITE, ufo.x, ufo.y, colors.ufo, PIXEL_SIZE);
@@ -695,9 +719,15 @@ function draw() {
     });
 
 
-    ctx.fillStyle = colors.projectile;
     playerProjectiles.forEach(p => {
-        if (p.status === 1) ctx.fillRect(p.x, p.y, p.width, p.height);
+        if (p.status === 1) {
+            if (devMode) {
+                ctx.fillStyle = `hsl(${animationFrame % 360}, 100%, 50%)`;
+            } else {
+                ctx.fillStyle = colors.projectile;
+            }
+            ctx.fillRect(p.x, p.y, p.width, p.height);
+        }
     });
     alienProjectiles.forEach(p => {
         if (p.status === 1) ctx.fillRect(p.x, p.y, p.width, p.height);
@@ -716,6 +746,13 @@ function draw() {
     ctx.textAlign = 'right';
     ctx.fillText('High Score: ' + highScore, canvas.width - 10, 25);
     ctx.textAlign = 'left';
+
+    if (devModeMessageTimer > 0) {
+        ctx.fillStyle = colors.text;
+        ctx.font = '30px "Press Start 2P"';
+        ctx.textAlign = 'center';
+        ctx.fillText('DEV MODE ACTIVATED', canvas.width / 2, 60);
+    }
 
     if (gameOver && !gameConfig.isDemo) {
         ctx.fillStyle = colors.text;
