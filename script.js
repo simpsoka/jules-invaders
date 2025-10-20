@@ -89,6 +89,74 @@ const SQUID_SPRITE = [
 ];
 
 
+// --- Color Management ---
+const colors = {
+    ufo: '#EE82EE',
+    squid: '#9370DB',
+    alien: '#ADFF2F',
+    bunker: '#ADFF2F',
+    ground: '#ADFF2F',
+    squidExplosion: 'magenta',
+};
+
+/**
+ * Converts an HSL color value to HEX.
+ * Assumes h, s, and l are contained in the set [0, 1] and
+ * returns r, g, and b in the set [0, 255].
+ *
+ * @param   {number}  h       The hue
+ * @param   {number}  s       The saturation
+ * @param   {number}  l       The lightness
+ * @return  {string}          The HEX representation
+ */
+function hslToHex(h, s, l) {
+  let r, g, b;
+
+  if (s == 0) {
+    r = g = b = l; // achromatic
+  } else {
+    const hue2rgb = (p, q, t) => {
+      if (t < 0) t += 1;
+      if (t > 1) t -= 1;
+      if (t < 1/6) return p + (q - p) * 6 * t;
+      if (t < 1/2) return q;
+      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+      return p;
+    }
+
+    const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+    const p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  }
+
+  const toHex = x => {
+    const hex = Math.round(x * 255).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  };
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function updateColorsForLevel(level) {
+    const hueShift = ((level - 1) * 10); // 10 degrees hue shift per level
+
+    // Base HSL values, with hue in degrees
+    const baseUfoHsl = { h: 300, s: 0.76, l: 0.72 };
+    const baseSquidHsl = { h: 260, s: 0.60, l: 0.71 };
+    const baseAlienHsl = { h: 84, s: 1.00, l: 0.59 };
+    const baseExplosionHsl = { h: 300, s: 1.00, l: 0.50 };
+
+    colors.ufo = hslToHex(((baseUfoHsl.h + hueShift) % 360) / 360, baseUfoHsl.s, baseUfoHsl.l);
+    colors.squid = hslToHex(((baseSquidHsl.h + hueShift) % 360) / 360, baseSquidHsl.s, baseSquidHsl.l);
+    colors.alien = hslToHex(((baseAlienHsl.h + hueShift) % 360) / 360, baseAlienHsl.s, baseAlienHsl.l);
+    colors.bunker = colors.alien; // Bunkers match aliens
+    colors.ground = colors.alien; // Ground matches aliens
+    colors.squidExplosion = hslToHex(((baseExplosionHsl.h + hueShift) % 360) / 360, baseExplosionHsl.s, baseExplosionHsl.l);
+}
+
+
 // --- Game variables ---
 let score = 0;
 let highScore = 0;
@@ -251,6 +319,7 @@ function resetGame() {
 }
 
 function resetAliensForNextLevel() {
+  updateColorsForLevel(level);
   alienSpeed = 0.5 * Math.pow(1.5, level - 1);
   alienFireRate = 0.0005 + (level - 1) * 0.0005;
   aliens.length = 0;
@@ -308,13 +377,14 @@ function update() {
     animationFrame++;
 
     if (!gameConfig.isDemo) {
-        if (keys.ArrowLeft) {
-            player.dx = -player.speed;
-        } else if (keys.ArrowRight) {
-            player.dx = player.speed;
-        } else {
-            player.dx = 0;
+        // Horizontal movement
+        let dx = 0;
+        if (keys.ArrowLeft && !keys.ArrowRight) {
+            dx = -player.speed;
+        } else if (keys.ArrowRight && !keys.ArrowLeft) {
+            dx = player.speed;
         }
+        player.dx = dx;
 
         // Shooting logic
         const currentTime = Date.now();
@@ -382,7 +452,7 @@ function update() {
                     p.status = 0;
                     if (alien.isSquid) {
                         score += 50;
-                        explosions.push({ x: alien.x, y: alien.y, color: 'magenta', size: 30, timer: 10 });
+                explosions.push({ x: alien.x, y: alien.y, color: colors.squidExplosion, size: 30, timer: 10 });
                     } else {
                         score += 10;
                     }
@@ -484,6 +554,11 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Darken background based on level
+    const backgroundDarkness = Math.min(0.5, (level - 1) * 0.05);
+    ctx.fillStyle = `rgba(0, 0, 0, ${backgroundDarkness})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     const playerColorMap = {
         1: '#708090', // Dark Steel
         2: '#FFD700'  // Gold
@@ -492,14 +567,14 @@ function draw() {
     drawPixelArt(playerSprite, player.x, player.y, playerColorMap, PIXEL_SIZE);
 
     if (ufo.status === 1) {
-        drawPixelArt(UFO_SPRITE, ufo.x, ufo.y, '#EE82EE', PIXEL_SIZE);
+        drawPixelArt(UFO_SPRITE, ufo.x, ufo.y, colors.ufo, PIXEL_SIZE);
     }
 
 
     aliens.flat().forEach(alien => {
         if (alien.status === 1) {
             if (alien.isSquid) {
-                drawPixelArt(SQUID_SPRITE, alien.x, alien.y, '#9370DB', PIXEL_SIZE);
+                drawPixelArt(SQUID_SPRITE, alien.x, alien.y, colors.squid, PIXEL_SIZE);
             } else {
                 let sprite;
                 const isDancing = Math.floor(animationFrame / 30) % 2 === 0;
@@ -510,13 +585,13 @@ function draw() {
                 } else {
                     sprite = isDancing ? ALIEN_SPRITE_3_DANCE : ALIEN_SPRITE_3;
                 }
-                drawPixelArt(sprite, alien.x, alien.y, '#ADFF2F', PIXEL_SIZE);
+                drawPixelArt(sprite, alien.x, alien.y, colors.alien, PIXEL_SIZE);
             }
         }
     });
 
     bunkers.forEach(bunker => {
-        ctx.fillStyle = '#ADFF2F';
+        ctx.fillStyle = colors.bunker;
         const blockWidth = PIXEL_SIZE * 2;
         const blockHeight = PIXEL_SIZE * 2;
         for(let r = 0; r < bunker.grid.length; r++) {
@@ -538,7 +613,7 @@ function draw() {
     });
 
     // Draw Ground Line
-    ctx.fillStyle = '#ADFF2F';
+    ctx.fillStyle = colors.ground;
     ctx.fillRect(0, canvas.height - 10, canvas.width, 5);
 
 
@@ -555,9 +630,9 @@ function draw() {
         ctx.font = '50px "Press Start 2P"';
         ctx.textAlign = 'center';
         ctx.fillText(gameWon ? 'YOU WIN!' : 'GAME OVER', canvas.width / 2, canvas.height / 2);
-        playAgainBtn.style.display = 'block';
+        if (playAgainBtn) playAgainBtn.style.display = 'block';
     } else {
-        playAgainBtn.style.display = 'none';
+        if (playAgainBtn) playAgainBtn.style.display = 'none';
     }
 }
 
@@ -577,5 +652,6 @@ function loadHighScore() {
 function initGame(config) {
     gameConfig = config;
     loadHighScore();
+    updateColorsForLevel(level);
     gameLoop();
 }
