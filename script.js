@@ -100,6 +100,20 @@ const SQUID_SPRITE = [
 // Note: The `colors` constant was previously declared twice.
 // The first declaration, which was a simplified version, has been removed
 // to resolve a syntax error that prevented the game from running.
+const colors = {
+    player: { 1: '#708090', 2: '#FFD700' },
+    dev: { 1: '#FF0000', 2: '#00FF00', 3: '#0000FF', 4: '#FFFF00', 5: '#FF00FF' },
+    ufo: '#EE82EE',
+    squid: '#9370DB',
+    alien: '#ADFF2F',
+    bunker: '#ADFF2F',
+    projectile: '#FFF',
+    ground: '#ADFF2F',
+    text: '#FFF',
+    explosion: 'magenta',
+    squidExplosion: 'red'
+};
+
 /**
  * Converts an HSL color value to HEX.
  * Assumes h, s, and l are contained in the set [0, 1] and
@@ -182,9 +196,19 @@ const keys = {
 };
 
 // Sound effects
-const shootSound = new Audio('assets/shoot.wav');
-const explosionSound = new Audio('assets/explosion.wav');
-const devSound = new Audio('assets/dev_mode.wav');
+function loadAudio(src) {
+    try {
+        const sound = new Audio(src);
+        return sound;
+    } catch (e) {
+        console.warn(`Could not load audio: ${src}`);
+        return { play: () => {} }; // Return a dummy object with a no-op play method
+    }
+}
+
+const shootSound = loadAudio('assets/shoot.wav');
+const explosionSound = loadAudio('assets/explosion.wav');
+const devSound = loadAudio('assets/dev_mode.wav');
 
 // Player
 const player = {
@@ -290,22 +314,27 @@ function keyUp(e) {
 }
 
 // --- Reset Game ---
-playAgainBtn.addEventListener('click', resetGame);
+if (playAgainBtn) {
+    playAgainBtn.addEventListener('click', resetGame);
+}
 
 function resetGame() {
   score = 0;
   level = 1;
 
   // Reset colors to default
-  colors.player = { 1: '#708090', 2: '#FFD700' };
-  colors.ufo = '#EE82EE';
-  colors.squid = '#9370DB';
-  colors.alien = '#ADFF2F';
-  colors.bunker = '#ADFF2F';
-  colors.projectile = '#FFF';
-  colors.ground = '#ADFF2F';
-  colors.text = '#FFF';
-  colors.explosion = 'magenta';
+  Object.assign(colors, {
+      player: { 1: '#708090', 2: '#FFD700' },
+      ufo: '#EE82EE',
+      squid: '#9370DB',
+      alien: '#ADFF2F',
+      bunker: '#ADFF2F',
+      projectile: '#FFF',
+      ground: '#ADFF2F',
+      text: '#FFF',
+      explosion: 'magenta',
+      squidExplosion: 'red'
+  });
   canvas.style.borderColor = '#FFFFFF';
 
   alienSpeed = 0.5;
@@ -348,7 +377,9 @@ function resetGame() {
   ufo.status = 0;
   ufo.x = -ufo.width;
 
-  playAgainBtn.style.display = 'none';
+  if (playAgainBtn) {
+    playAgainBtn.style.display = 'none';
+  }
 }
 
 function resetAliensForNextLevel() {
