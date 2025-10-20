@@ -69,6 +69,17 @@ const UFO_SPRITE = [
     [0, 1, 1, 0, 0, 1, 1, 0]
 ];
 
+const SQUID_SPRITE = [
+  [0, 1, 1, 0, 0, 1, 1, 0],
+  [1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 0, 1, 1, 1, 1, 0, 1],
+  [1, 0, 1, 0, 0, 1, 0, 1],
+  [0, 1, 0, 0, 0, 0, 1, 0],
+  [0, 0, 1, 0, 0, 1, 0, 0],
+  [0, 1, 0, 1, 1, 0, 1, 0],
+  [1, 0, 0, 0, 0, 0, 0, 1],
+];
+
 
 // --- Game variables ---
 let score = 0;
@@ -134,7 +145,8 @@ for (let c = 0; c < alienColumnCount; c++) {
     if (r === 0) alienType = 1;
     else if (r < 3) alienType = 2;
     else alienType = 3;
-    aliens[c][r] = { x: alienX, y: alienY, status: 1, type: alienType };
+    const isSquid = Math.random() < 1 / 15;
+    aliens[c][r] = { x: alienX, y: alienY, status: 1, type: alienType, isSquid: isSquid };
   }
 }
 
@@ -156,6 +168,7 @@ for (let i = 0; i < bunkerCount; i++) {
 // Projectiles
 let playerProjectiles = [];
 let alienProjectiles = [];
+let explosions = [];
 
 // --- Event listeners & Key handlers ---
 document.addEventListener('keydown', keyDown);
@@ -206,7 +219,8 @@ function resetGame() {
       if (r === 0) alienType = 1;
       else if (r < 3) alienType = 2;
       else alienType = 3;
-      aliens[c][r] = { x: alienX, y: alienY, status: 1, type: alienType };
+      const isSquid = Math.random() < 1 / 15;
+      aliens[c][r] = { x: alienX, y: alienY, status: 1, type: alienType, isSquid: isSquid };
     }
   }
 
@@ -221,6 +235,7 @@ function resetGame() {
 
   playerProjectiles.length = 0;
   alienProjectiles.length = 0;
+  explosions.length = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
 
@@ -240,11 +255,13 @@ function resetAliensForNextLevel() {
       if (r === 0) alienType = 1;
       else if (r < 3) alienType = 2;
       else alienType = 3;
-      aliens[c][r] = { x: alienX, y: alienY, status: 1, type: alienType };
+      const isSquid = Math.random() < 1 / 15;
+      aliens[c][r] = { x: alienX, y: alienY, status: 1, type: alienType, isSquid: isSquid };
     }
   }
   playerProjectiles.length = 0;
   alienProjectiles.length = 0;
+  explosions.length = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
 }
@@ -355,7 +372,12 @@ function update() {
                 if (alien.status === 1 && p.x > alien.x && p.x < alien.x + alienWidth && p.y > alien.y && p.y < alien.y + alienHeight) {
                     alien.status = 0;
                     p.status = 0;
-                    score += 10;
+                    if (alien.isSquid) {
+                        score += 50;
+                        explosions.push({ x: alien.x, y: alien.y, color: 'magenta', size: 30, timer: 10 });
+                    } else {
+                        score += 10;
+                    }
                     explosionSound.play();
                 }
             });
@@ -368,6 +390,14 @@ function update() {
                 explosionSound.play();
             }
         }
+    });
+
+    // Draw explosions
+    explosions.forEach(explosion => {
+        ctx.fillStyle = explosion.color;
+        ctx.beginPath();
+        ctx.arc(explosion.x + alienWidth / 2, explosion.y + alienHeight / 2, explosion.size * (explosion.timer / 10), 0, Math.PI * 2);
+        ctx.fill();
     });
 
 
@@ -416,6 +446,14 @@ function update() {
     // Filter out inactive projectiles
     playerProjectiles = playerProjectiles.filter(p => p.status === 1);
     alienProjectiles = alienProjectiles.filter(p => p.status === 1);
+
+    // Update explosions
+    explosions.forEach((explosion, index) => {
+        explosion.timer--;
+        if (explosion.timer <= 0) {
+            explosions.splice(index, 1);
+        }
+    });
 }
 
 // --- Drawing Functions ---
@@ -444,16 +482,20 @@ function draw() {
 
     aliens.flat().forEach(alien => {
         if (alien.status === 1) {
-            let sprite;
-            const isDancing = Math.floor(animationFrame / 30) % 2 === 0;
-            if (alien.type === 1) {
-                sprite = isDancing ? ALIEN_SPRITE_1_DANCE : ALIEN_SPRITE_1;
-            } else if (alien.type === 2) {
-                sprite = isDancing ? ALIEN_SPRITE_2_DANCE : ALIEN_SPRITE_2;
+            if (alien.isSquid) {
+                drawPixelArt(SQUID_SPRITE, alien.x, alien.y, '#9370DB', PIXEL_SIZE);
             } else {
-                sprite = isDancing ? ALIEN_SPRITE_3_DANCE : ALIEN_SPRITE_3;
+                let sprite;
+                const isDancing = Math.floor(animationFrame / 30) % 2 === 0;
+                if (alien.type === 1) {
+                    sprite = isDancing ? ALIEN_SPRITE_1_DANCE : ALIEN_SPRITE_1;
+                } else if (alien.type === 2) {
+                    sprite = isDancing ? ALIEN_SPRITE_2_DANCE : ALIEN_SPRITE_2;
+                } else {
+                    sprite = isDancing ? ALIEN_SPRITE_3_DANCE : ALIEN_SPRITE_3;
+                }
+                drawPixelArt(sprite, alien.x, alien.y, '#ADFF2F', PIXEL_SIZE);
             }
-            drawPixelArt(sprite, alien.x, alien.y, '#ADFF2F', PIXEL_SIZE);
         }
     });
 
