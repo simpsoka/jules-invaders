@@ -1,19 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Jules Invaders</title>
+  <title>Space Invaders</title>
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
+  <h1>Space Invaders</h1>
   <canvas id="gameCanvas" width="800" height="600"></canvas>
-  <div class="overlay">
-    <h1 class="title">Jules Invaders</h1>
-    <a href="game.html" class="play-button">Play</a>
-  </div>
+  <button id="playAgainBtn" style="display: none;">Play Again</button>
   <script src="script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      initGame({ isDemo: true });
+      initGame({ isDemo: false });
     });
   </script>
 </body>
