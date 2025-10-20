@@ -90,15 +90,9 @@ const SQUID_SPRITE = [
 
 
 // --- Color Management ---
-const colors = {
-    ufo: '#EE82EE',
-    squid: '#9370DB',
-    alien: '#ADFF2F',
-    bunker: '#ADFF2F',
-    ground: '#ADFF2F',
-    squidExplosion: 'magenta',
-};
-
+// Note: The `colors` constant was previously declared twice.
+// The first declaration, which was a simplified version, has been removed
+// to resolve a syntax error that prevented the game from running.
 /**
  * Converts an HSL color value to HEX.
  * Assumes h, s, and l are contained in the set [0, 1] and
