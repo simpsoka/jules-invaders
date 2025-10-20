@@ -80,6 +80,7 @@ let animationFrame = 0;
 let alienDirection = 1;
 let alienSpeed = 0.5;
 let alienFireRate = 0.0005;
+let gameConfig = { isDemo: false };
 
 const keys = {
     ArrowRight: false,
@@ -277,28 +278,30 @@ function fireAlienProjectile(alien) {
 
 // --- Main Game Loop ---
 function update() {
-    if (gameOver) return;
+    if (gameOver && !gameConfig.isDemo) return;
 
     animationFrame++;
 
-    if (keys.ArrowLeft) {
-        player.dx = -player.speed;
-    } else if (keys.ArrowRight) {
-        player.dx = player.speed;
-    } else {
-        player.dx = 0;
-    }
+    if (!gameConfig.isDemo) {
+        if (keys.ArrowLeft) {
+            player.dx = -player.speed;
+        } else if (keys.ArrowRight) {
+            player.dx = player.speed;
+        } else {
+            player.dx = 0;
+        }
 
-    // Shooting logic
-    const currentTime = Date.now();
-    if (keys[' '] && currentTime - player.lastShotTime > player.shootCooldown) {
-        fireProjectile();
-        player.lastShotTime = currentTime;
-    }
+        // Shooting logic
+        const currentTime = Date.now();
+        if (keys[' '] && currentTime - player.lastShotTime > player.shootCooldown) {
+            fireProjectile();
+            player.lastShotTime = currentTime;
+        }
 
-    player.x += player.dx;
-    if (player.x < 0) player.x = 0;
-    if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+        player.x += player.dx;
+        if (player.x < 0) player.x = 0;
+        if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+    }
 
     playerProjectiles.forEach(p => {
         if (p.status === 1) {
@@ -369,12 +372,14 @@ function update() {
 
 
     // Alien projectiles vs Player
-    alienProjectiles.forEach(p => {
-        if (p.status === 1 && p.x > player.x && p.x < player.x + player.width && p.y > player.y && p.y < player.y + player.height) {
-            p.status = 0;
-            gameOver = true;
-        }
-    });
+    if (!gameConfig.isDemo) {
+        alienProjectiles.forEach(p => {
+            if (p.status === 1 && p.x > player.x && p.x < player.x + player.width && p.y > player.y && p.y < player.y + player.height) {
+                p.status = 0;
+                gameOver = true;
+            }
+        });
+    }
 
     // Projectiles vs Bunkers
     const allProjectiles = [...playerProjectiles, ...alienProjectiles];
@@ -401,7 +406,7 @@ function update() {
         resetAliensForNextLevel();
     }
 
-    if (gameOver) {
+    if (gameOver && !gameConfig.isDemo) {
         if (score > highScore) {
             highScore = score;
             localStorage.setItem('spaceInvadersHighScore', highScore);
@@ -428,7 +433,9 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    drawPixelArt(PLAYER_SPRITE, player.x, player.y, '#D2691E', PIXEL_SIZE);
+    if (!gameConfig.isDemo) {
+        drawPixelArt(PLAYER_SPRITE, player.x, player.y, '#D2691E', PIXEL_SIZE);
+    }
 
     if (ufo.status === 1) {
         drawPixelArt(UFO_SPRITE, ufo.x, ufo.y, '#EE82EE', PIXEL_SIZE);
@@ -486,7 +493,7 @@ function draw() {
     ctx.fillText('High Score: ' + highScore, canvas.width - 10, 25);
     ctx.textAlign = 'left';
 
-    if (gameOver) {
+    if (gameOver && !gameConfig.isDemo) {
         ctx.font = '50px "Press Start 2P"';
         ctx.textAlign = 'center';
         ctx.fillText(gameWon ? 'YOU WIN!' : 'GAME OVER', canvas.width / 2, canvas.height / 2);
@@ -509,5 +516,8 @@ function loadHighScore() {
     }
 }
 
-loadHighScore();
-gameLoop();
+function initGame(config) {
+    gameConfig = config;
+    loadHighScore();
+    gameLoop();
+}
