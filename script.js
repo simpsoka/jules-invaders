@@ -5,12 +5,20 @@ const playAgainBtn = document.getElementById('playAgainBtn');
 // --- Sprite & Asset Definitions ---
 const PIXEL_SIZE = 4;
 
-const PLAYER_SPRITE = [
-  [0, 0, 0, 1, 0, 0, 0],
-  [0, 0, 1, 1, 1, 0, 0],
-  [0, 1, 1, 1, 1, 1, 0],
-  [1, 1, 1, 1, 1, 1, 1],
-  [1, 1, 1, 1, 1, 1, 1],
+const PLAYER_SPRITE_A = [
+    [0, 0, 1, 1, 1, 0, 0],
+    [0, 1, 1, 1, 1, 1, 0],
+    [1, 1, 2, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1],
+    [0, 1, 0, 0, 0, 1, 0]
+];
+
+const PLAYER_SPRITE_B = [
+    [0, 0, 1, 1, 1, 0, 0],
+    [0, 1, 1, 1, 1, 1, 0],
+    [1, 1, 0, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1],
+    [0, 1, 0, 0, 0, 1, 0]
 ];
 
 const ALIEN_SPRITE_1 = [
@@ -93,10 +101,10 @@ const explosionSound = new Audio('assets/explosion.wav');
 
 // Player
 const player = {
-  x: canvas.width / 2 - (PLAYER_SPRITE[0].length * PIXEL_SIZE) / 2,
-  y: canvas.height - (PLAYER_SPRITE.length * PIXEL_SIZE) - 20,
-  width: PLAYER_SPRITE[0].length * PIXEL_SIZE,
-  height: PLAYER_SPRITE.length * PIXEL_SIZE,
+  x: canvas.width / 2 - (PLAYER_SPRITE_A[0].length * PIXEL_SIZE) / 2,
+  y: canvas.height - (PLAYER_SPRITE_A.length * PIXEL_SIZE) - 20,
+  width: PLAYER_SPRITE_A[0].length * PIXEL_SIZE,
+  height: PLAYER_SPRITE_A.length * PIXEL_SIZE,
   speed: 5,
   dx: 0,
   shootCooldown: 100, // Milliseconds
@@ -192,7 +200,7 @@ function resetGame() {
   gameWon = false;
   alienDirection = 1;
 
-  player.x = canvas.width / 2 - (PLAYER_SPRITE[0].length * PIXEL_SIZE) / 2;
+  player.x = canvas.width / 2 - (PLAYER_SPRITE_A[0].length * PIXEL_SIZE) / 2;
   player.dx = 0;
 
   aliens.length = 0;
@@ -415,10 +423,15 @@ function update() {
 
 // --- Drawing Functions ---
 function drawPixelArt(sprite, x, y, color, pixelSize) {
-    ctx.fillStyle = color;
     for (let r = 0; r < sprite.length; r++) {
         for (let c = 0; c < sprite[r].length; c++) {
-            if (sprite[r][c] === 1) {
+            const pixel = sprite[r][c];
+            if (pixel !== 0) {
+                if (typeof color === 'object') {
+                    ctx.fillStyle = color[pixel];
+                } else {
+                    ctx.fillStyle = color;
+                }
                 ctx.fillRect(x + c * pixelSize, y + r * pixelSize, pixelSize, pixelSize);
             }
         }
@@ -428,7 +441,12 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    drawPixelArt(PLAYER_SPRITE, player.x, player.y, '#D2691E', PIXEL_SIZE);
+    const playerColorMap = {
+        1: '#708090', // Dark Steel
+        2: '#FFD700'  // Gold
+    };
+    const playerSprite = Math.floor(animationFrame / 30) % 2 === 0 ? PLAYER_SPRITE_A : PLAYER_SPRITE_B;
+    drawPixelArt(playerSprite, player.x, player.y, playerColorMap, PIXEL_SIZE);
 
     if (ufo.status === 1) {
         drawPixelArt(UFO_SPRITE, ufo.x, ufo.y, '#EE82EE', PIXEL_SIZE);
