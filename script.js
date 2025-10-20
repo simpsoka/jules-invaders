@@ -5,12 +5,20 @@ const playAgainBtn = document.getElementById('playAgainBtn');
 // --- Sprite & Asset Definitions ---
 const PIXEL_SIZE = 4;
 
-const PLAYER_SPRITE = [
-  [0, 0, 0, 1, 0, 0, 0],
-  [0, 0, 1, 1, 1, 0, 0],
-  [0, 1, 1, 1, 1, 1, 0],
-  [1, 1, 1, 1, 1, 1, 1],
-  [1, 1, 1, 1, 1, 1, 1],
+const PLAYER_SPRITE_A = [
+    [0, 0, 1, 1, 1, 0, 0],
+    [0, 1, 1, 1, 1, 1, 0],
+    [1, 1, 2, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1],
+    [0, 1, 0, 0, 0, 1, 0]
+];
+
+const PLAYER_SPRITE_B = [
+    [0, 0, 1, 1, 1, 0, 0],
+    [0, 1, 1, 1, 1, 1, 0],
+    [1, 1, 0, 1, 1, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1],
+    [0, 1, 0, 0, 0, 1, 0]
 ];
 
 const ALIEN_SPRITE_1 = [
@@ -69,6 +77,17 @@ const UFO_SPRITE = [
     [0, 1, 1, 0, 0, 1, 1, 0]
 ];
 
+const SQUID_SPRITE = [
+  [0, 1, 1, 0, 0, 1, 1, 0],
+  [1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 0, 1, 1, 1, 1, 0, 1],
+  [1, 0, 1, 0, 0, 1, 0, 1],
+  [0, 1, 0, 0, 0, 0, 1, 0],
+  [0, 0, 1, 0, 0, 1, 0, 0],
+  [0, 1, 0, 1, 1, 0, 1, 0],
+  [1, 0, 0, 0, 0, 0, 0, 1],
+];
+
 
 // --- Game variables ---
 let score = 0;
@@ -80,6 +99,7 @@ let animationFrame = 0;
 let alienDirection = 1;
 let alienSpeed = 0.5;
 let alienFireRate = 0.0005;
+let gameConfig = { isDemo: false };
 
 const keys = {
     ArrowRight: false,
@@ -93,10 +113,10 @@ const explosionSound = new Audio('assets/explosion.wav');
 
 // Player
 const player = {
-  x: canvas.width / 2 - (PLAYER_SPRITE[0].length * PIXEL_SIZE) / 2,
-  y: canvas.height - (PLAYER_SPRITE.length * PIXEL_SIZE) - 20,
-  width: PLAYER_SPRITE[0].length * PIXEL_SIZE,
-  height: PLAYER_SPRITE.length * PIXEL_SIZE,
+  x: canvas.width / 2 - (PLAYER_SPRITE_A[0].length * PIXEL_SIZE) / 2,
+  y: canvas.height - (PLAYER_SPRITE_A.length * PIXEL_SIZE) - 20,
+  width: PLAYER_SPRITE_A[0].length * PIXEL_SIZE,
+  height: PLAYER_SPRITE_A.length * PIXEL_SIZE,
   speed: 5,
   dx: 0,
   shootCooldown: 100, // Milliseconds
@@ -133,7 +153,8 @@ for (let c = 0; c < alienColumnCount; c++) {
     if (r === 0) alienType = 1;
     else if (r < 3) alienType = 2;
     else alienType = 3;
-    aliens[c][r] = { x: alienX, y: alienY, status: 1, type: alienType };
+    const isSquid = Math.random() < 1 / 15;
+    aliens[c][r] = { x: alienX, y: alienY, status: 1, type: alienType, isSquid: isSquid };
   }
 }
 
@@ -193,7 +214,7 @@ function resetGame() {
   gameWon = false;
   alienDirection = 1;
 
-  player.x = canvas.width / 2 - (PLAYER_SPRITE[0].length * PIXEL_SIZE) / 2;
+  player.x = canvas.width / 2 - (PLAYER_SPRITE_A[0].length * PIXEL_SIZE) / 2;
   player.dx = 0;
 
   aliens.length = 0;
@@ -206,7 +227,8 @@ function resetGame() {
       if (r === 0) alienType = 1;
       else if (r < 3) alienType = 2;
       else alienType = 3;
-      aliens[c][r] = { x: alienX, y: alienY, status: 1, type: alienType };
+      const isSquid = Math.random() < 1 / 15;
+      aliens[c][r] = { x: alienX, y: alienY, status: 1, type: alienType, isSquid: isSquid };
     }
   }
 
@@ -221,6 +243,7 @@ function resetGame() {
 
   playerProjectiles.length = 0;
   alienProjectiles.length = 0;
+  explosions.length = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
 
@@ -240,11 +263,13 @@ function resetAliensForNextLevel() {
       if (r === 0) alienType = 1;
       else if (r < 3) alienType = 2;
       else alienType = 3;
-      aliens[c][r] = { x: alienX, y: alienY, status: 1, type: alienType };
+      const isSquid = Math.random() < 1 / 15;
+      aliens[c][r] = { x: alienX, y: alienY, status: 1, type: alienType, isSquid: isSquid };
     }
   }
   playerProjectiles.length = 0;
   alienProjectiles.length = 0;
+  explosions.length = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
 }
@@ -293,28 +318,30 @@ function spawnParticles(x, y, color, count) {
 
 // --- Main Game Loop ---
 function update() {
-    if (gameOver) return;
+    if (gameOver && !gameConfig.isDemo) return;
 
     animationFrame++;
 
-    if (keys.ArrowLeft) {
-        player.dx = -player.speed;
-    } else if (keys.ArrowRight) {
-        player.dx = player.speed;
-    } else {
-        player.dx = 0;
-    }
+    if (!gameConfig.isDemo) {
+        if (keys.ArrowLeft) {
+            player.dx = -player.speed;
+        } else if (keys.ArrowRight) {
+            player.dx = player.speed;
+        } else {
+            player.dx = 0;
+        }
 
-    // Shooting logic
-    const currentTime = Date.now();
-    if (keys[' '] && currentTime - player.lastShotTime > player.shootCooldown) {
-        fireProjectile();
-        player.lastShotTime = currentTime;
-    }
+        // Shooting logic
+        const currentTime = Date.now();
+        if (keys[' '] && currentTime - player.lastShotTime > player.shootCooldown) {
+            fireProjectile();
+            player.lastShotTime = currentTime;
+        }
 
-    player.x += player.dx;
-    if (player.x < 0) player.x = 0;
-    if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+        player.x += player.dx;
+        if (player.x < 0) player.x = 0;
+        if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+    }
 
     playerProjectiles.forEach(p => {
         if (p.status === 1) {
@@ -368,7 +395,12 @@ function update() {
                 if (alien.status === 1 && p.x > alien.x && p.x < alien.x + alienWidth && p.y > alien.y && p.y < alien.y + alienHeight) {
                     alien.status = 0;
                     p.status = 0;
-                    score += 10;
+                    if (alien.isSquid) {
+                        score += 50;
+                        explosions.push({ x: alien.x, y: alien.y, color: 'magenta', size: 30, timer: 10 });
+                    } else {
+                        score += 10;
+                    }
                     explosionSound.play();
                     spawnParticles(alien.x + alienWidth / 2, alien.y + alienHeight / 2, '#ADFF2F', 10);
                 }
@@ -385,14 +417,24 @@ function update() {
         }
     });
 
+    // Draw explosions
+    explosions.forEach(explosion => {
+        ctx.fillStyle = explosion.color;
+        ctx.beginPath();
+        ctx.arc(explosion.x + alienWidth / 2, explosion.y + alienHeight / 2, explosion.size * (explosion.timer / 10), 0, Math.PI * 2);
+        ctx.fill();
+    });
+
 
     // Alien projectiles vs Player
-    alienProjectiles.forEach(p => {
-        if (p.status === 1 && p.x > player.x && p.x < player.x + player.width && p.y > player.y && p.y < player.y + player.height) {
-            p.status = 0;
-            gameOver = true;
-        }
-    });
+    if (!gameConfig.isDemo) {
+        alienProjectiles.forEach(p => {
+            if (p.status === 1 && p.x > player.x && p.x < player.x + player.width && p.y > player.y && p.y < player.y + player.height) {
+                p.status = 0;
+                gameOver = true;
+            }
+        });
+    }
 
     // Projectiles vs Bunkers
     const allProjectiles = [...playerProjectiles, ...alienProjectiles];
@@ -420,7 +462,7 @@ function update() {
         resetAliensForNextLevel();
     }
 
-    if (gameOver) {
+    if (gameOver && !gameConfig.isDemo) {
         if (score > highScore) {
             highScore = score;
             localStorage.setItem('spaceInvadersHighScore', highScore);
@@ -444,10 +486,15 @@ function update() {
 
 // --- Drawing Functions ---
 function drawPixelArt(sprite, x, y, color, pixelSize) {
-    ctx.fillStyle = color;
     for (let r = 0; r < sprite.length; r++) {
         for (let c = 0; c < sprite[r].length; c++) {
-            if (sprite[r][c] === 1) {
+            const pixel = sprite[r][c];
+            if (pixel !== 0) {
+                if (typeof color === 'object') {
+                    ctx.fillStyle = color[pixel];
+                } else {
+                    ctx.fillStyle = color;
+                }
                 ctx.fillRect(x + c * pixelSize, y + r * pixelSize, pixelSize, pixelSize);
             }
         }
@@ -457,7 +504,12 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    drawPixelArt(PLAYER_SPRITE, player.x, player.y, '#D2691E', PIXEL_SIZE);
+    const playerColorMap = {
+        1: '#708090', // Dark Steel
+        2: '#FFD700'  // Gold
+    };
+    const playerSprite = Math.floor(animationFrame / 30) % 2 === 0 ? PLAYER_SPRITE_A : PLAYER_SPRITE_B;
+    drawPixelArt(playerSprite, player.x, player.y, playerColorMap, PIXEL_SIZE);
 
     if (ufo.status === 1) {
         drawPixelArt(UFO_SPRITE, ufo.x, ufo.y, '#EE82EE', PIXEL_SIZE);
@@ -466,16 +518,20 @@ function draw() {
 
     aliens.flat().forEach(alien => {
         if (alien.status === 1) {
-            let sprite;
-            const isDancing = Math.floor(animationFrame / 30) % 2 === 0;
-            if (alien.type === 1) {
-                sprite = isDancing ? ALIEN_SPRITE_1_DANCE : ALIEN_SPRITE_1;
-            } else if (alien.type === 2) {
-                sprite = isDancing ? ALIEN_SPRITE_2_DANCE : ALIEN_SPRITE_2;
+            if (alien.isSquid) {
+                drawPixelArt(SQUID_SPRITE, alien.x, alien.y, '#9370DB', PIXEL_SIZE);
             } else {
-                sprite = isDancing ? ALIEN_SPRITE_3_DANCE : ALIEN_SPRITE_3;
+                let sprite;
+                const isDancing = Math.floor(animationFrame / 30) % 2 === 0;
+                if (alien.type === 1) {
+                    sprite = isDancing ? ALIEN_SPRITE_1_DANCE : ALIEN_SPRITE_1;
+                } else if (alien.type === 2) {
+                    sprite = isDancing ? ALIEN_SPRITE_2_DANCE : ALIEN_SPRITE_2;
+                } else {
+                    sprite = isDancing ? ALIEN_SPRITE_3_DANCE : ALIEN_SPRITE_3;
+                }
+                drawPixelArt(sprite, alien.x, alien.y, '#ADFF2F', PIXEL_SIZE);
             }
-            drawPixelArt(sprite, alien.x, alien.y, '#ADFF2F', PIXEL_SIZE);
         }
     });
 
@@ -523,7 +579,7 @@ function draw() {
     ctx.fillText('High Score: ' + highScore, canvas.width - 10, 25);
     ctx.textAlign = 'left';
 
-    if (gameOver) {
+    if (gameOver && !gameConfig.isDemo) {
         ctx.font = '50px "Press Start 2P"';
         ctx.textAlign = 'center';
         ctx.fillText(gameWon ? 'YOU WIN!' : 'GAME OVER', canvas.width / 2, canvas.height / 2);
@@ -546,5 +602,8 @@ function loadHighScore() {
     }
 }
 
-loadHighScore();
-gameLoop();
+function initGame(config) {
+    gameConfig = config;
+    loadHighScore();
+    gameLoop();
+}
