@@ -155,6 +155,7 @@ for (let i = 0; i < bunkerCount; i++) {
 // Projectiles
 let playerProjectiles = [];
 let alienProjectiles = [];
+let particles = [];
 
 // --- Event listeners & Key handlers ---
 document.addEventListener('keydown', keyDown);
@@ -275,6 +276,21 @@ function fireAlienProjectile(alien) {
     alienProjectiles.push(p);
 }
 
+function spawnParticles(x, y, color, count) {
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: x,
+            y: y,
+            vx: (Math.random() - 0.5) * 4,
+            vy: (Math.random() - 0.5) * 4,
+            size: Math.random() * 2 + 1,
+            color: color,
+            life: 50,
+            alpha: 1
+        });
+    }
+}
+
 // --- Main Game Loop ---
 function update() {
     if (gameOver) return;
@@ -354,6 +370,7 @@ function update() {
                     p.status = 0;
                     score += 10;
                     explosionSound.play();
+                    spawnParticles(alien.x + alienWidth / 2, alien.y + alienHeight / 2, '#ADFF2F', 10);
                 }
             });
 
@@ -363,6 +380,7 @@ function update() {
                 p.status = 0;
                 score += 100;
                 explosionSound.play();
+                spawnParticles(ufo.x + ufo.width / 2, ufo.y + ufo.height / 2, '#EE82EE', 20);
             }
         }
     });
@@ -389,6 +407,7 @@ function update() {
                     if (bunker.grid[gridY] && bunker.grid[gridY][gridX] === 1) {
                         bunker.grid[gridY][gridX] = 0; // Destroy block
                         p.status = 0; // Deactivate projectile
+                        spawnParticles(p.x, p.y, '#228B22', 5);
                     }
                 }
             });
@@ -411,6 +430,16 @@ function update() {
     // Filter out inactive projectiles
     playerProjectiles = playerProjectiles.filter(p => p.status === 1);
     alienProjectiles = alienProjectiles.filter(p => p.status === 1);
+
+    // Update particles
+    particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        p.alpha -= 1 / 50;
+    });
+
+    particles = particles.filter(p => p.life > 0);
 }
 
 // --- Drawing Functions ---
@@ -462,6 +491,14 @@ function draw() {
             }
         }
     });
+
+    // Draw particles
+    particles.forEach(p => {
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+    });
+    ctx.globalAlpha = 1.0;
 
 
     ctx.fillStyle = '#FFF';
