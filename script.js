@@ -95,6 +95,14 @@ const SQUID_SPRITE = [
   [1, 0, 0, 0, 0, 0, 0, 1],
 ];
 
+const JULES_LOGO_SPRITE = [
+    [1, 1, 1, 1, 0],
+    [0, 0, 1, 0, 0],
+    [0, 0, 1, 0, 0],
+    [0, 0, 1, 0, 0],
+    [1, 1, 1, 0, 0],
+];
+
 
 // --- Color Management ---
 // Note: The `colors` constant was previously declared twice.
@@ -110,6 +118,7 @@ const colors = {
     projectile: '#FFF',
     ground: '#ADFF2F',
     text: '#FFF',
+    powerup: '#FFA500',
     explosion: 'magenta',
     squidExplosion: 'red'
 };
@@ -220,6 +229,8 @@ const player = {
   dx: 0,
   shootCooldown: 100, // Milliseconds
   lastShotTime: 0,
+  powerupType: 'none',
+  powerupTimer: 0,
 };
 
 // UFO
@@ -277,6 +288,7 @@ let playerProjectiles = [];
 let alienProjectiles = [];
 let explosions = [];
 let particles = [];
+let powerups = [];
 
 // --- Event listeners & Key handlers ---
 document.addEventListener('keydown', keyDown);
@@ -376,6 +388,9 @@ function resetGame() {
   alienProjectiles.length = 0;
   explosions.length = 0;
   particles.length = 0;
+  powerups.length = 0;
+  player.powerupType = 'none';
+  player.powerupTimer = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
 
@@ -416,6 +431,7 @@ function resetAliensForNextLevel() {
   alienProjectiles.length = 0;
   explosions.length = 0;
   particles.length = 0;
+  powerups.length = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
 }
@@ -479,15 +495,35 @@ function shiftColor(hex, level) {
 }
 
 function fireProjectile() {
-    const p = {
-        x: player.x + player.width / 2 - 2.5,
-        y: player.y,
-        width: 5,
-        height: 10,
-        speed: 10,
-        status: 1
-    };
-    playerProjectiles.push(p);
+    if (player.powerupType === 'doubleLaser') {
+        const p1 = {
+            x: player.x + (player.width / 4) - 2.5,
+            y: player.y,
+            width: 5,
+            height: 10,
+            speed: 10,
+            status: 1
+        };
+        const p2 = {
+            x: player.x + (player.width * 3 / 4) - 2.5,
+            y: player.y,
+            width: 5,
+            height: 10,
+            speed: 10,
+            status: 1
+        };
+        playerProjectiles.push(p1, p2);
+    } else {
+        const p = {
+            x: player.x + player.width / 2 - 2.5,
+            y: player.y,
+            width: 5,
+            height: 10,
+            speed: 10,
+            status: 1
+        };
+        playerProjectiles.push(p);
+    }
     shootSound.play();
 }
 
@@ -522,6 +558,13 @@ function update() {
     if (gameOver && !gameConfig.isDemo) return;
 
     animationFrame++;
+
+    // Power-up timer
+    if (player.powerupTimer > 0) {
+        player.powerupTimer--;
+    } else {
+        player.powerupType = 'none';
+    }
 
     if (!gameConfig.isDemo) {
         // Horizontal movement
@@ -605,6 +648,18 @@ function update() {
                         explosions.push({ x: alien.x, y: alien.y, color: colors.explosion, size: 30, timer: 10 });
                     }
                     explosionSound.play();
+
+                    // Spawn power-up
+                    if (Math.random() < 0.05) { // 5% chance
+                        powerups.push({
+                            x: alien.x + alienWidth / 2,
+                            y: alien.y + alienHeight / 2,
+                            width: JULES_LOGO_SPRITE[0].length * PIXEL_SIZE,
+                            height: JULES_LOGO_SPRITE.length * PIXEL_SIZE,
+                            speed: 2,
+                            status: 1
+                        });
+                    }
                 }
             });
 
@@ -694,6 +749,27 @@ function update() {
             particles.splice(index, 1);
         }
     });
+
+    // Update powerups
+    powerups.forEach((powerup, index) => {
+        if (powerup.status === 1) {
+            powerup.y += powerup.speed;
+            if (powerup.y > canvas.height) {
+                powerup.status = 0;
+            }
+
+            // Player collision
+            if (player.x < powerup.x + powerup.width &&
+                player.x + player.width > powerup.x &&
+                player.y < powerup.y + powerup.height &&
+                player.y + player.height > powerup.y) {
+                powerup.status = 0;
+                player.powerupType = 'doubleLaser';
+                player.powerupTimer = 300; // 5 seconds at 60fps
+            }
+        }
+    });
+    powerups = powerups.filter(p => p.status === 1);
 }
 
 // --- Drawing Functions ---
@@ -826,6 +902,13 @@ function draw() {
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = 1.0; // Reset alpha
+    });
+
+    // Draw powerups
+    powerups.forEach(powerup => {
+        if (powerup.status === 1) {
+            drawPixelArt(JULES_LOGO_SPRITE, powerup.x, powerup.y, colors.powerup, PIXEL_SIZE);
+        }
     });
 }
 
