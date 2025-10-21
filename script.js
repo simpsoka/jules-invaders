@@ -13,7 +13,7 @@ const PLAYER_SPRITE_A = [
     [0, 1, 0, 0, 0, 1, 0]
 ];
 
-const DEV_SHIP_SPRITE = [
+const SQUIDSTORM_SHIP_SPRITE = [
     [0, 0, 0, 2, 0, 0, 0],
     [0, 0, 3, 1, 3, 0, 0],
     [0, 4, 1, 1, 1, 4, 0],
@@ -175,8 +175,8 @@ function updateColorsForLevel(level) {
 // --- Game variables ---
 const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 let userInputSequence = [];
-let devMode = false;
-let devModeMessageTimer = 0;
+let squidStormActive = false;
+let squidStormMessageTimer = 0;
 
 let score = 0;
 let highScore = 0;
@@ -208,7 +208,7 @@ function loadAudio(src) {
 
 const shootSound = loadAudio('assets/shoot.wav');
 const explosionSound = loadAudio('assets/explosion.wav');
-const devSound = loadAudio('assets/dev_mode.wav');
+const squidStormSound = loadAudio('assets/squidstorm.wav');
 
 // Player
 const player = {
@@ -297,9 +297,9 @@ function keyDown(e) {
   }
 
   if (JSON.stringify(userInputSequence) === JSON.stringify(konamiCode)) {
-    devMode = true;
-    devModeMessageTimer = 120; // 2 seconds at 60fps
-    devSound.play();
+    squidStormActive = true;
+    squidStormMessageTimer = 120; // 2 seconds at 60fps
+    squidStormSound.play();
   }
 }
 
@@ -339,7 +339,7 @@ function resetGame() {
 
   alienSpeed = 0.5;
   alienFireRate = 0.0005;
-  devMode = false;
+  squidStormActive = false;
   gameOver = false;
   gameWon = false;
   alienDirection = 1;
@@ -664,8 +664,8 @@ function update() {
         }
     });
 
-    if (devModeMessageTimer > 0) {
-        devModeMessageTimer--;
+    if (squidStormMessageTimer > 0) {
+        squidStormMessageTimer--;
     }
 }
 
@@ -694,8 +694,8 @@ function draw() {
     ctx.fillStyle = `rgba(0, 0, 0, ${backgroundDarkness})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    if (devMode) {
-        drawPixelArt(DEV_SHIP_SPRITE, player.x, player.y, colors.dev, PIXEL_SIZE);
+    if (squidStormActive) {
+        drawPixelArt(SQUIDSTORM_SHIP_SPRITE, player.x, player.y, colors.dev, PIXEL_SIZE);
     } else {
         const playerSprite = Math.floor(animationFrame / 30) % 2 === 0 ? PLAYER_SPRITE_A : PLAYER_SPRITE_B;
         drawPixelArt(playerSprite, player.x, player.y, colors.player, PIXEL_SIZE);
@@ -741,7 +741,7 @@ function draw() {
 
     playerProjectiles.forEach(p => {
         if (p.status === 1) {
-            if (devMode) {
+            if (squidStormActive) {
                 ctx.fillStyle = `hsl(${animationFrame % 360}, 100%, 50%)`;
             } else {
                 ctx.fillStyle = colors.projectile;
@@ -767,11 +767,18 @@ function draw() {
     ctx.fillText('High Score: ' + highScore, canvas.width - 10, 25);
     ctx.textAlign = 'left';
 
-    if (devModeMessageTimer > 0) {
-        ctx.fillStyle = colors.text;
-        ctx.font = '30px "Press Start 2P"';
-        ctx.textAlign = 'center';
-        ctx.fillText('DEV MODE ACTIVATED', canvas.width / 2, 60);
+    if (squidStormMessageTimer > 0) {
+        // Purple flash effect for the first 20 frames
+        if (squidStormMessageTimer > 100) {
+            const flashOpacity = (squidStormMessageTimer - 100) / 20; // Fades out from 1.0 to 0.05
+            ctx.fillStyle = `rgba(147, 112, 219, ${flashOpacity * 0.5})`; // #9370DB with opacity
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        ctx.fillStyle = '#9370DB';
+        ctx.font = '20px "Press Start 2P"';
+        ctx.textAlign = 'left';
+        ctx.fillText('SQUIDSTORM ACTIVE', 10, 60);
     }
 
     if (gameOver && !gameConfig.isDemo) {
