@@ -95,6 +95,14 @@ const SQUID_SPRITE = [
   [1, 0, 0, 0, 0, 0, 0, 1],
 ];
 
+const JULES_LOGO_SPRITE = [
+    [0, 1, 1, 1, 0],
+    [0, 0, 1, 0, 0],
+    [0, 0, 1, 0, 0],
+    [1, 0, 1, 0, 0],
+    [0, 1, 0, 0, 0],
+];
+
 
 // --- Color Management ---
 // Note: The `colors` constant was previously declared twice.
@@ -220,6 +228,8 @@ const player = {
   dx: 0,
   shootCooldown: 100, // Milliseconds
   lastShotTime: 0,
+  powerupType: null,
+  powerupTimer: 0,
 };
 
 // UFO
@@ -277,6 +287,7 @@ let playerProjectiles = [];
 let alienProjectiles = [];
 let explosions = [];
 let particles = [];
+let powerups = [];
 
 // --- Event listeners & Key handlers ---
 document.addEventListener('keydown', keyDown);
@@ -376,6 +387,9 @@ function resetGame() {
   alienProjectiles.length = 0;
   explosions.length = 0;
   particles.length = 0;
+  powerups.length = 0;
+  player.powerupType = null;
+  player.powerupTimer = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
 
@@ -416,6 +430,9 @@ function resetAliensForNextLevel() {
   alienProjectiles.length = 0;
   explosions.length = 0;
   particles.length = 0;
+  powerups.length = 0;
+  player.powerupType = null;
+  player.powerupTimer = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
 }
@@ -479,15 +496,35 @@ function shiftColor(hex, level) {
 }
 
 function fireProjectile() {
-    const p = {
-        x: player.x + player.width / 2 - 2.5,
-        y: player.y,
-        width: 5,
-        height: 10,
-        speed: 10,
-        status: 1
-    };
-    playerProjectiles.push(p);
+    if (player.powerupType === 'double-laser') {
+        const p1 = {
+            x: player.x + player.width / 2 - 10,
+            y: player.y,
+            width: 5,
+            height: 10,
+            speed: 10,
+            status: 1
+        };
+        const p2 = {
+            x: player.x + player.width / 2 + 5,
+            y: player.y,
+            width: 5,
+            height: 10,
+            speed: 10,
+            status: 1
+        };
+        playerProjectiles.push(p1, p2);
+    } else {
+        const p = {
+            x: player.x + player.width / 2 - 2.5,
+            y: player.y,
+            width: 5,
+            height: 10,
+            speed: 10,
+            status: 1
+        };
+        playerProjectiles.push(p);
+    }
     shootSound.play();
 }
 
@@ -604,6 +641,19 @@ function update() {
                         score += 10;
                         explosions.push({ x: alien.x, y: alien.y, color: colors.explosion, size: 30, timer: 10 });
                     }
+
+                    // Add a chance to spawn a power-up
+                    if (Math.random() < 0.1) { // 10% chance
+                        powerups.push({
+                            x: alien.x + alienWidth / 2,
+                            y: alien.y + alienHeight / 2,
+                            width: JULES_LOGO_SPRITE[0].length * PIXEL_SIZE,
+                            height: JULES_LOGO_SPRITE.length * PIXEL_SIZE,
+                            speed: 2,
+                            type: 'double-laser',
+                            status: 1
+                        });
+                    }
                     explosionSound.play();
                 }
             });
@@ -694,6 +744,38 @@ function update() {
             particles.splice(index, 1);
         }
     });
+
+    // Decrement powerup timer
+    if (player.powerupTimer > 0) {
+        player.powerupTimer--;
+        if (player.powerupTimer === 0) {
+            player.powerupType = null;
+        }
+    }
+
+    // Update powerups
+    powerups.forEach((powerup, index) => {
+        if (powerup.status === 1) {
+            powerup.y += powerup.speed;
+            if (powerup.y > canvas.height) {
+                powerup.status = 0;
+            }
+
+            // Collision with player
+            if (
+                player.x < powerup.x + powerup.width &&
+                player.x + player.width > powerup.x &&
+                player.y < powerup.y + powerup.height &&
+                player.y + player.height > powerup.y
+            ) {
+                powerup.status = 0;
+                player.powerupType = powerup.type;
+                player.powerupTimer = 300; // 5 seconds at 60fps
+            }
+        }
+    });
+
+    powerups = powerups.filter(p => p.status === 1);
 }
 
 // --- Drawing Functions ---
@@ -732,6 +814,14 @@ function draw() {
         drawPixelArt(UFO_SPRITE, ufo.x, ufo.y, colors.ufo, PIXEL_SIZE);
     }
 
+    powerups.forEach(powerup => {
+        if (powerup.status === 1) {
+            // Pulsating color effect
+            const pulsatingFactor = Math.abs(Math.sin(animationFrame / 15));
+            const color = `rgba(255, 255, 0, ${0.5 + pulsatingFactor * 0.5})`;
+            drawPixelArt(JULES_LOGO_SPRITE, powerup.x, powerup.y, color, PIXEL_SIZE);
+        }
+    });
 
     aliens.flat().forEach(alien => {
         if (alien.status === 1) {
