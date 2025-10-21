@@ -84,6 +84,14 @@ const UFO_SPRITE = [
     [0, 1, 1, 0, 0, 1, 1, 0]
 ];
 
+const JULES_LOGO_SPRITE = [
+    [0, 1, 1, 1, 0],
+    [0, 0, 1, 0, 0],
+    [0, 0, 1, 0, 0],
+    [1, 0, 1, 0, 0],
+    [0, 1, 0, 0, 0]
+];
+
 const SQUID_SPRITE = [
   [0, 1, 1, 0, 0, 1, 1, 0],
   [1, 1, 1, 1, 1, 1, 1, 1],
@@ -220,6 +228,8 @@ const player = {
   dx: 0,
   shootCooldown: 100, // Milliseconds
   lastShotTime: 0,
+  powerupActive: false,
+  powerupTimer: 0,
 };
 
 // UFO
@@ -276,6 +286,7 @@ for (let i = 0; i < bunkerCount; i++) {
 let playerProjectiles = [];
 let alienProjectiles = [];
 let explosions = [];
+let powerups = [];
 
 // --- Event listeners & Key handlers ---
 document.addEventListener('keydown', keyDown);
@@ -476,15 +487,39 @@ function shiftColor(hex, level) {
 }
 
 function fireProjectile() {
-    const p = {
-        x: player.x + player.width / 2 - 2.5,
-        y: player.y,
-        width: 5,
-        height: 10,
-        speed: 10,
-        status: 1
-    };
-    playerProjectiles.push(p);
+    const projectileWidth = 5;
+    const projectileHeight = 10;
+    const projectileSpeed = 10;
+
+    if (player.powerupActive) {
+        const p1 = {
+            x: player.x + player.width / 4 - projectileWidth / 2,
+            y: player.y,
+            width: projectileWidth,
+            height: projectileHeight,
+            speed: projectileSpeed,
+            status: 1
+        };
+        const p2 = {
+            x: player.x + (player.width * 3) / 4 - projectileWidth / 2,
+            y: player.y,
+            width: projectileWidth,
+            height: projectileHeight,
+            speed: projectileSpeed,
+            status: 1
+        };
+        playerProjectiles.push(p1, p2);
+    } else {
+        const p = {
+            x: player.x + player.width / 2 - projectileWidth / 2,
+            y: player.y,
+            width: projectileWidth,
+            height: projectileHeight,
+            speed: projectileSpeed,
+            status: 1
+        };
+        playerProjectiles.push(p);
+    }
     shootSound.play();
 }
 
@@ -587,6 +622,18 @@ function update() {
                     } else {
                         score += 10;
                     }
+
+                    // Add a 5% chance to spawn a power-up
+                    if (Math.random() < 0.05) {
+                        powerups.push({
+                            x: alien.x,
+                            y: alien.y,
+                            width: JULES_LOGO_SPRITE[0].length * PIXEL_SIZE,
+                            height: JULES_LOGO_SPRITE.length * PIXEL_SIZE,
+                            speed: 2,
+                            status: 1
+                        });
+                    }
                     explosionSound.play();
                 }
             });
@@ -652,9 +699,32 @@ function update() {
         }
     }
 
+    // Update and handle power-ups
+    powerups.forEach(powerup => {
+        if (powerup.status === 1) {
+            powerup.y += powerup.speed;
+            if (powerup.y > canvas.height) {
+                powerup.status = 0;
+            }
+
+            // Collision with player
+            if (
+                player.x < powerup.x + powerup.width &&
+                player.x + player.width > powerup.x &&
+                player.y < powerup.y + powerup.height &&
+                player.y + player.height > powerup.y
+            ) {
+                powerup.status = 0;
+                player.powerupActive = true;
+                player.powerupTimer = 300; // 5 seconds at 60fps
+            }
+        }
+    });
+
     // Filter out inactive projectiles
     playerProjectiles = playerProjectiles.filter(p => p.status === 1);
     alienProjectiles = alienProjectiles.filter(p => p.status === 1);
+    powerups = powerups.filter(p => p.status === 1);
 
     // Update explosions
     explosions.forEach((explosion, index) => {
@@ -666,6 +736,13 @@ function update() {
 
     if (squidStormMessageTimer > 0) {
         squidStormMessageTimer--;
+    }
+
+    if (player.powerupActive) {
+        player.powerupTimer--;
+        if (player.powerupTimer <= 0) {
+            player.powerupActive = false;
+        }
     }
 }
 
@@ -753,6 +830,12 @@ function draw() {
         if (p.status === 1) ctx.fillRect(p.x, p.y, p.width, p.height);
     });
 
+    powerups.forEach(powerup => {
+        if (powerup.status === 1) {
+            drawPixelArt(JULES_LOGO_SPRITE, powerup.x, powerup.y, '#FFD700', PIXEL_SIZE);
+        }
+    });
+
     // Draw Ground Line
     ctx.fillStyle = colors.ground;
     ctx.fillRect(0, canvas.height - 10, canvas.width, 5);
@@ -767,6 +850,13 @@ function draw() {
     ctx.fillText('High Score: ' + highScore, canvas.width - 10, 25);
     ctx.textAlign = 'left';
 
+    if (player.powerupActive) {
+        ctx.fillStyle = '#FFD700';
+        ctx.font = '20px "Press Start 2P"';
+        ctx.textAlign = 'left';
+        ctx.fillText('DOUBLE LASERS!', 10, 60);
+    }
+
     if (squidStormMessageTimer > 0) {
         // Purple flash effect for the first 20 frames
         if (squidStormMessageTimer > 100) {
@@ -778,7 +868,7 @@ function draw() {
         ctx.fillStyle = '#9370DB';
         ctx.font = '20px "Press Start 2P"';
         ctx.textAlign = 'left';
-        ctx.fillText('SQUIDSTORM ACTIVE', 10, 60);
+        ctx.fillText('SQUIDSTORM ACTIVE', 10, 85);
     }
 
     if (gameOver && !gameConfig.isDemo) {
