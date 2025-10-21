@@ -647,6 +647,19 @@ function update() {
                         score += 10;
                         explosions.push({ x: alien.x, y: alien.y, color: colors.explosion, size: 30, timer: 10 });
                     }
+
+                    // Add a chance to spawn a power-up
+                    if (Math.random() < 0.1) { // 10% chance
+                        powerups.push({
+                            x: alien.x + alienWidth / 2,
+                            y: alien.y + alienHeight / 2,
+                            width: JULES_LOGO_SPRITE[0].length * PIXEL_SIZE,
+                            height: JULES_LOGO_SPRITE.length * PIXEL_SIZE,
+                            speed: 2,
+                            type: 'double-laser',
+                            status: 1
+                        });
+                    }
                     explosionSound.play();
 
                     // Spawn power-up
@@ -808,6 +821,14 @@ function draw() {
         drawPixelArt(UFO_SPRITE, ufo.x, ufo.y, colors.ufo, PIXEL_SIZE);
     }
 
+    powerups.forEach(powerup => {
+        if (powerup.status === 1) {
+            // Pulsating color effect
+            const pulsatingFactor = Math.abs(Math.sin(animationFrame / 15));
+            const color = `rgba(255, 255, 0, ${0.5 + pulsatingFactor * 0.5})`;
+            drawPixelArt(JULES_LOGO_SPRITE, powerup.x, powerup.y, color, PIXEL_SIZE);
+        }
+    });
 
     aliens.flat().forEach(alien => {
         if (alien.status === 1) {
