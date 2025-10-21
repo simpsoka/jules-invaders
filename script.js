@@ -1,6 +1,10 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const playAgainBtn = document.getElementById('playAgainBtn');
+const mobileControls = document.getElementById('mobileControls');
+const leftBtn = document.getElementById('leftBtn');
+const rightBtn = document.getElementById('rightBtn');
+const fireBtn = document.getElementById('fireBtn');
 
 // --- Sprite & Asset Definitions ---
 const PIXEL_SIZE = 4;
@@ -803,12 +807,16 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
 }
 
 function draw() {
+    const scale = canvas.width / 800;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.scale(scale, scale);
+
 
     // Darken background based on level
     const backgroundDarkness = Math.min(0.5, (level - 1) * 0.05);
     ctx.fillStyle = `rgba(0, 0, 0, ${backgroundDarkness})`;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, 800, 600);
 
     if (squidStormActive) {
         drawPixelArt(SQUIDSTORM_SHIP_SPRITE, player.x, player.y, colors.dev, PIXEL_SIZE);
@@ -931,6 +939,8 @@ function draw() {
             drawPixelArt(JULES_LOGO_SPRITE, powerup.x, powerup.y, colors.powerup, PIXEL_SIZE);
         }
     });
+
+    ctx.restore();
 }
 
 function gameLoop() {
@@ -946,9 +956,50 @@ function loadHighScore() {
     }
 }
 
+function resizeCanvas() {
+    const gameContainer = document.getElementById('gameContainer');
+    const aspectRatio = 800 / 600;
+    const containerWidth = gameContainer.offsetWidth;
+    const containerHeight = gameContainer.offsetHeight;
+
+    let newWidth, newHeight;
+
+    if (containerWidth / containerHeight > aspectRatio) {
+        newHeight = containerHeight;
+        newWidth = newHeight * aspectRatio;
+    } else {
+        newWidth = containerWidth;
+        newHeight = newWidth / aspectRatio;
+    }
+
+    canvas.style.width = `${newWidth}px`;
+    canvas.style.height = `${newHeight}px`;
+
+    // Set the canvas resolution to its original size for crisp pixel art
+    canvas.width = 800;
+    canvas.height = 600;
+}
+
+
 function initGame(config) {
     gameConfig = config;
     loadHighScore();
     updateColorsForLevel(level);
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice) {
+        mobileControls.style.display = 'flex';
+
+        leftBtn.addEventListener('touchstart', (e) => { e.preventDefault(); keys.ArrowLeft = true; });
+        leftBtn.addEventListener('touchend', () => { keys.ArrowLeft = false; });
+        rightBtn.addEventListener('touchstart', (e) => { e.preventDefault(); keys.ArrowRight = true; });
+        rightBtn.addEventListener('touchend', () => { keys.ArrowRight = false; });
+        fireBtn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[' '] = true; });
+        fireBtn.addEventListener('touchend', () => { keys[' '] = false; });
+    }
+
     gameLoop();
 }

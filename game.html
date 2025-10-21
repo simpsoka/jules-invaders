@@ -2,12 +2,20 @@
 <html>
 <head>
   <title>Jules Invaders</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-  <h1>Jules Invaders</h1>
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
-  <button id="playAgainBtn" style="display: none;">Play Again</button>
+  <div id="gameContainer">
+    <h1>Jules Invaders</h1>
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <button id="playAgainBtn" style="display: none;">Play Again</button>
+  </div>
+  <div id="mobileControls" style="display: none;">
+    <button id="leftBtn">LEFT</button>
+    <button id="fireBtn">FIRE</button>
+    <button id="rightBtn">RIGHT</button>
+  </div>
   <script src="script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
