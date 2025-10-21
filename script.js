@@ -96,11 +96,11 @@ const SQUID_SPRITE = [
 ];
 
 const JULES_LOGO_SPRITE = [
-    [0, 1, 1, 1, 0],
+    [1, 1, 1, 1, 0],
     [0, 0, 1, 0, 0],
     [0, 0, 1, 0, 0],
-    [1, 0, 1, 0, 0],
-    [0, 1, 0, 0, 0],
+    [0, 0, 1, 0, 0],
+    [1, 1, 1, 0, 0],
 ];
 
 
@@ -118,6 +118,7 @@ const colors = {
     projectile: '#FFF',
     ground: '#ADFF2F',
     text: '#FFF',
+    powerup: '#FFA500',
     explosion: 'magenta',
     squidExplosion: 'red'
 };
@@ -228,7 +229,7 @@ const player = {
   dx: 0,
   shootCooldown: 100, // Milliseconds
   lastShotTime: 0,
-  powerupType: null,
+  powerupType: 'none',
   powerupTimer: 0,
 };
 
@@ -388,7 +389,7 @@ function resetGame() {
   explosions.length = 0;
   particles.length = 0;
   powerups.length = 0;
-  player.powerupType = null;
+  player.powerupType = 'none';
   player.powerupTimer = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
@@ -431,8 +432,6 @@ function resetAliensForNextLevel() {
   explosions.length = 0;
   particles.length = 0;
   powerups.length = 0;
-  player.powerupType = null;
-  player.powerupTimer = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
 }
@@ -496,9 +495,9 @@ function shiftColor(hex, level) {
 }
 
 function fireProjectile() {
-    if (player.powerupType === 'double-laser') {
+    if (player.powerupType === 'doubleLaser') {
         const p1 = {
-            x: player.x + player.width / 2 - 10,
+            x: player.x + (player.width / 4) - 2.5,
             y: player.y,
             width: 5,
             height: 10,
@@ -506,7 +505,7 @@ function fireProjectile() {
             status: 1
         };
         const p2 = {
-            x: player.x + player.width / 2 + 5,
+            x: player.x + (player.width * 3 / 4) - 2.5,
             y: player.y,
             width: 5,
             height: 10,
@@ -559,6 +558,13 @@ function update() {
     if (gameOver && !gameConfig.isDemo) return;
 
     animationFrame++;
+
+    // Power-up timer
+    if (player.powerupTimer > 0) {
+        player.powerupTimer--;
+    } else {
+        player.powerupType = 'none';
+    }
 
     if (!gameConfig.isDemo) {
         // Horizontal movement
@@ -655,6 +661,18 @@ function update() {
                         });
                     }
                     explosionSound.play();
+
+                    // Spawn power-up
+                    if (Math.random() < 0.05) { // 5% chance
+                        powerups.push({
+                            x: alien.x + alienWidth / 2,
+                            y: alien.y + alienHeight / 2,
+                            width: JULES_LOGO_SPRITE[0].length * PIXEL_SIZE,
+                            height: JULES_LOGO_SPRITE.length * PIXEL_SIZE,
+                            speed: 2,
+                            status: 1
+                        });
+                    }
                 }
             });
 
@@ -745,14 +763,6 @@ function update() {
         }
     });
 
-    // Decrement powerup timer
-    if (player.powerupTimer > 0) {
-        player.powerupTimer--;
-        if (player.powerupTimer === 0) {
-            player.powerupType = null;
-        }
-    }
-
     // Update powerups
     powerups.forEach((powerup, index) => {
         if (powerup.status === 1) {
@@ -761,20 +771,17 @@ function update() {
                 powerup.status = 0;
             }
 
-            // Collision with player
-            if (
-                player.x < powerup.x + powerup.width &&
+            // Player collision
+            if (player.x < powerup.x + powerup.width &&
                 player.x + player.width > powerup.x &&
                 player.y < powerup.y + powerup.height &&
-                player.y + player.height > powerup.y
-            ) {
+                player.y + player.height > powerup.y) {
                 powerup.status = 0;
-                player.powerupType = powerup.type;
+                player.powerupType = 'doubleLaser';
                 player.powerupTimer = 300; // 5 seconds at 60fps
             }
         }
     });
-
     powerups = powerups.filter(p => p.status === 1);
 }
 
@@ -916,6 +923,13 @@ function draw() {
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
         ctx.fill();
         ctx.globalAlpha = 1.0; // Reset alpha
+    });
+
+    // Draw powerups
+    powerups.forEach(powerup => {
+        if (powerup.status === 1) {
+            drawPixelArt(JULES_LOGO_SPRITE, powerup.x, powerup.y, colors.powerup, PIXEL_SIZE);
+        }
     });
 }
 
