@@ -230,7 +230,6 @@ const player = {
   width: PLAYER_SPRITE_A[0].length * PIXEL_SIZE,
   height: PLAYER_SPRITE_A.length * PIXEL_SIZE,
   speed: 5,
-  dx: 0,
   shootCooldown: 100, // Milliseconds
   lastShotTime: 0,
   powerupType: 'none',
@@ -362,7 +361,6 @@ function resetGame() {
   alienDirection = 1;
 
   player.x = canvas.width / 2 - (PLAYER_SPRITE_A[0].length * PIXEL_SIZE) / 2;
-  player.dx = 0;
 
   aliens.length = 0;
   for (let c = 0; c < alienColumnCount; c++) {
@@ -578,7 +576,6 @@ function update() {
         } else if (keys.ArrowRight && !keys.ArrowLeft) {
             dx = player.speed;
         }
-        player.dx = dx;
 
         // Shooting logic
         const currentTime = Date.now();
@@ -587,7 +584,7 @@ function update() {
             player.lastShotTime = currentTime;
         }
 
-        player.x += player.dx;
+        player.x += dx;
         if (player.x < 0) player.x = 0;
         if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
     }
