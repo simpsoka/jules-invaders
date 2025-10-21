@@ -177,6 +177,16 @@ const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft',
 let userInputSequence = [];
 let squidStormActive = false;
 let squidStormMessageTimer = 0;
+let krakenRisingActive = false;
+let krakenRisingTimer = 0;
+const KRAKEN_EVENT_DURATION = 180; // 3 seconds at 60fps
+const KRAKEN_WAVE_COUNT = 15;
+const krakenWaves = [];
+const krakenShadow = {
+    y: 0,
+    height: 0,
+    alpha: 0,
+};
 
 let score = 0;
 let highScore = 0;
@@ -340,6 +350,9 @@ function resetGame() {
   alienSpeed = 0.5;
   alienFireRate = 0.0005;
   squidStormActive = false;
+  krakenRisingActive = false;
+  krakenRisingTimer = 0;
+  krakenWaves.length = 0;
   gameOver = false;
   gameWon = false;
   alienDirection = 1;
@@ -415,6 +428,25 @@ function resetAliensForNextLevel() {
   explosions.length = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
+
+  // --- Kraken Rising Event Trigger ---
+  // 25% chance of triggering on a new level
+  if (level > 1 && Math.random() < 0.25) {
+      krakenRisingActive = true;
+      krakenRisingTimer = KRAKEN_EVENT_DURATION;
+
+      // Initialize waves
+      krakenWaves.length = 0;
+      for (let i = 0; i < KRAKEN_WAVE_COUNT; i++) {
+          krakenWaves.push({
+              y: canvas.height,
+              speed: 2 + Math.random() * 2,
+              amplitude: 10 + Math.random() * 20,
+              frequency: 0.01 + Math.random() * 0.02,
+              alpha: 0.1 + Math.random() * 0.2,
+          });
+      }
+  }
 }
 
 
@@ -500,11 +532,44 @@ function fireAlienProjectile(alien) {
     alienProjectiles.push(p);
 }
 
+function updateKrakenRising() {
+    if (!krakenRisingActive) return;
+
+    krakenRisingTimer--;
+
+    // Animate waves
+    krakenWaves.forEach(wave => {
+        wave.y -= wave.speed;
+        if (wave.y < -wave.amplitude) { // Reset wave when it goes off-screen
+            wave.y = canvas.height;
+        }
+    });
+
+    // Animate shadow
+    const progress = (KRAKEN_EVENT_DURATION - krakenRisingTimer) / KRAKEN_EVENT_DURATION;
+    if (progress < 0.5) {
+        // Fade in and grow
+        krakenShadow.alpha = progress * 2 * 0.4; // Max alpha 0.4
+        krakenShadow.height = progress * 2 * (canvas.height * 0.6); // Max height 60%
+    } else {
+        // Fade out and shrink
+        krakenShadow.alpha = (1 - progress) * 2 * 0.4;
+        krakenShadow.height = (1 - progress) * 2 * (canvas.height * 0.6);
+    }
+    krakenShadow.y = (canvas.height - krakenShadow.height) / 2;
+
+
+    if (krakenRisingTimer <= 0) {
+        krakenRisingActive = false;
+    }
+}
+
 // --- Main Game Loop ---
 function update() {
     if (gameOver && !gameConfig.isDemo) return;
 
     animationFrame++;
+    updateKrakenRising();
 
     if (!gameConfig.isDemo) {
         // Horizontal movement
@@ -686,6 +751,26 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
     }
 }
 
+function drawKrakenRising() {
+    if (!krakenRisingActive) return;
+
+    // Draw the shadow
+    ctx.fillStyle = `rgba(0, 0, 15, ${krakenShadow.alpha})`;
+    ctx.fillRect(0, krakenShadow.y, canvas.width, krakenShadow.height);
+
+    // Draw the waves
+    krakenWaves.forEach(wave => {
+        ctx.beginPath();
+        ctx.moveTo(0, wave.y);
+        for (let x = 0; x < canvas.width; x++) {
+            const yOffset = Math.sin(x * wave.frequency + animationFrame * 0.05) * wave.amplitude;
+            ctx.lineTo(x, wave.y + yOffset);
+        }
+        ctx.strokeStyle = `rgba(0, 0, 0, ${wave.alpha})`;
+        ctx.stroke();
+    });
+}
+
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -693,6 +778,8 @@ function draw() {
     const backgroundDarkness = Math.min(0.5, (level - 1) * 0.05);
     ctx.fillStyle = `rgba(0, 0, 0, ${backgroundDarkness})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    drawKrakenRising();
 
     if (squidStormActive) {
         drawPixelArt(SQUIDSTORM_SHIP_SPRITE, player.x, player.y, colors.dev, PIXEL_SIZE);
