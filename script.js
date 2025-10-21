@@ -287,6 +287,7 @@ let playerProjectiles = [];
 let alienProjectiles = [];
 let explosions = [];
 let powerups = [];
+let particles = [];
 
 // --- Event listeners & Key handlers ---
 document.addEventListener('keydown', keyDown);
@@ -385,6 +386,7 @@ function resetGame() {
   playerProjectiles.length = 0;
   alienProjectiles.length = 0;
   explosions.length = 0;
+  particles.length = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
 
@@ -424,6 +426,7 @@ function resetAliensForNextLevel() {
   playerProjectiles.length = 0;
   alienProjectiles.length = 0;
   explosions.length = 0;
+  particles.length = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
 }
@@ -535,6 +538,20 @@ function fireAlienProjectile(alien) {
     alienProjectiles.push(p);
 }
 
+function createExplosion(x, y, color, count = 20) {
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: x,
+            y: y,
+            color: color,
+            size: Math.random() * 2 + 1,
+            vx: (Math.random() - 0.5) * 4,
+            vy: (Math.random() - 0.5) * 4,
+            life: Math.random() * 20 + 10 // Lifespan in frames
+        });
+    }
+}
+
 // --- Main Game Loop ---
 function update() {
     if (gameOver && !gameConfig.isDemo) return;
@@ -617,10 +634,10 @@ function update() {
                     p.status = 0;
                     if (alien.isSquid) {
                         score += 50;
-                explosions.push({ x: alien.x, y: alien.y, color: colors.squidExplosion, size: 30, timer: 10 });
-                        explosions.push({ x: alien.x, y: alien.y, color: colors.explosion, size: 30, timer: 10 });
+                        createExplosion(alien.x + alienWidth / 2, alien.y + alienHeight / 2, colors.squid);
                     } else {
                         score += 10;
+                        explosions.push({ x: alien.x, y: alien.y, color: colors.explosion, size: 30, timer: 10 });
                     }
 
                     // Add a 5% chance to spawn a power-up
@@ -744,6 +761,15 @@ function update() {
             player.powerupActive = false;
         }
     }
+    // Update particles
+    particles.forEach((particle, index) => {
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.life--;
+        if (particle.life <= 0) {
+            particles.splice(index, 1);
+        }
+    });
 }
 
 // --- Drawing Functions ---
@@ -880,6 +906,16 @@ function draw() {
     } else {
         if (playAgainBtn) playAgainBtn.style.display = 'none';
     }
+
+    // Draw particles
+    particles.forEach(particle => {
+        ctx.fillStyle = particle.color;
+        ctx.globalAlpha = Math.max(0, particle.life / 20); // Fade out
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1.0; // Reset alpha
+    });
 }
 
 function gameLoop() {
