@@ -497,13 +497,28 @@ function shiftColor(hex, level) {
 }
 
 function fireProjectile() {
-    if (player.powerupType === 'doubleLaser') {
+    if (squidStormActive) {
+        // Triple shot with spread
+        const baseProjectile = {
+            y: player.y,
+            width: 5,
+            height: 10,
+            speed: 10,
+            status: 1
+        };
+        playerProjectiles.push(
+            { ...baseProjectile, x: player.x + player.width / 2 - 2.5, vx: -2 }, // Left
+            { ...baseProjectile, x: player.x + player.width / 2 - 2.5, vx: 0 },  // Center
+            { ...baseProjectile, x: player.x + player.width / 2 - 2.5, vx: 2 }   // Right
+        );
+    } else if (player.powerupType === 'doubleLaser') {
         const p1 = {
             x: player.x + (player.width / 4) - 2.5,
             y: player.y,
             width: 5,
             height: 10,
             speed: 10,
+            vx: 0,
             status: 1
         };
         const p2 = {
@@ -512,6 +527,7 @@ function fireProjectile() {
             width: 5,
             height: 10,
             speed: 10,
+            vx: 0,
             status: 1
         };
         playerProjectiles.push(p1, p2);
@@ -522,6 +538,7 @@ function fireProjectile() {
             width: 5,
             height: 10,
             speed: 10,
+            vx: 0,
             status: 1
         };
         playerProjectiles.push(p);
@@ -592,7 +609,8 @@ function update() {
     playerProjectiles.forEach(p => {
         if (p.status === 1) {
             p.y -= p.speed;
-            if (p.y < 0) p.status = 0;
+            p.x += p.vx; // Horizontal movement
+            if (p.y < 0 || p.x < 0 || p.x > canvas.width) p.status = 0;
         }
     });
 
