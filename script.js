@@ -88,6 +88,13 @@ const UFO_SPRITE = [
     [0, 1, 1, 0, 0, 1, 1, 0]
 ];
 
+const BENEVOLENT_UFO_SPRITE = [
+    [0, 1, 1, 1, 1, 1, 1, 0],
+    [1, 1, 2, 1, 1, 2, 1, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1],
+    [0, 1, 0, 1, 1, 0, 1, 0]
+];
+
 const SQUID_SPRITE = [
   [0, 1, 1, 0, 0, 1, 1, 0],
   [1, 1, 1, 1, 1, 1, 1, 1],
@@ -116,6 +123,7 @@ const colors = {
     player: { 1: '#708090', 2: '#FFD700' },
     dev: { 1: '#FF0000', 2: '#00FF00', 3: '#0000FF', 4: '#FFFF00', 5: '#FF00FF' },
     ufo: '#EE82EE',
+    benevolentUfo: { 1: '#00FFFF', 2: '#FFFFFF' },
     squid: '#9370DB',
     alien: '#ADFF2F',
     bunker: '#ADFF2F',
@@ -190,6 +198,8 @@ const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft',
 let userInputSequence = [];
 let squidStormActive = false;
 let squidStormMessageTimer = 0;
+let squidSquadActive = false;
+let squidSquadTimer = 0;
 
 let score = 0;
 let highScore = 0;
@@ -222,6 +232,7 @@ function loadAudio(src) {
 const shootSound = loadAudio('assets/shoot.wav');
 const explosionSound = loadAudio('assets/explosion.wav');
 const squidStormSound = loadAudio('assets/squidstorm.wav');
+const benevolentHitSound = loadAudio('assets/benevolent-hit.wav');
 
 // Player
 const player = {
@@ -243,6 +254,15 @@ const ufo = {
     width: UFO_SPRITE[0].length * PIXEL_SIZE,
     height: UFO_SPRITE.length * PIXEL_SIZE,
     speed: 2,
+    status: 0 // 0 = inactive, 1 = active
+};
+
+const benevolentUfo = {
+    x: -BENEVOLENT_UFO_SPRITE[0].length * PIXEL_SIZE,
+    y: 60,
+    width: BENEVOLENT_UFO_SPRITE[0].length * PIXEL_SIZE,
+    height: BENEVOLENT_UFO_SPRITE.length * PIXEL_SIZE,
+    speed: 2.5,
     status: 0 // 0 = inactive, 1 = active
 };
 
@@ -395,6 +415,10 @@ function resetGame() {
   player.powerupTimer = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
+  benevolentUfo.status = 0;
+  benevolentUfo.x = -benevolentUfo.width;
+  squidSquadActive = false;
+  squidSquadTimer = 0;
 
   if (playAgainBtn) {
     playAgainBtn.style.display = 'none';
@@ -436,6 +460,10 @@ function resetAliensForNextLevel() {
   powerups.length = 0;
   ufo.status = 0;
   ufo.x = -ufo.width;
+  benevolentUfo.status = 0;
+  benevolentUfo.x = -benevolentUfo.width;
+  squidSquadActive = false;
+  squidSquadTimer = 0;
 }
 
 
@@ -497,7 +525,27 @@ function shiftColor(hex, level) {
 }
 
 function fireProjectile() {
-    if (squidStormActive) {
+    if (squidSquadActive) {
+        const helperShipOffset = player.width + 10;
+        const positions = [
+            player.x,
+            player.x - helperShipOffset,
+            player.x + helperShipOffset,
+            player.x - helperShipOffset * 2,
+        ];
+        positions.forEach(posX => {
+            const p = {
+                x: posX + player.width / 2 - 2.5,
+                y: player.y,
+                width: 5,
+                height: 10,
+                speed: 10,
+                vx: 0,
+                status: 1
+            };
+            playerProjectiles.push(p);
+        });
+    } else if (squidStormActive) {
         // Triple shot with spread
         const baseProjectile = {
             y: player.y,
@@ -585,6 +633,13 @@ function update() {
         player.powerupType = 'none';
     }
 
+    // Squid Squad timer
+    if (squidSquadTimer > 0) {
+        squidSquadTimer--;
+    } else {
+        squidSquadActive = false;
+    }
+
     if (!gameConfig.isDemo) {
         // Horizontal movement
         let dx = 0;
@@ -631,6 +686,19 @@ function update() {
         ufo.x += ufo.speed;
         if (ufo.x > canvas.width) {
             ufo.status = 0;
+        }
+    }
+
+    // Benevolent UFO Logic
+    if (benevolentUfo.status === 0 && Math.random() < 0.0002) { // Lower spawn rate
+        benevolentUfo.status = 1;
+        benevolentUfo.x = -benevolentUfo.width;
+    }
+
+    if (benevolentUfo.status === 1) {
+        benevolentUfo.x += benevolentUfo.speed;
+        if (benevolentUfo.x > canvas.width) {
+            benevolentUfo.status = 0;
         }
     }
 
@@ -701,6 +769,17 @@ function update() {
                 p.status = 0;
                 score += 100;
                 explosionSound.play();
+            }
+
+            // Player projectile vs Benevolent UFO
+            if (benevolentUfo.status === 1 && p.x > benevolentUfo.x && p.x < benevolentUfo.x + benevolentUfo.width && p.y > benevolentUfo.y && p.y < benevolentUfo.y + benevolentUfo.height) {
+                benevolentUfo.status = 0;
+                p.status = 0;
+                score += 200;
+                benevolentHitSound.play();
+                createExplosion(benevolentUfo.x + benevolentUfo.width / 2, benevolentUfo.y + benevolentUfo.height / 2, colors.benevolentUfo[1], 40);
+                squidSquadActive = true;
+                squidSquadTimer = 900; // 15 seconds at 60fps
             }
         }
     });
@@ -840,8 +919,21 @@ function draw() {
         drawPixelArt(playerSprite, player.x, player.y, colors.player, PIXEL_SIZE);
     }
 
+    if (squidSquadActive) {
+        const playerSprite = Math.floor(animationFrame / 30) % 2 === 0 ? PLAYER_SPRITE_A : PLAYER_SPRITE_B;
+        const helperShipOffset = player.width + 10;
+        // Draw three helper ships
+        drawPixelArt(playerSprite, player.x - helperShipOffset, player.y, colors.player, PIXEL_SIZE);
+        drawPixelArt(playerSprite, player.x + helperShipOffset, player.y, colors.player, PIXEL_SIZE);
+        drawPixelArt(playerSprite, player.x - helperShipOffset * 2, player.y, colors.player, PIXEL_SIZE);
+    }
+
     if (ufo.status === 1) {
         drawPixelArt(UFO_SPRITE, ufo.x, ufo.y, colors.ufo, PIXEL_SIZE);
+    }
+
+    if (benevolentUfo.status === 1) {
+        drawPixelArt(BENEVOLENT_UFO_SPRITE, benevolentUfo.x, benevolentUfo.y, colors.benevolentUfo, PIXEL_SIZE);
     }
 
     powerups.forEach(powerup => {
