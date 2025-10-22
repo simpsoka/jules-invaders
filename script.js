@@ -1064,18 +1064,16 @@ function loadHighScore() {
 }
 
 function resizeCanvas() {
-    const gameContainer = document.getElementById('gameContainer');
     const aspectRatio = 800 / 600;
-    const containerWidth = gameContainer.offsetWidth;
-    const containerHeight = gameContainer.offsetHeight;
+    const { innerWidth, innerHeight } = window;
 
     let newWidth, newHeight;
 
-    if (containerWidth / containerHeight > aspectRatio) {
-        newHeight = containerHeight;
+    if (innerWidth / innerHeight > aspectRatio) {
+        newHeight = innerHeight;
         newWidth = newHeight * aspectRatio;
     } else {
-        newWidth = containerWidth;
+        newWidth = innerWidth;
         newHeight = newWidth / aspectRatio;
     }
 
