@@ -1,0 +1,17 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "test-results",
+      "package.json",
+      "package-lock.json",
+      "README.md",
+      ".github",
+      ".firebaserc",
+      ".firebase/**"
+    ]
+  }
+}
