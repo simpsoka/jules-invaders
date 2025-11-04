@@ -110,39 +110,48 @@ function initNetwork() {
 
     sessionRef.once('value', (snapshot) => {
         const session = snapshot.val();
+
+        const joinSession = (currentSession) => {
+            const players = currentSession.players || {};
+            const playerCount = Object.keys(players).length;
+            const isPlayerAlreadyIn = !!players[uid];
+
+            if (!isPlayerAlreadyIn) {
+                if (currentSession.gameState !== 'waiting') {
+                    console.error("Cannot join session: Game is already in progress.");
+                    return;
+                }
+                if (playerCount >= 2) {
+                    console.error("Cannot join session: Game is full.");
+                    return;
+                }
+            }
+
+            const playerRef = db.ref(`sessions/${sessionId}/players/${uid}`);
+            playerRef.onDisconnect().remove();
+
+            playerRef.set({
+              score: 0,
+              status: 'waiting'
+            }).then(() => {
+              console.log('Player connected to session:', sessionId);
+              dispatchEvent(new CustomEvent('NE_SESSION_STATE', { detail: { state: 'WAITING' } }));
+              setupEventListeners();
+              setupSessionListeners();
+            });
+        };
+
         if (!session) {
-            console.error("Session not found:", sessionId);
-            // Ideally, redirect or show an error message to the user.
-            return;
+            const newSession = {
+                gameState: "waiting",
+                players: {}
+            };
+            sessionRef.set(newSession).then(() => {
+                joinSession(newSession);
+            });
+        } else {
+            joinSession(session);
         }
-
-        const players = session.players || {};
-        const playerCount = Object.keys(players).length;
-        const isPlayerAlreadyIn = !!players[uid];
-
-        if (!isPlayerAlreadyIn) {
-            if (session.gameState !== 'waiting') {
-                console.error("Cannot join session: Game is already in progress.");
-                return;
-            }
-            if (playerCount >= 2) {
-                console.error("Cannot join session: Game is full.");
-                return;
-            }
-        }
-
-        const playerRef = db.ref(`sessions/${sessionId}/players/${uid}`);
-        playerRef.onDisconnect().remove();
-
-        playerRef.set({
-          score: 0,
-          status: 'waiting'
-        }).then(() => {
-          console.log('Player connected to session:', sessionId);
-          dispatchEvent(new CustomEvent('NE_SESSION_STATE', { detail: { state: 'WAITING' } }));
-          setupEventListeners();
-          setupSessionListeners();
-        });
     });
   }).catch((error) => {
     console.error("Firebase auth failed:", error);
