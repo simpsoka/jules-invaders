@@ -1,58 +1,5 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-
-function enableHolidayTheme() {
-    // Sprites
-    PLAYER_SPRITE_A = HOLIDAY_PLAYER_SPRITE;
-    PLAYER_SPRITE_B = HOLIDAY_PLAYER_SPRITE; // Using the same for both animation frames
-    ALIEN_SPRITE_1 = HOLIDAY_ALIEN_SPRITE_1;
-    ALIEN_SPRITE_2 = HOLIDAY_ALIEN_SPRITE_2;
-    ALIEN_SPRITE_3 = HOLIDAY_ALIEN_SPRITE_3;
-    ALIEN_SPRITE_1_DANCE = HOLIDAY_ALIEN_SPRITE_1;
-    ALIEN_SPRITE_2_DANCE = HOLIDAY_ALIEN_SPRITE_2;
-    ALIEN_SPRITE_3_DANCE = HOLIDAY_ALIEN_SPRITE_3;
-    UFO_SPRITE = HOLIDAY_UFO_SPRITE;
-
-    // Colors
-    Object.assign(colors, holidayColors);
-
-    // Sounds are not changed to avoid 404 errors for missing files.
-}
-
-// Snowfall effect
-let snowflakes = [];
-function createSnowflakes() {
-    snowflakes = []; // Clear existing snowflakes
-    for (let i = 0; i < 150; i++) { // Increased count for a denser feel
-        snowflakes.push({
-            x: Math.random() * canvas.width,
-            y: Math.random() * canvas.height,
-            radius: Math.random() * 2.5 + 1, // Slightly larger flakes
-            speed: Math.random() * 1.5 + 0.5, // Varied speeds
-            opacity: Math.random() * 0.6 + 0.3 // Varied opacity
-        });
-    }
-}
-
-function drawSnow() {
-    snowflakes.forEach(flake => {
-        ctx.fillStyle = `rgba(255, 255, 255, ${flake.opacity})`;
-        ctx.beginPath();
-        ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
-        ctx.fill();
-    });
-}
-
-function updateSnow() {
-    snowflakes.forEach(flake => {
-        flake.y += flake.speed;
-        if (flake.y > canvas.height) {
-            flake.x = Math.random() * canvas.width;
-            flake.y = -flake.radius; // Reset above the screen
-        }
-    });
-}
-
 const playAgainBtn = document.getElementById('playAgainBtn');
 const mobileControls = document.getElementById('mobileControls');
 const leftBtn = document.getElementById('leftBtn');
@@ -62,7 +9,7 @@ const fireBtn = document.getElementById('fireBtn');
 // --- Sprite & Asset Definitions ---
 const PIXEL_SIZE = 4;
 
-let PLAYER_SPRITE_A = [
+const PLAYER_SPRITE_A = [
     [0, 0, 1, 1, 1, 0, 0],
     [0, 1, 1, 1, 1, 1, 0],
     [1, 1, 2, 1, 1, 1, 1],
@@ -77,7 +24,7 @@ const SQUIDSTORM_SHIP_SPRITE = [
     [5, 1, 1, 1, 1, 1, 5],
 ];
 
-let PLAYER_SPRITE_B = [
+const PLAYER_SPRITE_B = [
     [0, 0, 1, 1, 1, 0, 0],
     [0, 1, 1, 1, 1, 1, 0],
     [1, 1, 0, 1, 1, 1, 1],
@@ -85,42 +32,42 @@ let PLAYER_SPRITE_B = [
     [0, 1, 0, 0, 0, 1, 0]
 ];
 
-let ALIEN_SPRITE_1 = [
+const ALIEN_SPRITE_1 = [
   [0, 0, 1, 1, 0, 0],
   [0, 1, 1, 1, 1, 0],
   [1, 1, 0, 0, 1, 1],
   [1, 0, 0, 0, 0, 1],
 ];
 
-let ALIEN_SPRITE_2 = [
+const ALIEN_SPRITE_2 = [
   [0, 1, 0, 0, 1, 0],
   [1, 0, 1, 1, 0, 1],
   [1, 1, 1, 1, 1, 1],
   [0, 1, 0, 0, 1, 0],
 ];
 
-let ALIEN_SPRITE_3 = [
+const ALIEN_SPRITE_3 = [
   [0, 0, 1, 1, 0, 0],
   [1, 1, 1, 1, 1, 1],
   [0, 1, 1, 1, 1, 0],
   [1, 0, 0, 0, 0, 1],
 ];
 
-let ALIEN_SPRITE_1_DANCE = [
+const ALIEN_SPRITE_1_DANCE = [
   [0, 0, 1, 1, 0, 0],
   [0, 1, 1, 1, 1, 0],
   [1, 1, 0, 0, 1, 1],
   [0, 1, 1, 1, 1, 0],
 ];
 
-let ALIEN_SPRITE_2_DANCE = [
+const ALIEN_SPRITE_2_DANCE = [
   [0, 1, 0, 0, 1, 0],
   [1, 0, 1, 1, 0, 1],
   [1, 1, 1, 1, 1, 1],
   [1, 0, 1, 1, 0, 1],
 ];
 
-let ALIEN_SPRITE_3_DANCE = [
+const ALIEN_SPRITE_3_DANCE = [
   [0, 0, 1, 1, 0, 0],
   [1, 1, 1, 1, 1, 1],
   [0, 1, 1, 1, 1, 0],
@@ -134,7 +81,7 @@ const BUNKER_SPRITE = [
   [1, 1, 0, 0, 0, 1, 1],
 ];
 
-let UFO_SPRITE = [
+const UFO_SPRITE = [
     [0, 0, 1, 1, 1, 1, 0, 0],
     [0, 1, 1, 1, 1, 1, 1, 0],
     [1, 1, 1, 1, 1, 1, 1, 1],
@@ -265,6 +212,24 @@ let alienSpeed = 0.5;
 let alienFireRate = 0.0005;
 let gameConfig = { isDemo: false };
 
+let holidayThemeActive = false;
+
+const originalSprites = {
+    PLAYER_SPRITE_A,
+    SQUIDSTORM_SHIP_SPRITE,
+    PLAYER_SPRITE_B,
+    ALIEN_SPRITE_1,
+    ALIEN_SPRITE_2,
+    ALIEN_SPRITE_3,
+    ALIEN_SPRITE_1_DANCE,
+    ALIEN_SPRITE_2_DANCE,
+    ALIEN_SPRITE_3_DANCE,
+    BUNKER_SPRITE,
+    UFO_SPRITE
+};
+
+const originalColors = { ...colors };
+
 const keys = {
     ArrowRight: false,
     ArrowLeft: false,
@@ -365,6 +330,21 @@ let alienProjectiles = [];
 let explosions = [];
 let particles = [];
 let powerups = [];
+let snowflakes = [];
+
+// --- Game Functions ---
+function initSnow() {
+    const snowflakeCount = 100;
+    if (snowflakes.length > 0) return; // Don't re-initialize
+    for (let i = 0; i < snowflakeCount; i++) {
+        snowflakes.push({
+            x: Math.random() * 800, // Use canvas resolution width
+            y: Math.random() * 600, // Use canvas resolution height
+            size: Math.random() * 2 + 1,
+            speed: Math.random() * 0.5 + 0.2
+        });
+    }
+}
 
 // --- Event listeners & Key handlers ---
 document.addEventListener('keydown', keyDown);
@@ -675,8 +655,6 @@ function createExplosion(x, y, color, count = 20) {
 
 // --- Main Game Loop ---
 function update() {
-    // Holiday Snowfall
-    updateSnow();
     if (gameOver && !gameConfig.isDemo) return;
 
     animationFrame++;
@@ -936,6 +914,17 @@ function update() {
         }
     });
     powerups = powerups.filter(p => p.status === 1);
+
+    // Update snow
+    if (holidayThemeActive) {
+        snowflakes.forEach(snow => {
+            snow.y += snow.speed;
+            if (snow.y > 600) { // Use canvas resolution height
+                snow.y = 0;
+                snow.x = Math.random() * 800; // Use canvas resolution width
+            }
+        });
+    }
 }
 
 // --- Drawing Functions ---
@@ -944,11 +933,11 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
         for (let c = 0; c < sprite[r].length; c++) {
             const pixel = sprite[r][c];
             if (pixel !== 0) {
-                let finalColor = color;
-                if (typeof color === 'object' && color !== null) {
-                    finalColor = color[pixel] || '#FFFFFF'; // Fallback to white if color not in map
+                if (typeof color === 'object') {
+                    ctx.fillStyle = color[pixel];
+                } else {
+                    ctx.fillStyle = color;
                 }
-                ctx.fillStyle = finalColor;
                 ctx.fillRect(x + c * pixelSize, y + r * pixelSize, pixelSize, pixelSize);
             }
         }
@@ -961,14 +950,29 @@ function draw() {
     ctx.save();
     ctx.scale(scale, scale);
 
-    // Holiday Snowfall
-    drawSnow();
-
 
     // Darken background based on level
     const backgroundDarkness = Math.min(0.5, (level - 1) * 0.05);
     ctx.fillStyle = `rgba(0, 0, 0, ${backgroundDarkness})`;
     ctx.fillRect(0, 0, 800, 600);
+
+    if (holidayThemeActive) {
+        const grd = ctx.createLinearGradient(0, 0, 0, 600);
+        grd.addColorStop(0, "#001030");
+        grd.addColorStop(1, "#004080");
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, 800, 600);
+    }
+
+    // Draw snow
+    if (holidayThemeActive) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        snowflakes.forEach(snow => {
+            ctx.beginPath();
+            ctx.arc(snow.x, snow.y, snow.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
 
     if (squidStormActive) {
         drawPixelArt(SQUIDSTORM_SHIP_SPRITE, player.x, player.y, colors.dev, PIXEL_SIZE);
@@ -1144,17 +1148,58 @@ function resizeCanvas() {
 }
 
 
+function applyHolidayTheme() {
+    holidayThemeActive = true;
+    PLAYER_SPRITE_A = holidaySprites.PLAYER_SPRITE_A;
+    SQUIDSTORM_SHIP_SPRITE = holidaySprites.SQUIDSTORM_SHIP_SPRITE;
+    PLAYER_SPRITE_B = holidaySprites.PLAYER_SPRITE_B;
+    ALIEN_SPRITE_1 = holidaySprites.ALIEN_SPRITE_1;
+    ALIEN_SPRITE_2 = holidaySprites.ALIEN_SPRITE_2;
+    ALIEN_SPRITE_3 = holidaySprites.ALIEN_SPRITE_3;
+    ALIEN_SPRITE_1_DANCE = holidaySprites.ALIEN_SPRITE_1_DANCE;
+    ALIEN_SPRITE_2_DANCE = holidaySprites.ALIEN_SPRITE_2_DANCE;
+    ALIEN_SPRITE_3_DANCE = holidaySprites.ALIEN_SPRITE_3_DANCE;
+    BUNKER_SPRITE = holidaySprites.BUNKER_SPRITE;
+    UFO_SPRITE = holidaySprites.UFO_SPRITE;
+    Object.assign(colors, holidayColors);
+    shootSound.src = holidaySounds.shoot;
+    explosionSound.src = holidaySounds.explosion;
+    draw();
+}
+
+function removeHolidayTheme() {
+    holidayThemeActive = false;
+    PLAYER_SPRITE_A = originalSprites.PLAYER_SPRITE_A;
+    SQUIDSTORM_SHIP_SPRITE = originalSprites.SQUIDSTORM_SHIP_SPRITE;
+    PLAYER_SPRITE_B = originalSprites.PLAYER_SPRITE_B;
+    ALIEN_SPRITE_1 = originalSprites.ALIEN_SPRITE_1;
+    ALIEN_SPRITE_2 = originalSprites.ALIEN_SPRITE_2;
+    ALIEN_SPRITE_3 = originalSprites.ALIEN_SPRITE_3;
+    ALIEN_SPRITE_1_DANCE = originalSprites.ALIEN_SPRITE_1_DANCE;
+    ALIEN_SPRITE_2_DANCE = originalSprites.ALIEN_SPRITE_2_DANCE;
+    ALIEN_SPRITE_3_DANCE = originalSprites.ALIEN_SPRITE_3_DANCE;
+    BUNKER_SPRITE = originalSprites.BUNKER_SPRITE;
+    UFO_SPRITE = originalSprites.UFO_SPRITE;
+    Object.assign(colors, originalColors);
+    shootSound.src = "assets/shoot.wav";
+    explosionSound.src = "assets/explosion.wav";
+    draw();
+}
+
 function initGame(config) {
     gameConfig = config;
-    const urlParams = new URLSearchParams(window.location.search);
-    const theme = urlParams.get('theme');
-
-    if (theme === 'holiday') {
-        enableHolidayTheme();
-        createSnowflakes();
-    }
     loadHighScore();
     updateColorsForLevel(level);
+    initSnow();
+
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('change', () => {
+        if (themeToggle.checked) {
+            applyHolidayTheme();
+        } else {
+            removeHolidayTheme();
+        }
+    });
 
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();

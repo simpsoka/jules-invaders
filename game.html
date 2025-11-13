@@ -8,6 +8,10 @@
 </head>
 <body>
   <div id="gameContainer">
+    <div class="theme-switcher">
+      <label for="themeToggle">Holiday Theme:</label>
+      <input type="checkbox" id="themeToggle">
+    </div>
     <h1>Jules Invaders</h1>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
     <button id="playAgainBtn" style="display: none;">Play Again</button>
@@ -17,7 +21,7 @@
     <button id="fireBtn">FIRE</button>
     <button id="rightBtn">RIGHT</button>
   </div>
-  <script src="holiday.js"></script>
+  <script src="holiday-theme.js"></script>
   <script src="script.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
