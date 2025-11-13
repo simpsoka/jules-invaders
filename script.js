@@ -1,5 +1,58 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+
+function enableHolidayTheme() {
+    // Sprites
+    PLAYER_SPRITE_A = HOLIDAY_PLAYER_SPRITE;
+    PLAYER_SPRITE_B = HOLIDAY_PLAYER_SPRITE; // Using the same for both animation frames
+    ALIEN_SPRITE_1 = HOLIDAY_ALIEN_SPRITE_1;
+    ALIEN_SPRITE_2 = HOLIDAY_ALIEN_SPRITE_2;
+    ALIEN_SPRITE_3 = HOLIDAY_ALIEN_SPRITE_3;
+    ALIEN_SPRITE_1_DANCE = HOLIDAY_ALIEN_SPRITE_1;
+    ALIEN_SPRITE_2_DANCE = HOLIDAY_ALIEN_SPRITE_2;
+    ALIEN_SPRITE_3_DANCE = HOLIDAY_ALIEN_SPRITE_3;
+    UFO_SPRITE = HOLIDAY_UFO_SPRITE;
+
+    // Colors
+    Object.assign(colors, holidayColors);
+
+    // Sounds are not changed to avoid 404 errors for missing files.
+}
+
+// Snowfall effect
+let snowflakes = [];
+function createSnowflakes() {
+    snowflakes = []; // Clear existing snowflakes
+    for (let i = 0; i < 150; i++) { // Increased count for a denser feel
+        snowflakes.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            radius: Math.random() * 2.5 + 1, // Slightly larger flakes
+            speed: Math.random() * 1.5 + 0.5, // Varied speeds
+            opacity: Math.random() * 0.6 + 0.3 // Varied opacity
+        });
+    }
+}
+
+function drawSnow() {
+    snowflakes.forEach(flake => {
+        ctx.fillStyle = `rgba(255, 255, 255, ${flake.opacity})`;
+        ctx.beginPath();
+        ctx.arc(flake.x, flake.y, flake.radius, 0, Math.PI * 2);
+        ctx.fill();
+    });
+}
+
+function updateSnow() {
+    snowflakes.forEach(flake => {
+        flake.y += flake.speed;
+        if (flake.y > canvas.height) {
+            flake.x = Math.random() * canvas.width;
+            flake.y = -flake.radius; // Reset above the screen
+        }
+    });
+}
+
 const playAgainBtn = document.getElementById('playAgainBtn');
 const mobileControls = document.getElementById('mobileControls');
 const leftBtn = document.getElementById('leftBtn');
@@ -9,7 +62,7 @@ const fireBtn = document.getElementById('fireBtn');
 // --- Sprite & Asset Definitions ---
 const PIXEL_SIZE = 4;
 
-const PLAYER_SPRITE_A = [
+let PLAYER_SPRITE_A = [
     [0, 0, 1, 1, 1, 0, 0],
     [0, 1, 1, 1, 1, 1, 0],
     [1, 1, 2, 1, 1, 1, 1],
@@ -24,7 +77,7 @@ const SQUIDSTORM_SHIP_SPRITE = [
     [5, 1, 1, 1, 1, 1, 5],
 ];
 
-const PLAYER_SPRITE_B = [
+let PLAYER_SPRITE_B = [
     [0, 0, 1, 1, 1, 0, 0],
     [0, 1, 1, 1, 1, 1, 0],
     [1, 1, 0, 1, 1, 1, 1],
@@ -32,42 +85,42 @@ const PLAYER_SPRITE_B = [
     [0, 1, 0, 0, 0, 1, 0]
 ];
 
-const ALIEN_SPRITE_1 = [
+let ALIEN_SPRITE_1 = [
   [0, 0, 1, 1, 0, 0],
   [0, 1, 1, 1, 1, 0],
   [1, 1, 0, 0, 1, 1],
   [1, 0, 0, 0, 0, 1],
 ];
 
-const ALIEN_SPRITE_2 = [
+let ALIEN_SPRITE_2 = [
   [0, 1, 0, 0, 1, 0],
   [1, 0, 1, 1, 0, 1],
   [1, 1, 1, 1, 1, 1],
   [0, 1, 0, 0, 1, 0],
 ];
 
-const ALIEN_SPRITE_3 = [
+let ALIEN_SPRITE_3 = [
   [0, 0, 1, 1, 0, 0],
   [1, 1, 1, 1, 1, 1],
   [0, 1, 1, 1, 1, 0],
   [1, 0, 0, 0, 0, 1],
 ];
 
-const ALIEN_SPRITE_1_DANCE = [
+let ALIEN_SPRITE_1_DANCE = [
   [0, 0, 1, 1, 0, 0],
   [0, 1, 1, 1, 1, 0],
   [1, 1, 0, 0, 1, 1],
   [0, 1, 1, 1, 1, 0],
 ];
 
-const ALIEN_SPRITE_2_DANCE = [
+let ALIEN_SPRITE_2_DANCE = [
   [0, 1, 0, 0, 1, 0],
   [1, 0, 1, 1, 0, 1],
   [1, 1, 1, 1, 1, 1],
   [1, 0, 1, 1, 0, 1],
 ];
 
-const ALIEN_SPRITE_3_DANCE = [
+let ALIEN_SPRITE_3_DANCE = [
   [0, 0, 1, 1, 0, 0],
   [1, 1, 1, 1, 1, 1],
   [0, 1, 1, 1, 1, 0],
@@ -81,7 +134,7 @@ const BUNKER_SPRITE = [
   [1, 1, 0, 0, 0, 1, 1],
 ];
 
-const UFO_SPRITE = [
+let UFO_SPRITE = [
     [0, 0, 1, 1, 1, 1, 0, 0],
     [0, 1, 1, 1, 1, 1, 1, 0],
     [1, 1, 1, 1, 1, 1, 1, 1],
@@ -622,6 +675,8 @@ function createExplosion(x, y, color, count = 20) {
 
 // --- Main Game Loop ---
 function update() {
+    // Holiday Snowfall
+    updateSnow();
     if (gameOver && !gameConfig.isDemo) return;
 
     animationFrame++;
@@ -889,11 +944,11 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
         for (let c = 0; c < sprite[r].length; c++) {
             const pixel = sprite[r][c];
             if (pixel !== 0) {
-                if (typeof color === 'object') {
-                    ctx.fillStyle = color[pixel];
-                } else {
-                    ctx.fillStyle = color;
+                let finalColor = color;
+                if (typeof color === 'object' && color !== null) {
+                    finalColor = color[pixel] || '#FFFFFF'; // Fallback to white if color not in map
                 }
+                ctx.fillStyle = finalColor;
                 ctx.fillRect(x + c * pixelSize, y + r * pixelSize, pixelSize, pixelSize);
             }
         }
@@ -905,6 +960,9 @@ function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
     ctx.scale(scale, scale);
+
+    // Holiday Snowfall
+    drawSnow();
 
 
     // Darken background based on level
@@ -1088,6 +1146,13 @@ function resizeCanvas() {
 
 function initGame(config) {
     gameConfig = config;
+    const urlParams = new URLSearchParams(window.location.search);
+    const theme = urlParams.get('theme');
+
+    if (theme === 'holiday') {
+        enableHolidayTheme();
+        createSnowflakes();
+    }
     loadHighScore();
     updateColorsForLevel(level);
 
