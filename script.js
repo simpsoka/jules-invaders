@@ -114,18 +114,28 @@ const JULES_LOGO_SPRITE = [
     [1, 1, 1, 0, 0],
 ];
 
-const MASCOT_SPRITE = [
-    [0, 0, 2, 2, 2, 2, 0],
-    [0, 2, 2, 2, 2, 2, 2],
-    [2, 2, 2, 2, 2, 2, 2],
-    [2, 2, 2, 2, 2, 2, 0],
-    [0, 0, 2, 2, 2, 0, 0],
-    [0, 0, 0, 2, 0, 0, 0],
-    [1, 1, 1, 1, 0, 0, 0],
-    [0, 0, 1, 0, 0, 0, 0],
-    [0, 0, 1, 0, 0, 0, 0],
-    [0, 0, 1, 0, 0, 0, 0],
-    [1, 1, 1, 0, 0, 0, 0],
+const MASCOT_SPRITE_IDLE_1 = [
+    [0, 1, 1, 1, 0],
+    [1, 0, 1, 0, 1],
+    [1, 1, 1, 1, 1],
+    [0, 1, 0, 1, 0],
+    [1, 0, 1, 0, 1]
+];
+
+const MASCOT_SPRITE_IDLE_2 = [
+    [0, 1, 1, 1, 0],
+    [1, 0, 1, 0, 1],
+    [1, 1, 1, 1, 1],
+    [1, 0, 1, 0, 1],
+    [0, 1, 0, 1, 0]
+];
+
+const MASCOT_SPRITE_WAVE = [
+    [0, 1, 1, 1, 1],
+    [1, 0, 1, 0, 0],
+    [1, 1, 1, 1, 1],
+    [1, 0, 1, 0, 1],
+    [0, 1, 0, 1, 0]
 ];
 
 
@@ -135,7 +145,6 @@ const MASCOT_SPRITE = [
 // to resolve a syntax error that prevented the game from running.
 const colors = {
     player: { 1: '#708090', 2: '#FFD700' },
-    mascot: { 1: '#FFD700', 2: '#00FFFF' },
     dev: { 1: '#FF0000', 2: '#00FF00', 3: '#0000FF', 4: '#FFFF00', 5: '#FF00FF' },
     ufo: '#EE82EE',
     benevolentUfo: { 1: '#00FFFF', 2: '#FFFFFF' },
@@ -899,17 +908,17 @@ function update() {
 }
 
 // --- Drawing Functions ---
-function drawPixelArt(renderingContext, sprite, x, y, color, pixelSize) {
+function drawPixelArt(sprite, x, y, color, pixelSize, context = ctx) {
     for (let r = 0; r < sprite.length; r++) {
         for (let c = 0; c < sprite[r].length; c++) {
             const pixel = sprite[r][c];
             if (pixel !== 0) {
                 if (typeof color === 'object') {
-                    renderingContext.fillStyle = color[pixel];
+                    context.fillStyle = color[pixel];
                 } else {
-                    renderingContext.fillStyle = color;
+                    context.fillStyle = color;
                 }
-                renderingContext.fillRect(x + c * pixelSize, y + r * pixelSize, pixelSize, pixelSize);
+                context.fillRect(x + c * pixelSize, y + r * pixelSize, pixelSize, pixelSize);
             }
         }
     }
@@ -928,27 +937,27 @@ function draw() {
     ctx.fillRect(0, 0, 800, 600);
 
     if (squidStormActive) {
-        drawPixelArt(ctx, SQUIDSTORM_SHIP_SPRITE, player.x, player.y, colors.dev, PIXEL_SIZE);
+        drawPixelArt(SQUIDSTORM_SHIP_SPRITE, player.x, player.y, colors.dev, PIXEL_SIZE, ctx);
     } else {
         const playerSprite = Math.floor(animationFrame / 30) % 2 === 0 ? PLAYER_SPRITE_A : PLAYER_SPRITE_B;
-        drawPixelArt(ctx, playerSprite, player.x, player.y, colors.player, PIXEL_SIZE);
+        drawPixelArt(playerSprite, player.x, player.y, colors.player, PIXEL_SIZE, ctx);
     }
 
     if (squidSquadActive) {
         const playerSprite = Math.floor(animationFrame / 30) % 2 === 0 ? PLAYER_SPRITE_A : PLAYER_SPRITE_B;
         const helperShipOffset = player.width + 10;
         // Draw three helper ships
-        drawPixelArt(ctx, playerSprite, player.x - helperShipOffset, player.y, colors.player, PIXEL_SIZE);
-        drawPixelArt(ctx, playerSprite, player.x + helperShipOffset, player.y, colors.player, PIXEL_SIZE);
-        drawPixelArt(ctx, playerSprite, player.x - helperShipOffset * 2, player.y, colors.player, PIXEL_SIZE);
+        drawPixelArt(playerSprite, player.x - helperShipOffset, player.y, colors.player, PIXEL_SIZE, ctx);
+        drawPixelArt(playerSprite, player.x + helperShipOffset, player.y, colors.player, PIXEL_SIZE, ctx);
+        drawPixelArt(playerSprite, player.x - helperShipOffset * 2, player.y, colors.player, PIXEL_SIZE, ctx);
     }
 
     if (ufo.status === 1) {
-        drawPixelArt(ctx, UFO_SPRITE, ufo.x, ufo.y, colors.ufo, PIXEL_SIZE);
+        drawPixelArt(UFO_SPRITE, ufo.x, ufo.y, colors.ufo, PIXEL_SIZE, ctx);
     }
 
     if (benevolentUfo.status === 1) {
-        drawPixelArt(ctx, BENEVOLENT_UFO_SPRITE, benevolentUfo.x, benevolentUfo.y, colors.benevolentUfo, PIXEL_SIZE);
+        drawPixelArt(BENEVOLENT_UFO_SPRITE, benevolentUfo.x, benevolentUfo.y, colors.benevolentUfo, PIXEL_SIZE, ctx);
     }
 
     powerups.forEach(powerup => {
@@ -956,14 +965,14 @@ function draw() {
             // Pulsating color effect
             const pulsatingFactor = Math.abs(Math.sin(animationFrame / 15));
             const color = `rgba(255, 255, 0, ${0.5 + pulsatingFactor * 0.5})`;
-            drawPixelArt(ctx, JULES_LOGO_SPRITE, powerup.x, powerup.y, color, PIXEL_SIZE);
+            drawPixelArt(JULES_LOGO_SPRITE, powerup.x, powerup.y, color, PIXEL_SIZE, ctx);
         }
     });
 
     aliens.flat().forEach(alien => {
         if (alien.status === 1) {
             if (alien.isSquid) {
-                drawPixelArt(ctx, SQUID_SPRITE, alien.x, alien.y, colors.squid, PIXEL_SIZE);
+                drawPixelArt(SQUID_SPRITE, alien.x, alien.y, colors.squid, PIXEL_SIZE, ctx);
             } else {
                 let sprite;
                 const isDancing = Math.floor(animationFrame / 30) % 2 === 0;
@@ -974,7 +983,7 @@ function draw() {
                 } else {
                     sprite = isDancing ? ALIEN_SPRITE_3_DANCE : ALIEN_SPRITE_3;
                 }
-                drawPixelArt(ctx, sprite, alien.x, alien.y, colors.alien, PIXEL_SIZE);
+                drawPixelArt(sprite, alien.x, alien.y, colors.alien, PIXEL_SIZE, ctx);
             }
         }
     });
@@ -1058,7 +1067,7 @@ function draw() {
     // Draw powerups
     powerups.forEach(powerup => {
         if (powerup.status === 1) {
-            drawPixelArt(ctx, JULES_LOGO_SPRITE, powerup.x, powerup.y, colors.powerup, PIXEL_SIZE);
+            drawPixelArt(JULES_LOGO_SPRITE, powerup.x, powerup.y, colors.powerup, PIXEL_SIZE, ctx);
         }
     });
 
@@ -1068,7 +1077,29 @@ function draw() {
 function gameLoop() {
     update();
     draw();
+    drawMascot();
     requestAnimationFrame(gameLoop);
+}
+
+// --- Mascot Functions ---
+let mascotContainer, mascotCanvas, mascotCtx;
+let mascotHover = false;
+let mascotFrame = 0;
+
+function drawMascot() {
+    if (!mascotCtx) return;
+
+    mascotFrame++;
+    mascotCtx.clearRect(0, 0, mascotCanvas.width, mascotCanvas.height);
+
+    let sprite;
+    if (mascotHover) {
+        sprite = MASCOT_SPRITE_WAVE;
+    } else {
+        sprite = Math.floor(mascotFrame / 30) % 2 === 0 ? MASCOT_SPRITE_IDLE_1 : MASCOT_SPRITE_IDLE_2;
+    }
+
+    drawPixelArt(sprite, 0, 0, { 1: '#FFFFFF' }, 10, mascotCtx); // Draw to mascot's canvas
 }
 
 function loadHighScore() {
@@ -1100,38 +1131,6 @@ function resizeCanvas() {
     canvas.height = 600;
 }
 
-function drawMascot() {
-    const mascotCanvas = document.getElementById('mascotCanvas');
-    if (!mascotCanvas) return;
-    const mascotCtx = mascotCanvas.getContext('2d');
-    mascotCtx.clearRect(0, 0, mascotCanvas.width, mascotCanvas.height);
-    drawPixelArt(mascotCtx, MASCOT_SPRITE, 0, 0, colors.mascot, 4);
-}
-
-function initMascot() {
-    const mascotContainer = document.getElementById('mascotContainer');
-    const mascotMessage = document.getElementById('mascotMessage');
-    if (!mascotContainer || !mascotMessage) return;
-
-    drawMascot();
-
-    mascotContainer.addEventListener('mouseenter', () => {
-        const messages = [
-            "Need a hint?",
-            "You're doing great!",
-            "Watch out for the squids!",
-            "Go for the high score!",
-            "I believe in you!"
-        ];
-        mascotMessage.innerText = messages[Math.floor(Math.random() * messages.length)];
-        mascotMessage.style.display = 'block';
-    });
-
-    mascotContainer.addEventListener('mouseleave', () => {
-        mascotMessage.style.display = 'none';
-    });
-}
-
 
 function initGame(config) {
     gameConfig = config;
@@ -1140,7 +1139,18 @@ function initGame(config) {
 
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
-    initMascot();
+
+    mascotContainer = document.getElementById('mascot-container');
+    if (mascotContainer) {
+        mascotCanvas = document.createElement('canvas');
+        mascotCanvas.width = 50;
+        mascotCanvas.height = 50;
+        mascotCtx = mascotCanvas.getContext('2d');
+        mascotContainer.appendChild(mascotCanvas);
+
+        mascotContainer.addEventListener('mouseenter', () => mascotHover = true);
+        mascotContainer.addEventListener('mouseleave', () => mascotHover = false);
+    }
 
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (isTouchDevice) {
