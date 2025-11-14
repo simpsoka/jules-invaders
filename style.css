@@ -43,6 +43,21 @@ canvas {
   color: #000;
 }
 
+#mascot-container {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+#mascot-container:hover {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 5px #fff);
+}
+
 h1 {
   display: none;
 }
