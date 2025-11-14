@@ -43,6 +43,29 @@ canvas {
   color: #000;
 }
 
+#mascotContainer {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  cursor: pointer;
+  z-index: 100;
+}
+
+#mascotMessage {
+  display: none;
+  position: absolute;
+  bottom: 90px;
+  left: 0;
+  background-color: #fff;
+  color: #000;
+  padding: 10px;
+  border-radius: 5px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+  width: 150px;
+  text-align: center;
+}
+
 h1 {
   display: none;
 }

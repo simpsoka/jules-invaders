@@ -114,6 +114,20 @@ const JULES_LOGO_SPRITE = [
     [1, 1, 1, 0, 0],
 ];
 
+const MASCOT_SPRITE = [
+    [0, 0, 2, 2, 2, 2, 0],
+    [0, 2, 2, 2, 2, 2, 2],
+    [2, 2, 2, 2, 2, 2, 2],
+    [2, 2, 2, 2, 2, 2, 0],
+    [0, 0, 2, 2, 2, 0, 0],
+    [0, 0, 0, 2, 0, 0, 0],
+    [1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0, 0],
+    [0, 0, 1, 0, 0, 0, 0],
+    [1, 1, 1, 0, 0, 0, 0],
+];
+
 
 // --- Color Management ---
 // Note: The `colors` constant was previously declared twice.
@@ -121,6 +135,7 @@ const JULES_LOGO_SPRITE = [
 // to resolve a syntax error that prevented the game from running.
 const colors = {
     player: { 1: '#708090', 2: '#FFD700' },
+    mascot: { 1: '#FFD700', 2: '#00FFFF' },
     dev: { 1: '#FF0000', 2: '#00FF00', 3: '#0000FF', 4: '#FFFF00', 5: '#FF00FF' },
     ufo: '#EE82EE',
     benevolentUfo: { 1: '#00FFFF', 2: '#FFFFFF' },
@@ -884,17 +899,17 @@ function update() {
 }
 
 // --- Drawing Functions ---
-function drawPixelArt(sprite, x, y, color, pixelSize) {
+function drawPixelArt(renderingContext, sprite, x, y, color, pixelSize) {
     for (let r = 0; r < sprite.length; r++) {
         for (let c = 0; c < sprite[r].length; c++) {
             const pixel = sprite[r][c];
             if (pixel !== 0) {
                 if (typeof color === 'object') {
-                    ctx.fillStyle = color[pixel];
+                    renderingContext.fillStyle = color[pixel];
                 } else {
-                    ctx.fillStyle = color;
+                    renderingContext.fillStyle = color;
                 }
-                ctx.fillRect(x + c * pixelSize, y + r * pixelSize, pixelSize, pixelSize);
+                renderingContext.fillRect(x + c * pixelSize, y + r * pixelSize, pixelSize, pixelSize);
             }
         }
     }
@@ -913,27 +928,27 @@ function draw() {
     ctx.fillRect(0, 0, 800, 600);
 
     if (squidStormActive) {
-        drawPixelArt(SQUIDSTORM_SHIP_SPRITE, player.x, player.y, colors.dev, PIXEL_SIZE);
+        drawPixelArt(ctx, SQUIDSTORM_SHIP_SPRITE, player.x, player.y, colors.dev, PIXEL_SIZE);
     } else {
         const playerSprite = Math.floor(animationFrame / 30) % 2 === 0 ? PLAYER_SPRITE_A : PLAYER_SPRITE_B;
-        drawPixelArt(playerSprite, player.x, player.y, colors.player, PIXEL_SIZE);
+        drawPixelArt(ctx, playerSprite, player.x, player.y, colors.player, PIXEL_SIZE);
     }
 
     if (squidSquadActive) {
         const playerSprite = Math.floor(animationFrame / 30) % 2 === 0 ? PLAYER_SPRITE_A : PLAYER_SPRITE_B;
         const helperShipOffset = player.width + 10;
         // Draw three helper ships
-        drawPixelArt(playerSprite, player.x - helperShipOffset, player.y, colors.player, PIXEL_SIZE);
-        drawPixelArt(playerSprite, player.x + helperShipOffset, player.y, colors.player, PIXEL_SIZE);
-        drawPixelArt(playerSprite, player.x - helperShipOffset * 2, player.y, colors.player, PIXEL_SIZE);
+        drawPixelArt(ctx, playerSprite, player.x - helperShipOffset, player.y, colors.player, PIXEL_SIZE);
+        drawPixelArt(ctx, playerSprite, player.x + helperShipOffset, player.y, colors.player, PIXEL_SIZE);
+        drawPixelArt(ctx, playerSprite, player.x - helperShipOffset * 2, player.y, colors.player, PIXEL_SIZE);
     }
 
     if (ufo.status === 1) {
-        drawPixelArt(UFO_SPRITE, ufo.x, ufo.y, colors.ufo, PIXEL_SIZE);
+        drawPixelArt(ctx, UFO_SPRITE, ufo.x, ufo.y, colors.ufo, PIXEL_SIZE);
     }
 
     if (benevolentUfo.status === 1) {
-        drawPixelArt(BENEVOLENT_UFO_SPRITE, benevolentUfo.x, benevolentUfo.y, colors.benevolentUfo, PIXEL_SIZE);
+        drawPixelArt(ctx, BENEVOLENT_UFO_SPRITE, benevolentUfo.x, benevolentUfo.y, colors.benevolentUfo, PIXEL_SIZE);
     }
 
     powerups.forEach(powerup => {
@@ -941,14 +956,14 @@ function draw() {
             // Pulsating color effect
             const pulsatingFactor = Math.abs(Math.sin(animationFrame / 15));
             const color = `rgba(255, 255, 0, ${0.5 + pulsatingFactor * 0.5})`;
-            drawPixelArt(JULES_LOGO_SPRITE, powerup.x, powerup.y, color, PIXEL_SIZE);
+            drawPixelArt(ctx, JULES_LOGO_SPRITE, powerup.x, powerup.y, color, PIXEL_SIZE);
         }
     });
 
     aliens.flat().forEach(alien => {
         if (alien.status === 1) {
             if (alien.isSquid) {
-                drawPixelArt(SQUID_SPRITE, alien.x, alien.y, colors.squid, PIXEL_SIZE);
+                drawPixelArt(ctx, SQUID_SPRITE, alien.x, alien.y, colors.squid, PIXEL_SIZE);
             } else {
                 let sprite;
                 const isDancing = Math.floor(animationFrame / 30) % 2 === 0;
@@ -959,7 +974,7 @@ function draw() {
                 } else {
                     sprite = isDancing ? ALIEN_SPRITE_3_DANCE : ALIEN_SPRITE_3;
                 }
-                drawPixelArt(sprite, alien.x, alien.y, colors.alien, PIXEL_SIZE);
+                drawPixelArt(ctx, sprite, alien.x, alien.y, colors.alien, PIXEL_SIZE);
             }
         }
     });
@@ -1043,7 +1058,7 @@ function draw() {
     // Draw powerups
     powerups.forEach(powerup => {
         if (powerup.status === 1) {
-            drawPixelArt(JULES_LOGO_SPRITE, powerup.x, powerup.y, colors.powerup, PIXEL_SIZE);
+            drawPixelArt(ctx, JULES_LOGO_SPRITE, powerup.x, powerup.y, colors.powerup, PIXEL_SIZE);
         }
     });
 
@@ -1085,6 +1100,38 @@ function resizeCanvas() {
     canvas.height = 600;
 }
 
+function drawMascot() {
+    const mascotCanvas = document.getElementById('mascotCanvas');
+    if (!mascotCanvas) return;
+    const mascotCtx = mascotCanvas.getContext('2d');
+    mascotCtx.clearRect(0, 0, mascotCanvas.width, mascotCanvas.height);
+    drawPixelArt(mascotCtx, MASCOT_SPRITE, 0, 0, colors.mascot, 4);
+}
+
+function initMascot() {
+    const mascotContainer = document.getElementById('mascotContainer');
+    const mascotMessage = document.getElementById('mascotMessage');
+    if (!mascotContainer || !mascotMessage) return;
+
+    drawMascot();
+
+    mascotContainer.addEventListener('mouseenter', () => {
+        const messages = [
+            "Need a hint?",
+            "You're doing great!",
+            "Watch out for the squids!",
+            "Go for the high score!",
+            "I believe in you!"
+        ];
+        mascotMessage.innerText = messages[Math.floor(Math.random() * messages.length)];
+        mascotMessage.style.display = 'block';
+    });
+
+    mascotContainer.addEventListener('mouseleave', () => {
+        mascotMessage.style.display = 'none';
+    });
+}
+
 
 function initGame(config) {
     gameConfig = config;
@@ -1093,6 +1140,7 @@ function initGame(config) {
 
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
+    initMascot();
 
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (isTouchDevice) {
