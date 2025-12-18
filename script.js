@@ -1,3 +1,4 @@
+// TODO: Refactor global variables into a Game class to avoid polluting the global namespace.
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const playAgainBtn = document.getElementById('playAgainBtn');
@@ -7,6 +8,7 @@ const rightBtn = document.getElementById('rightBtn');
 const fireBtn = document.getElementById('fireBtn');
 
 // --- Sprite & Asset Definitions ---
+// TODO: Move sprite definitions to a separate file (e.g., sprites.js) to clean up the main logic.
 const PIXEL_SIZE = 4;
 
 const PLAYER_SPRITE_A = [
@@ -116,6 +118,7 @@ const JULES_LOGO_SPRITE = [
 
 
 // --- Color Management ---
+// TODO: Extract color palette and management into a dedicated module or configuration object.
 // Note: The `colors` constant was previously declared twice.
 // The first declaration, which was a simplified version, has been removed
 // to resolve a syntax error that prevented the game from running.
@@ -194,6 +197,7 @@ function updateColorsForLevel(level) {
 
 
 // --- Game variables ---
+// TODO: Group game state variables into a single state object to improve manageability and reset logic.
 const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
 let userInputSequence = [];
 let squidStormActive = false;
@@ -212,6 +216,7 @@ let alienSpeed = 0.5;
 let alienFireRate = 0.0005;
 let gameConfig = { isDemo: false };
 
+// TODO: Encapsulate input handling in a dedicated InputManager class.
 const keys = {
     ArrowRight: false,
     ArrowLeft: false,
@@ -219,6 +224,7 @@ const keys = {
 };
 
 // Sound effects
+// TODO: Create a SoundManager to handle loading, playing, and muting audio assets.
 function loadAudio(src) {
     try {
         const sound = new Audio(src);
@@ -621,6 +627,7 @@ function createExplosion(x, y, color, count = 20) {
 }
 
 // --- Main Game Loop ---
+// TODO: Break down the update function into smaller, more focused functions (e.g., updatePlayer, updateAliens, updateProjectiles).
 function update() {
     if (gameOver && !gameConfig.isDemo) return;
 
@@ -900,6 +907,7 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
     }
 }
 
+// TODO: Refactor the draw function to separate UI rendering from game entity rendering.
 function draw() {
     const scale = canvas.width / 800;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
