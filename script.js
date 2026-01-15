@@ -1,3 +1,10 @@
+/**
+ * INSTRUCTIONS FOR IMPROVEMENT:
+ * 1. SCALABILITY: Consider splitting this file into modules (e.g., Player.js, Enemy.js, Input.js) using ES6 modules.
+ * 2. SCALABILITY: Move configuration values (speeds, dimensions, colors) into a separate Config.js or a constant object at the top.
+ * 3. PERFORMANCE: Implement object pooling for projectiles and particles to reduce garbage collection overhead.
+ */
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const playAgainBtn = document.getElementById('playAgainBtn');
@@ -146,6 +153,7 @@ const colors = {
  * @return  {string}          The HEX representation
  */
 function hslToHex(h, s, l) {
+  // INSTRUCTION: PERFORMANCE - Move hue2rgb and toHex helper functions outside to avoid recreating them on every call.
   let r, g, b;
 
   if (s == 0) {
@@ -622,6 +630,8 @@ function createExplosion(x, y, color, count = 20) {
 
 // --- Main Game Loop ---
 function update() {
+    // INSTRUCTION: ROBUSTNESS - Incorporate 'deltaTime' (time elapsed since last frame) into movement calculations
+    // to ensure consistent speed across different frame rates (e.g., player.x += player.speed * dt).
     if (gameOver && !gameConfig.isDemo) return;
 
     animationFrame++;
@@ -885,6 +895,9 @@ function update() {
 
 // --- Drawing Functions ---
 function drawPixelArt(sprite, x, y, color, pixelSize) {
+    // INSTRUCTION: PERFORMANCE - This function is called frequently.
+    // Cache sprites as OffscreenCanvas or ImageBitmap objects to avoid redrawing individual pixels every frame.
+    // Invalidate/regenerate cache when colors change (e.g. level up).
     for (let r = 0; r < sprite.length; r++) {
         for (let c = 0; c < sprite[r].length; c++) {
             const pixel = sprite[r][c];
@@ -901,6 +914,8 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
 }
 
 function draw() {
+    // INSTRUCTION: PERFORMANCE - Check if 'scale' calculation is necessary if canvas dimensions are fixed.
+    // INSTRUCTION: ACCESSIBILITY - Use window.matchMedia('(prefers-reduced-motion: reduce)') to disable flashing effects.
     const scale = canvas.width / 800;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
