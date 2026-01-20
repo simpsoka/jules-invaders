@@ -120,19 +120,19 @@ const JULES_LOGO_SPRITE = [
 // The first declaration, which was a simplified version, has been removed
 // to resolve a syntax error that prevented the game from running.
 const colors = {
-    player: { 1: '#708090', 2: '#FFD700' },
+    player: { 1: '#FF007F', 2: '#FFC0CB' }, // Rose and Pink
     dev: { 1: '#FF0000', 2: '#00FF00', 3: '#0000FF', 4: '#FFFF00', 5: '#FF00FF' },
-    ufo: '#EE82EE',
-    benevolentUfo: { 1: '#00FFFF', 2: '#FFFFFF' },
-    squid: '#9370DB',
-    alien: '#ADFF2F',
-    bunker: '#ADFF2F',
-    projectile: '#FFF',
-    ground: '#ADFF2F',
+    ufo: '#800080', // Purple
+    benevolentUfo: { 1: '#FF69B4', 2: '#FFFFFF' }, // HotPink and White
+    squid: '#DB7093', // PaleVioletRed
+    alien: '#FF1493', // HotPink
+    bunker: '#FF1493', // HotPink
+    projectile: '#FFC0CB', // Pink
+    ground: '#FF1493', // HotPink
     text: '#FFF',
-    powerup: '#FFA500',
-    explosion: 'magenta',
-    squidExplosion: 'red'
+    powerup: '#FFD700', // Gold
+    explosion: '#FF69B4', // HotPink
+    squidExplosion: '#DC143C' // Crimson
 };
 
 /**
@@ -178,11 +178,11 @@ function hslToHex(h, s, l) {
 function updateColorsForLevel(level) {
     const hueShift = ((level - 1) * 10); // 10 degrees hue shift per level
 
-    // Base HSL values, with hue in degrees
-    const baseUfoHsl = { h: 300, s: 0.76, l: 0.72 };
-    const baseSquidHsl = { h: 260, s: 0.60, l: 0.71 };
-    const baseAlienHsl = { h: 84, s: 1.00, l: 0.59 };
-    const baseExplosionHsl = { h: 300, s: 1.00, l: 0.50 };
+    // Base HSL values, with hue in degrees (Valentines themed)
+    const baseUfoHsl = { h: 300, s: 1.0, l: 0.25 }; // Dark Purple
+    const baseSquidHsl = { h: 340, s: 0.60, l: 0.65 }; // Pinkish
+    const baseAlienHsl = { h: 330, s: 1.00, l: 0.54 }; // Hot Pink
+    const baseExplosionHsl = { h: 350, s: 1.00, l: 0.50 }; // Red
 
     colors.ufo = hslToHex(((baseUfoHsl.h + hueShift) % 360) / 360, baseUfoHsl.s, baseUfoHsl.l);
     colors.squid = hslToHex(((baseSquidHsl.h + hueShift) % 360) / 360, baseSquidHsl.s, baseSquidHsl.l);
@@ -360,16 +360,16 @@ function resetGame() {
 
   // Reset colors to default
   Object.assign(colors, {
-      player: { 1: '#708090', 2: '#FFD700' },
-      ufo: '#EE82EE',
-      squid: '#9370DB',
-      alien: '#ADFF2F',
-      bunker: '#ADFF2F',
-      projectile: '#FFF',
-      ground: '#ADFF2F',
+      player: { 1: '#FF007F', 2: '#FFC0CB' },
+      ufo: '#800080',
+      squid: '#DB7093',
+      alien: '#FF1493',
+      bunker: '#FF1493',
+      projectile: '#FFC0CB',
+      ground: '#FF1493',
       text: '#FFF',
-      explosion: 'magenta',
-      squidExplosion: 'red'
+      explosion: '#FF69B4',
+      squidExplosion: '#DC143C'
   });
   canvas.style.borderColor = '#FFFFFF';
 
