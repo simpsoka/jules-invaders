@@ -122,13 +122,13 @@ const JULES_LOGO_SPRITE = [
 const colors = {
     player: { 1: '#708090', 2: '#FFD700' },
     dev: { 1: '#FF0000', 2: '#00FF00', 3: '#0000FF', 4: '#FFFF00', 5: '#FF00FF' },
-    ufo: '#EE82EE',
+    ufo: '#FFB6C1',
     benevolentUfo: { 1: '#00FFFF', 2: '#FFFFFF' },
-    squid: '#9370DB',
-    alien: '#ADFF2F',
-    bunker: '#ADFF2F',
+    squid: '#9400D3',
+    alien: '#FF1493',
+    bunker: '#FF1493',
     projectile: '#FFF',
-    ground: '#ADFF2F',
+    ground: '#FF1493',
     text: '#FFF',
     powerup: '#FFA500',
     explosion: 'magenta',
@@ -179,9 +179,9 @@ function updateColorsForLevel(level) {
     const hueShift = ((level - 1) * 10); // 10 degrees hue shift per level
 
     // Base HSL values, with hue in degrees
-    const baseUfoHsl = { h: 300, s: 0.76, l: 0.72 };
-    const baseSquidHsl = { h: 260, s: 0.60, l: 0.71 };
-    const baseAlienHsl = { h: 84, s: 1.00, l: 0.59 };
+    const baseUfoHsl = { h: 351, s: 1.00, l: 0.86 };
+    const baseSquidHsl = { h: 282, s: 1.00, l: 0.41 };
+    const baseAlienHsl = { h: 328, s: 1.00, l: 0.54 };
     const baseExplosionHsl = { h: 300, s: 1.00, l: 0.50 };
 
     colors.ufo = hslToHex(((baseUfoHsl.h + hueShift) % 360) / 360, baseUfoHsl.s, baseUfoHsl.l);
@@ -361,12 +361,12 @@ function resetGame() {
   // Reset colors to default
   Object.assign(colors, {
       player: { 1: '#708090', 2: '#FFD700' },
-      ufo: '#EE82EE',
-      squid: '#9370DB',
-      alien: '#ADFF2F',
-      bunker: '#ADFF2F',
+      ufo: '#FFB6C1',
+      squid: '#9400D3',
+      alien: '#FF1493',
+      bunker: '#FF1493',
       projectile: '#FFF',
-      ground: '#ADFF2F',
+      ground: '#FF1493',
       text: '#FFF',
       explosion: 'magenta',
       squidExplosion: 'red'
@@ -431,11 +431,11 @@ function resetAliensForNextLevel() {
   alienFireRate = 0.0005 + (level - 1) * 0.0005;
 
   // Update colors for the new level
-  colors.ufo = shiftColor('#EE82EE', level);
-  colors.squid = shiftColor('#9370DB', level);
-  colors.alien = shiftColor('#ADFF2F', level);
-  colors.bunker = shiftColor('#ADFF2F', level);
-  colors.ground = shiftColor('#ADFF2F', level);
+  colors.ufo = shiftColor('#FFB6C1', level);
+  colors.squid = shiftColor('#9400D3', level);
+  colors.alien = shiftColor('#FF1493', level);
+  colors.bunker = shiftColor('#FF1493', level);
+  colors.ground = shiftColor('#FF1493', level);
   canvas.style.borderColor = shiftColor('#FFFFFF', level);
 
 
