@@ -119,19 +119,19 @@ const JULES_LOGO_SPRITE = [
 // The first declaration, which was a simplified version, has been removed
 // to resolve a syntax error that prevented the game from running.
 const colors = {
-  player: { 1: "#708090", 2: "#FF0000" },
+  player: { 1: "#708090", 2: "#00FF00" },
   dev: { 1: "#FF0000", 2: "#FF1493", 3: "#FF69B4", 4: "#FFC0CB", 5: "#FFFFFF" },
-  ufo: "#FFB6C1",
-  benevolentUfo: { 1: "#FFB6C1", 2: "#FFFFFF" },
-  squid: "#9400D3",
-  alien: "#FF1493",
-  bunker: "#FF1493",
-  projectile: "#FFC0CB",
-  ground: "#FF1493",
-  text: "#FFC0CB",
-  powerup: "#FF0000",
-  explosion: "#FF1493",
-  squidExplosion: "#FF0000",
+  ufo: "#FFD700",
+  benevolentUfo: { 1: "#FFD700", 2: "#FFFFFF" },
+  squid: "#FFA500",
+  alien: "#32CD32",
+  bunker: "#006400",
+  projectile: "#90EE90",
+  ground: "#228B22",
+  text: "#90EE90",
+  powerup: "#FFD700",
+  explosion: "#32CD32",
+  squidExplosion: "#FFD700",
 };
 
 /**
@@ -178,10 +178,10 @@ function updateColorsForLevel(level) {
   const hueShift = (level - 1) * 10; // 10 degrees hue shift per level
 
   // Base HSL values, with hue in degrees
-  const baseUfoHsl = { h: 351, s: 1.0, l: 0.86 };
-  const baseSquidHsl = { h: 282, s: 1.0, l: 0.41 };
-  const baseAlienHsl = { h: 328, s: 1.0, l: 0.54 };
-  const baseExplosionHsl = { h: 328, s: 1.0, l: 0.54 };
+  const baseUfoHsl = { h: 50, s: 1.0, l: 0.5 };
+  const baseSquidHsl = { h: 39, s: 1.0, l: 0.5 };
+  const baseAlienHsl = { h: 120, s: 1.0, l: 0.4 };
+  const baseExplosionHsl = { h: 120, s: 1.0, l: 0.5 };
 
   colors.ufo = hslToHex(
     ((baseUfoHsl.h + hueShift) % 360) / 360,
@@ -390,18 +390,18 @@ function resetGame() {
 
   // Reset colors to default
   Object.assign(colors, {
-    player: { 1: "#708090", 2: "#FF0000" },
-    ufo: "#FFB6C1",
-    squid: "#9400D3",
-    alien: "#FF1493",
-    bunker: "#FF1493",
-    projectile: "#FFC0CB",
-    ground: "#FF1493",
-    text: "#FFC0CB",
-    explosion: "#FF1493",
-    squidExplosion: "#FF0000",
+    player: { 1: "#708090", 2: "#00FF00" },
+    ufo: "#FFD700",
+    squid: "#FFA500",
+    alien: "#32CD32",
+    bunker: "#006400",
+    projectile: "#90EE90",
+    ground: "#228B22",
+    text: "#90EE90",
+    explosion: "#32CD32",
+    squidExplosion: "#FFD700",
   });
-  canvas.style.borderColor = "#FFC0CB";
+  canvas.style.borderColor = "#32CD32";
 
   alienSpeed = 0.5;
   alienFireRate = 0.0005;
@@ -467,12 +467,12 @@ function resetAliensForNextLevel() {
   alienFireRate = 0.0005 + (level - 1) * 0.0005;
 
   // Update colors for the new level
-  colors.ufo = shiftColor("#FFB6C1", level);
-  colors.squid = shiftColor("#9400D3", level);
-  colors.alien = shiftColor("#FF1493", level);
-  colors.bunker = shiftColor("#FF1493", level);
-  colors.ground = shiftColor("#FF1493", level);
-  canvas.style.borderColor = shiftColor("#FFFFFF", level);
+  colors.ufo = shiftColor("#FFD700", level);
+  colors.squid = shiftColor("#FFA500", level);
+  colors.alien = shiftColor("#32CD32", level);
+  colors.bunker = shiftColor("#006400", level);
+  colors.ground = shiftColor("#228B22", level);
+  canvas.style.borderColor = shiftColor("#90EE90", level);
 
   aliens.length = 0;
   for (let c = 0; c < alienColumnCount; c++) {
