@@ -10,9 +10,9 @@ const fireBtn = document.getElementById("fireBtn");
 const PIXEL_SIZE = 4;
 
 const PLAYER_SPRITE_A = [
+  [0, 0, 0, 1, 0, 0, 0],
   [0, 0, 1, 1, 1, 0, 0],
-  [0, 1, 1, 1, 1, 1, 0],
-  [1, 1, 2, 1, 1, 1, 1],
+  [0, 1, 1, 2, 1, 1, 0],
   [1, 1, 1, 1, 1, 1, 1],
   [0, 1, 0, 0, 0, 1, 0],
 ];
@@ -25,67 +25,69 @@ const SQUIDSTORM_SHIP_SPRITE = [
 ];
 
 const PLAYER_SPRITE_B = [
+  [0, 0, 0, 1, 0, 0, 0],
   [0, 0, 1, 1, 1, 0, 0],
-  [0, 1, 1, 1, 1, 1, 0],
-  [1, 1, 0, 1, 1, 1, 1],
-  [1, 1, 1, 1, 1, 1, 1],
+  [0, 1, 1, 2, 1, 1, 0],
+  [1, 0, 1, 1, 1, 0, 1],
   [0, 1, 0, 0, 0, 1, 0],
 ];
 
 const ALIEN_SPRITE_1 = [
-  [0, 0, 1, 1, 0, 0],
+  [0, 1, 0, 0, 1, 0],
+  [1, 1, 1, 1, 1, 1],
   [0, 1, 1, 1, 1, 0],
-  [1, 1, 0, 0, 1, 1],
-  [1, 0, 0, 0, 0, 1],
+  [0, 0, 1, 1, 0, 0],
 ];
 
 const ALIEN_SPRITE_2 = [
-  [0, 1, 0, 0, 1, 0],
-  [1, 0, 1, 1, 0, 1],
+  [1, 0, 0, 0, 0, 1],
+  [1, 1, 0, 0, 1, 1],
   [1, 1, 1, 1, 1, 1],
-  [0, 1, 0, 0, 1, 0],
+  [0, 1, 1, 1, 1, 0],
 ];
 
 const ALIEN_SPRITE_3 = [
-  [0, 0, 1, 1, 0, 0],
+  [0, 0, 0, 0, 0, 0],
+  [0, 1, 0, 0, 1, 0],
   [1, 1, 1, 1, 1, 1],
   [0, 1, 1, 1, 1, 0],
-  [1, 0, 0, 0, 0, 1],
 ];
 
 const ALIEN_SPRITE_1_DANCE = [
-  [0, 0, 1, 1, 0, 0],
+  [0, 1, 0, 0, 1, 0],
+  [1, 1, 1, 1, 1, 1],
   [0, 1, 1, 1, 1, 0],
-  [1, 1, 0, 0, 1, 1],
-  [0, 1, 1, 1, 1, 0],
+  [0, 1, 0, 0, 1, 0],
 ];
 
 const ALIEN_SPRITE_2_DANCE = [
-  [0, 1, 0, 0, 1, 0],
-  [1, 0, 1, 1, 0, 1],
+  [1, 0, 0, 0, 0, 1],
+  [1, 1, 0, 0, 1, 1],
   [1, 1, 1, 1, 1, 1],
-  [1, 0, 1, 1, 0, 1],
+  [0, 0, 1, 1, 0, 0],
 ];
 
 const ALIEN_SPRITE_3_DANCE = [
-  [0, 0, 1, 1, 0, 0],
-  [1, 1, 1, 1, 1, 1],
-  [0, 1, 1, 1, 1, 0],
+  [0, 0, 0, 0, 0, 0],
   [0, 1, 0, 0, 1, 0],
+  [1, 1, 1, 1, 1, 1],
+  [1, 0, 1, 1, 0, 1],
 ];
 
 const BUNKER_SPRITE = [
-  [0, 1, 1, 1, 1, 1, 0],
+  [0, 1, 0, 0, 0, 1, 0],
+  [1, 1, 1, 0, 1, 1, 1],
   [1, 1, 1, 1, 1, 1, 1],
-  [1, 1, 0, 0, 0, 1, 1],
-  [1, 1, 0, 0, 0, 1, 1],
+  [0, 1, 1, 1, 1, 1, 0],
 ];
 
 const UFO_SPRITE = [
-  [0, 0, 1, 1, 1, 1, 0, 0],
-  [0, 1, 1, 1, 1, 1, 1, 0],
-  [1, 1, 1, 1, 1, 1, 1, 1],
   [0, 1, 1, 0, 0, 1, 1, 0],
+  [1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1],
+  [0, 1, 1, 1, 1, 1, 1, 0],
+  [0, 0, 1, 1, 1, 1, 0, 0],
+  [0, 0, 0, 1, 1, 0, 0, 0],
 ];
 
 const BENEVOLENT_UFO_SPRITE = [
@@ -119,19 +121,19 @@ const JULES_LOGO_SPRITE = [
 // The first declaration, which was a simplified version, has been removed
 // to resolve a syntax error that prevented the game from running.
 const colors = {
-  player: { 1: "#008000", 2: "#FF8C00" },
+  player: { 1: "#FF1493", 2: "#FF69B4" },
   dev: { 1: "#FF0000", 2: "#FF1493", 3: "#FF69B4", 4: "#FFC0CB", 5: "#FFFFFF" },
-  ufo: "#FFD700",
-  benevolentUfo: { 1: "#FFD700", 2: "#FFFFFF" },
-  squid: "#FF8C00",
-  alien: "#32CD32",
-  bunker: "#228B22",
+  ufo: "#FF0000",
+  benevolentUfo: { 1: "#FF0000", 2: "#FFFFFF" },
+  squid: "#FF69B4",
+  alien: "#FF1493",
+  bunker: "#FFB6C1",
   projectile: "#FFFFFF",
-  ground: "#228B22",
-  text: "#FFD700",
+  ground: "#FF1493",
+  text: "#FF69B4",
   powerup: "#FF0000",
-  explosion: "#32CD32",
-  squidExplosion: "#FF8C00",
+  explosion: "#FFC0CB",
+  squidExplosion: "#FF69B4",
 };
 
 /**
@@ -178,10 +180,10 @@ function updateColorsForLevel(level) {
   const hueShift = (level - 1) * 10; // 10 degrees hue shift per level
 
   // Base HSL values, with hue in degrees
-  const baseUfoHsl = { h: 51, s: 1.0, l: 0.5 };
-  const baseSquidHsl = { h: 33, s: 1.0, l: 0.5 };
-  const baseAlienHsl = { h: 120, s: 0.61, l: 0.5 };
-  const baseExplosionHsl = { h: 120, s: 0.61, l: 0.5 };
+  const baseUfoHsl = { h: 0, s: 1.0, l: 0.5 };
+  const baseSquidHsl = { h: 330, s: 1.0, l: 0.5 };
+  const baseAlienHsl = { h: 340, s: 1.0, l: 0.5 };
+  const baseExplosionHsl = { h: 350, s: 1.0, l: 0.8 };
 
   colors.ufo = hslToHex(
     ((baseUfoHsl.h + hueShift) % 360) / 360,
@@ -390,18 +392,18 @@ function resetGame() {
 
   // Reset colors to default
   Object.assign(colors, {
-    player: { 1: "#008000", 2: "#FF8C00" },
-    ufo: "#FFD700",
-    squid: "#FF8C00",
-    alien: "#32CD32",
-    bunker: "#228B22",
+    player: { 1: "#FF1493", 2: "#FF69B4" },
+    ufo: "#FF0000",
+    squid: "#FF69B4",
+    alien: "#FF1493",
+    bunker: "#FFB6C1",
     projectile: "#FFFFFF",
-    ground: "#228B22",
-    text: "#FFD700",
-    explosion: "#32CD32",
-    squidExplosion: "#FF8C00",
+    ground: "#FF1493",
+    text: "#FF69B4",
+    explosion: "#FFC0CB",
+    squidExplosion: "#FF69B4",
   });
-  canvas.style.borderColor = "#FFD700";
+  canvas.style.borderColor = "#FF69B4";
 
   alienSpeed = 0.5;
   alienFireRate = 0.0005;
@@ -467,10 +469,10 @@ function resetAliensForNextLevel() {
   alienFireRate = 0.0005 + (level - 1) * 0.0005;
 
   // Update colors for the new level
-  colors.ufo = shiftColor("#FFB6C1", level);
-  colors.squid = shiftColor("#9400D3", level);
+  colors.ufo = shiftColor("#FF0000", level);
+  colors.squid = shiftColor("#FF69B4", level);
   colors.alien = shiftColor("#FF1493", level);
-  colors.bunker = shiftColor("#FF1493", level);
+  colors.bunker = shiftColor("#FFB6C1", level);
   colors.ground = shiftColor("#FF1493", level);
   canvas.style.borderColor = shiftColor("#FFFFFF", level);
 
@@ -1162,10 +1164,10 @@ function draw() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    ctx.fillStyle = "#9370DB";
+    ctx.fillStyle = "#FF1493";
     ctx.font = '20px "Press Start 2P"';
     ctx.textAlign = "left";
-    ctx.fillText("SQUIDSTORM ACTIVE", 10, 60);
+    ctx.fillText("CUPID STORM ACTIVE", 10, 60);
   }
 
   if (gameOver && !gameConfig.isDemo) {
