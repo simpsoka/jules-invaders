@@ -5,18 +5,18 @@ html, body {
   padding: 0;
   overflow: hidden;
   height: 100%;
-  background-color: #000;
+  background-color: #000033; /* Dark Blue for night sky */
 }
 
 body {
-  color: #FFD700;
+  color: #FFFFFF; /* White text */
   font-family: 'Press Start 2P', cursive;
   text-align: center;
 }
 
 canvas {
-  background-color: #000;
-  border: 2px solid #FFD700;
+  background-color: #000033; /* Dark Blue */
+  border: 4px solid #FF0000; /* Red Border */
   image-rendering: -moz-crisp-edges;
   image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
@@ -29,9 +29,9 @@ canvas {
   top: 55%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #000;
-  color: #FFD700;
-  border: 2px solid #FFD700;
+  background-color: #006400; /* Dark Green */
+  color: #FFFFFF;
+  border: 2px solid #FF0000; /* Red Border */
   padding: 15px 30px;
   font-family: 'Press Start 2P', cursive;
   cursor: pointer;
@@ -39,8 +39,8 @@ canvas {
 }
 
 #playAgainBtn:hover {
-  background-color: #006400;
-  color: #fff;
+  background-color: #FF0000; /* Red on hover */
+  color: #FFFFFF;
 }
 
 h1 {
@@ -78,8 +78,8 @@ h1 {
 
 #mobileControls button {
   background-color: transparent;
-  border: 2px solid #FFD700;
-  color: #FFD700;
+  border: 2px solid #FF0000; /* Red Border */
+  color: #FFFFFF;
   font-family: 'Press Start 2P', cursive;
   font-size: 18px;
   padding: 15px 20px;
@@ -113,13 +113,14 @@ h1 {
 .play-button {
   font-size: 30px;
   padding: 15px 30px;
-  border: 2px solid #FFD700;
-  color: #FFD700;
+  border: 2px solid #FF0000; /* Red Border */
+  color: #FFFFFF;
   text-decoration: none;
   cursor: pointer;
+  background-color: #006400; /* Dark Green */
 }
 
 .play-button:hover {
-  background-color: #006400;
+  background-color: #FF0000; /* Red */
   color: #fff;
 }
