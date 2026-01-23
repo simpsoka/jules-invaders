@@ -233,8 +233,8 @@ let gameOver = false;
 let gameWon = false;
 let animationFrame = 0;
 let alienDirection = 1;
-let alienSpeed = 0.5;
-let alienFireRate = 0.0005;
+let alienSpeed = 0.3;
+let alienFireRate = 0.0003;
 let gameConfig = { isDemo: false };
 
 const keys = {
@@ -265,8 +265,8 @@ const player = {
   y: canvas.height - PLAYER_SPRITE_A.length * PIXEL_SIZE - 20,
   width: PLAYER_SPRITE_A[0].length * PIXEL_SIZE,
   height: PLAYER_SPRITE_A.length * PIXEL_SIZE,
-  speed: 5,
-  shootCooldown: 100, // Milliseconds
+  speed: 6,
+  shootCooldown: 80, // Milliseconds
   lastShotTime: 0,
   powerupType: "none",
   powerupTimer: 0,
@@ -403,8 +403,8 @@ function resetGame() {
   });
   canvas.style.borderColor = "#FFD700";
 
-  alienSpeed = 0.5;
-  alienFireRate = 0.0005;
+  alienSpeed = 0.3;
+  alienFireRate = 0.0003;
   squidStormActive = false;
   gameOver = false;
   gameWon = false;
@@ -463,8 +463,8 @@ function resetGame() {
 
 function resetAliensForNextLevel() {
   updateColorsForLevel(level);
-  alienSpeed = 0.5 * Math.pow(1.5, level - 1);
-  alienFireRate = 0.0005 + (level - 1) * 0.0005;
+  alienSpeed = 0.3 * Math.pow(1.2, level - 1);
+  alienFireRate = 0.0003 + (level - 1) * 0.0002;
 
   // Update colors for the new level
   colors.ufo = shiftColor("#FFB6C1", level);
@@ -805,8 +805,8 @@ function update() {
           }
 
           // Add a chance to spawn a power-up
-          if (Math.random() < 0.1) {
-            // 10% chance
+          if (Math.random() < 0.15) {
+            // 15% chance
             powerups.push({
               x: alien.x + alienWidth / 2,
               y: alien.y + alienHeight / 2,
@@ -820,8 +820,8 @@ function update() {
           explosionSound.play();
 
           // Spawn power-up
-          if (Math.random() < 0.05) {
-            // 5% chance
+          if (Math.random() < 0.08) {
+            // 8% chance
             powerups.push({
               x: alien.x + alienWidth / 2,
               y: alien.y + alienHeight / 2,
