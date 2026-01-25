@@ -9,14 +9,14 @@ html, body {
 }
 
 body {
-  color: #FFD700;
+  color: #FF1493;
   font-family: 'Press Start 2P', cursive;
   text-align: center;
 }
 
 canvas {
   background-color: #000;
-  border: 2px solid #FFD700;
+  border: 2px solid #FF1493;
   image-rendering: -moz-crisp-edges;
   image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
@@ -30,8 +30,8 @@ canvas {
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: #000;
-  color: #FFD700;
-  border: 2px solid #FFD700;
+  color: #FF1493;
+  border: 2px solid #FF1493;
   padding: 15px 30px;
   font-family: 'Press Start 2P', cursive;
   cursor: pointer;
@@ -39,7 +39,7 @@ canvas {
 }
 
 #playAgainBtn:hover {
-  background-color: #006400;
+  background-color: #FF69B4;
   color: #fff;
 }
 
@@ -78,8 +78,8 @@ h1 {
 
 #mobileControls button {
   background-color: transparent;
-  border: 2px solid #FFD700;
-  color: #FFD700;
+  border: 2px solid #FF1493;
+  color: #FF1493;
   font-family: 'Press Start 2P', cursive;
   font-size: 18px;
   padding: 15px 20px;
@@ -88,7 +88,7 @@ h1 {
 }
 
 #mobileControls button:active {
-  background-color: #006400;
+  background-color: #FF69B4;
   color: #fff;
 }
 
@@ -113,13 +113,13 @@ h1 {
 .play-button {
   font-size: 30px;
   padding: 15px 30px;
-  border: 2px solid #FFD700;
-  color: #FFD700;
+  border: 2px solid #FF1493;
+  color: #FF1493;
   text-decoration: none;
   cursor: pointer;
 }
 
 .play-button:hover {
-  background-color: #006400;
+  background-color: #FF69B4;
   color: #fff;
 }
