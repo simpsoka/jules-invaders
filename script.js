@@ -9,12 +9,13 @@ const fireBtn = document.getElementById("fireBtn");
 // --- Sprite & Asset Definitions ---
 const PIXEL_SIZE = 4;
 
+// Player: Heart Shape
 const PLAYER_SPRITE_A = [
-  [0, 0, 1, 1, 1, 0, 0],
-  [0, 1, 1, 1, 1, 1, 0],
-  [1, 1, 2, 1, 1, 1, 1],
+  [0, 1, 1, 0, 1, 1, 0],
   [1, 1, 1, 1, 1, 1, 1],
-  [0, 1, 0, 0, 0, 1, 0],
+  [1, 1, 1, 1, 1, 1, 1],
+  [0, 1, 1, 1, 1, 1, 0],
+  [0, 0, 1, 1, 1, 0, 0],
 ];
 
 const SQUIDSTORM_SHIP_SPRITE = [
@@ -24,68 +25,77 @@ const SQUIDSTORM_SHIP_SPRITE = [
   [5, 1, 1, 1, 1, 1, 5],
 ];
 
+// Player: Heart Shape (Beating - slightly smaller or different?)
 const PLAYER_SPRITE_B = [
-  [0, 0, 1, 1, 1, 0, 0],
-  [0, 1, 1, 1, 1, 1, 0],
-  [1, 1, 0, 1, 1, 1, 1],
+  [0, 1, 1, 0, 1, 1, 0],
   [1, 1, 1, 1, 1, 1, 1],
-  [0, 1, 0, 0, 0, 1, 0],
+  [1, 1, 2, 1, 2, 1, 1],
+  [0, 1, 1, 1, 1, 1, 0],
+  [0, 0, 1, 1, 1, 0, 0],
 ];
 
+// Alien 1: Small Hearts
 const ALIEN_SPRITE_1 = [
-  [0, 0, 1, 1, 0, 0],
-  [0, 1, 1, 1, 1, 0],
-  [1, 1, 0, 0, 1, 1],
-  [1, 0, 0, 0, 0, 1],
-];
-
-const ALIEN_SPRITE_2 = [
   [0, 1, 0, 0, 1, 0],
-  [1, 0, 1, 1, 0, 1],
   [1, 1, 1, 1, 1, 1],
-  [0, 1, 0, 0, 1, 0],
+  [1, 1, 1, 1, 1, 1],
+  [0, 1, 1, 1, 1, 0],
+  [0, 0, 1, 1, 0, 0],
 ];
 
+// Alien 2: Different Heart
+const ALIEN_SPRITE_2 = [
+  [1, 0, 0, 0, 0, 1],
+  [1, 1, 0, 0, 1, 1],
+  [1, 1, 1, 1, 1, 1],
+  [0, 1, 1, 1, 1, 0],
+];
+
+// Alien 3: Lips/Kiss
 const ALIEN_SPRITE_3 = [
   [0, 0, 1, 1, 0, 0],
+  [0, 1, 0, 0, 1, 0],
   [1, 1, 1, 1, 1, 1],
   [0, 1, 1, 1, 1, 0],
-  [1, 0, 0, 0, 0, 1],
 ];
 
+// Dance frames (Simple variation)
 const ALIEN_SPRITE_1_DANCE = [
+  [0, 1, 0, 0, 1, 0],
+  [1, 1, 1, 1, 1, 1],
+  [1, 0, 1, 1, 0, 1],
+  [0, 1, 0, 0, 1, 0],
   [0, 0, 1, 1, 0, 0],
-  [0, 1, 1, 1, 1, 0],
-  [1, 1, 0, 0, 1, 1],
-  [0, 1, 1, 1, 1, 0],
 ];
 
 const ALIEN_SPRITE_2_DANCE = [
-  [0, 1, 0, 0, 1, 0],
-  [1, 0, 1, 1, 0, 1],
+  [0, 0, 0, 0, 0, 0],
+  [1, 1, 0, 0, 1, 1],
   [1, 1, 1, 1, 1, 1],
-  [1, 0, 1, 1, 0, 1],
+  [0, 1, 1, 1, 1, 0],
 ];
 
 const ALIEN_SPRITE_3_DANCE = [
   [0, 0, 1, 1, 0, 0],
   [1, 1, 1, 1, 1, 1],
-  [0, 1, 1, 1, 1, 0],
   [0, 1, 0, 0, 1, 0],
+  [0, 1, 1, 1, 1, 0],
 ];
 
+// Bunker: Cloud/Gift
 const BUNKER_SPRITE = [
+  [0, 0, 1, 1, 1, 0, 0],
   [0, 1, 1, 1, 1, 1, 0],
   [1, 1, 1, 1, 1, 1, 1],
-  [1, 1, 0, 0, 0, 1, 1],
-  [1, 1, 0, 0, 0, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1],
 ];
 
+// UFO: Cupid-ish
 const UFO_SPRITE = [
-  [0, 0, 1, 1, 1, 1, 0, 0],
+  [0, 0, 1, 1, 1, 0, 0, 0],
   [0, 1, 1, 1, 1, 1, 1, 0],
   [1, 1, 1, 1, 1, 1, 1, 1],
-  [0, 1, 1, 0, 0, 1, 1, 0],
+  [0, 0, 1, 0, 0, 1, 0, 0],
 ];
 
 const BENEVOLENT_UFO_SPRITE = [
@@ -115,23 +125,20 @@ const JULES_LOGO_SPRITE = [
 ];
 
 // --- Color Management ---
-// Note: The `colors` constant was previously declared twice.
-// The first declaration, which was a simplified version, has been removed
-// to resolve a syntax error that prevented the game from running.
 const colors = {
-  player: { 1: "#008000", 2: "#FF8C00" },
+  player: { 1: "#FF1493", 2: "#FF69B4" }, // DeepPink, HotPink
   dev: { 1: "#FF0000", 2: "#FF1493", 3: "#FF69B4", 4: "#FFC0CB", 5: "#FFFFFF" },
-  ufo: "#FFD700",
-  benevolentUfo: { 1: "#FFD700", 2: "#FFFFFF" },
-  squid: "#FF8C00",
-  alien: "#32CD32",
-  bunker: "#228B22",
-  projectile: "#FFFFFF",
-  ground: "#228B22",
-  text: "#FFD700",
+  ufo: "#FF0000", // Red
+  benevolentUfo: { 1: "#FF69B4", 2: "#FFFFFF" },
+  squid: "#FF1493",
+  alien: "#FF69B4", // HotPink
+  bunker: "#DB7093", // PaleVioletRed
+  projectile: "#FFC0CB", // Pink
+  ground: "#DB7093", // PaleVioletRed
+  text: "#FF1493", // DeepPink
   powerup: "#FF0000",
-  explosion: "#32CD32",
-  squidExplosion: "#FF8C00",
+  explosion: "#FF69B4",
+  squidExplosion: "#FF0000",
 };
 
 /**
@@ -177,11 +184,12 @@ function hslToHex(h, s, l) {
 function updateColorsForLevel(level) {
   const hueShift = (level - 1) * 10; // 10 degrees hue shift per level
 
-  // Base HSL values, with hue in degrees
-  const baseUfoHsl = { h: 51, s: 1.0, l: 0.5 };
-  const baseSquidHsl = { h: 33, s: 1.0, l: 0.5 };
-  const baseAlienHsl = { h: 120, s: 0.61, l: 0.5 };
-  const baseExplosionHsl = { h: 120, s: 0.61, l: 0.5 };
+  // Base HSL values for Valentine Theme (Pinks/Reds/Purples)
+  // 330 is DeepPink
+  const baseUfoHsl = { h: 0, s: 1.0, l: 0.5 }; // Red
+  const baseSquidHsl = { h: 330, s: 1.0, l: 0.5 };
+  const baseAlienHsl = { h: 340, s: 1.0, l: 0.6 }; // HotPink ish
+  const baseExplosionHsl = { h: 300, s: 1.0, l: 0.5 };
 
   colors.ufo = hslToHex(
     ((baseUfoHsl.h + hueShift) % 360) / 360,
@@ -388,20 +396,20 @@ function resetGame() {
   score = 0;
   level = 1;
 
-  // Reset colors to default
+  // Reset colors to default (Valentine Theme)
   Object.assign(colors, {
-    player: { 1: "#008000", 2: "#FF8C00" },
-    ufo: "#FFD700",
-    squid: "#FF8C00",
-    alien: "#32CD32",
-    bunker: "#228B22",
-    projectile: "#FFFFFF",
-    ground: "#228B22",
-    text: "#FFD700",
-    explosion: "#32CD32",
-    squidExplosion: "#FF8C00",
+    player: { 1: "#FF1493", 2: "#FF69B4" },
+    ufo: "#FF0000",
+    squid: "#FF1493",
+    alien: "#FF69B4",
+    bunker: "#DB7093",
+    projectile: "#FFC0CB",
+    ground: "#DB7093",
+    text: "#FF1493",
+    explosion: "#FF69B4",
+    squidExplosion: "#FF0000",
   });
-  canvas.style.borderColor = "#FFD700";
+  canvas.style.borderColor = "#FF1493";
 
   alienSpeed = 0.5;
   alienFireRate = 0.0005;
@@ -467,12 +475,13 @@ function resetAliensForNextLevel() {
   alienFireRate = 0.0005 + (level - 1) * 0.0005;
 
   // Update colors for the new level
-  colors.ufo = shiftColor("#FFB6C1", level);
-  colors.squid = shiftColor("#9400D3", level);
-  colors.alien = shiftColor("#FF1493", level);
-  colors.bunker = shiftColor("#FF1493", level);
-  colors.ground = shiftColor("#FF1493", level);
-  canvas.style.borderColor = shiftColor("#FFFFFF", level);
+  // Maintain pink/red theme
+  colors.ufo = shiftColor("#FF0000", level); // Red base
+  colors.squid = shiftColor("#FF1493", level); // DeepPink base
+  colors.alien = shiftColor("#FF69B4", level); // HotPink base
+  colors.bunker = shiftColor("#DB7093", level); // PaleVioletRed base
+  colors.ground = shiftColor("#DB7093", level);
+  canvas.style.borderColor = shiftColor("#FF1493", level);
 
   aliens.length = 0;
   for (let c = 0; c < alienColumnCount; c++) {
@@ -543,9 +552,9 @@ function shiftColor(hex, level) {
     h /= 6;
   }
 
-  // Apply level-based shift
-  h = (h + (level - 1) * 0.03) % 1; // Hue shift
-  l = Math.max(0.1, Math.min(0.9, l - (level - 1) * 0.01)); // Lightness shift
+  // Apply level-based shift (Keep hue within range for consistency, or small shift)
+  h = (h + (level - 1) * 0.01) % 1; // Slight Hue shift
+  l = Math.max(0.3, Math.min(0.8, l + (level % 2 === 0 ? 0.05 : -0.05))); // Lightness shift
 
   // Convert HSL to RGB
   let r2, g2, b2;
