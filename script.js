@@ -74,6 +74,34 @@ const ALIEN_SPRITE_3_DANCE = [
   [0, 1, 0, 0, 1, 0],
 ];
 
+const ALIEN_SPRITE_4 = [
+  [0, 0, 1, 1, 0, 0],
+  [0, 1, 1, 1, 1, 0],
+  [1, 1, 0, 0, 1, 1],
+  [1, 0, 1, 1, 0, 1],
+];
+
+const ALIEN_SPRITE_5 = [
+  [0, 1, 1, 1, 1, 0],
+  [1, 1, 0, 0, 1, 1],
+  [1, 1, 1, 1, 1, 1],
+  [0, 1, 0, 0, 1, 0],
+];
+
+const ALIEN_SPRITE_4_DANCE = [
+  [0, 0, 1, 1, 0, 0],
+  [0, 1, 1, 1, 1, 0],
+  [1, 1, 0, 0, 1, 1],
+  [0, 1, 0, 0, 1, 0],
+];
+
+const ALIEN_SPRITE_5_DANCE = [
+  [0, 1, 1, 1, 1, 0],
+  [1, 1, 0, 0, 1, 1],
+  [1, 1, 1, 1, 1, 1],
+  [1, 0, 1, 1, 0, 1],
+];
+
 const BUNKER_SPRITE = [
   [0, 1, 1, 1, 1, 1, 0],
   [1, 1, 1, 1, 1, 1, 1],
@@ -307,9 +335,11 @@ for (let c = 0; c < alienColumnCount; c++) {
     const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
     const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
     let alienType;
-    if (r === 0) alienType = 1;
-    else if (r < 3) alienType = 2;
-    else alienType = 3;
+    if (r === 0) alienType = 5;
+    else if (r === 1) alienType = 4;
+    else if (r === 2) alienType = 3;
+    else if (r === 3) alienType = 2;
+    else alienType = 1;
     const isSquid = Math.random() < 1 / 15;
     aliens[c][r] = {
       x: alienX,
@@ -419,9 +449,11 @@ function resetGame() {
       const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
       const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
       let alienType;
-      if (r === 0) alienType = 1;
-      else if (r < 3) alienType = 2;
-      else alienType = 3;
+      if (r === 0) alienType = 5;
+      else if (r === 1) alienType = 4;
+      else if (r === 2) alienType = 3;
+      else if (r === 3) alienType = 2;
+      else alienType = 1;
       const isSquid = Math.random() < 1 / 15;
       aliens[c][r] = {
         x: alienX,
@@ -481,9 +513,11 @@ function resetAliensForNextLevel() {
       const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
       const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
       let alienType;
-      if (r === 0) alienType = 1;
-      else if (r < 3) alienType = 2;
-      else alienType = 3;
+      if (r === 0) alienType = 5;
+      else if (r === 1) alienType = 4;
+      else if (r === 2) alienType = 3;
+      else if (r === 3) alienType = 2;
+      else alienType = 1;
       const isSquid = Math.random() < 1 / 15;
       aliens[c][r] = {
         x: alienX,
@@ -1101,8 +1135,12 @@ function draw() {
           sprite = isDancing ? ALIEN_SPRITE_1_DANCE : ALIEN_SPRITE_1;
         } else if (alien.type === 2) {
           sprite = isDancing ? ALIEN_SPRITE_2_DANCE : ALIEN_SPRITE_2;
-        } else {
+        } else if (alien.type === 3) {
           sprite = isDancing ? ALIEN_SPRITE_3_DANCE : ALIEN_SPRITE_3;
+        } else if (alien.type === 4) {
+          sprite = isDancing ? ALIEN_SPRITE_4_DANCE : ALIEN_SPRITE_4;
+        } else {
+          sprite = isDancing ? ALIEN_SPRITE_5_DANCE : ALIEN_SPRITE_5;
         }
         drawPixelArt(sprite, alien.x, alien.y, colors.alien, PIXEL_SIZE);
       }
