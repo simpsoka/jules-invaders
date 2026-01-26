@@ -301,25 +301,43 @@ const alienOffsetTop = 50;
 const alienOffsetLeft = 30;
 
 const aliens = [];
-for (let c = 0; c < alienColumnCount; c++) {
-  aliens[c] = [];
-  for (let r = 0; r < alienRowCount; r++) {
-    const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
-    const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
-    let alienType;
-    if (r === 0) alienType = 1;
-    else if (r < 3) alienType = 2;
-    else alienType = 3;
-    const isSquid = Math.random() < 1 / 15;
-    aliens[c][r] = {
-      x: alienX,
-      y: alienY,
-      status: 1,
-      type: alienType,
-      isSquid: isSquid,
-    };
+
+function populateAliens(levelToLoad) {
+  aliens.length = 0;
+
+  const patterns = [
+    (c, r) => true, // Level 1: Block
+    (c, r) => Math.abs(c - 5) + Math.abs(r - 2) <= 3, // Level 2: Diamond
+    (c, r) => c % 2 === 0, // Level 3: Columns
+    (c, r) => r >= Math.abs(c - 5) / 2, // Level 4: Triangle
+  ];
+
+  const pattern = patterns[(levelToLoad - 1) % patterns.length];
+
+  for (let c = 0; c < alienColumnCount; c++) {
+    aliens[c] = [];
+    for (let r = 0; r < alienRowCount; r++) {
+      if (pattern(c, r)) {
+        const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
+        const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
+        let alienType;
+        if (r === 0) alienType = 1;
+        else if (r < 3) alienType = 2;
+        else alienType = 3;
+        const isSquid = Math.random() < 1 / 15;
+        aliens[c][r] = {
+          x: alienX,
+          y: alienY,
+          status: 1,
+          type: alienType,
+          isSquid: isSquid,
+        };
+      }
+    }
   }
 }
+
+populateAliens(1);
 
 // Bunkers
 const bunkerCount = 3;
@@ -412,26 +430,7 @@ function resetGame() {
 
   player.x = canvas.width / 2 - (PLAYER_SPRITE_A[0].length * PIXEL_SIZE) / 2;
 
-  aliens.length = 0;
-  for (let c = 0; c < alienColumnCount; c++) {
-    aliens[c] = [];
-    for (let r = 0; r < alienRowCount; r++) {
-      const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
-      const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
-      let alienType;
-      if (r === 0) alienType = 1;
-      else if (r < 3) alienType = 2;
-      else alienType = 3;
-      const isSquid = Math.random() < 1 / 15;
-      aliens[c][r] = {
-        x: alienX,
-        y: alienY,
-        status: 1,
-        type: alienType,
-        isSquid: isSquid,
-      };
-    }
-  }
+  populateAliens(1);
 
   bunkers.length = 0;
   for (let i = 0; i < bunkerCount; i++) {
@@ -474,26 +473,7 @@ function resetAliensForNextLevel() {
   colors.ground = shiftColor("#FF1493", level);
   canvas.style.borderColor = shiftColor("#FFFFFF", level);
 
-  aliens.length = 0;
-  for (let c = 0; c < alienColumnCount; c++) {
-    aliens[c] = [];
-    for (let r = 0; r < alienRowCount; r++) {
-      const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
-      const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
-      let alienType;
-      if (r === 0) alienType = 1;
-      else if (r < 3) alienType = 2;
-      else alienType = 3;
-      const isSquid = Math.random() < 1 / 15;
-      aliens[c][r] = {
-        x: alienX,
-        y: alienY,
-        status: 1,
-        type: alienType,
-        isSquid: isSquid,
-      };
-    }
-  }
+  populateAliens(level);
   playerProjectiles.length = 0;
   alienProjectiles.length = 0;
   explosions.length = 0;
