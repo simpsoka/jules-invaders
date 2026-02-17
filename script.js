@@ -1217,7 +1217,7 @@ function gameLoop() {
 function loadHighScore() {
   const storedHighScore = localStorage.getItem("spaceInvadersHighScore");
   if (storedHighScore) {
-    highScore = parseInt(storedHighScore);
+    highScore = parseInt(storedHighScore, 10);
   }
 }
 
