@@ -115,9 +115,6 @@ const JULES_LOGO_SPRITE = [
 ];
 
 // --- Color Management ---
-// Note: The `colors` constant was previously declared twice.
-// The first declaration, which was a simplified version, has been removed
-// to resolve a syntax error that prevented the game from running.
 const colors = {
   player: { 1: "#008000", 2: "#FF8C00" },
   dev: { 1: "#FF0000", 2: "#FF1493", 3: "#FF69B4", 4: "#FFC0CB", 5: "#FFFFFF" },
