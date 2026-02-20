@@ -385,6 +385,7 @@ if (playAgainBtn) {
 }
 
 function resetGame() {
+  clearSpriteCache();
   score = 0;
   level = 1;
 
@@ -462,6 +463,7 @@ function resetGame() {
 }
 
 function resetAliensForNextLevel() {
+  clearSpriteCache();
   updateColorsForLevel(level);
   alienSpeed = 0.5 * Math.pow(1.5, level - 1);
   alienFireRate = 0.0005 + (level - 1) * 0.0005;
@@ -989,25 +991,57 @@ function update() {
 }
 
 // --- Drawing Functions ---
-function drawPixelArt(sprite, x, y, color, pixelSize) {
-  for (let r = 0; r < sprite.length; r++) {
-    for (let c = 0; c < sprite[r].length; c++) {
+const spriteCache = new Map();
+
+function clearSpriteCache() {
+  spriteCache.clear();
+}
+
+function getCachedSprite(sprite, color, pixelSize) {
+  if (!spriteCache.has(sprite)) {
+    spriteCache.set(sprite, new Map());
+  }
+  const colorCache = spriteCache.get(sprite);
+
+  // Map keys can be objects or primitives, so we can use `color` directly.
+  if (!colorCache.has(color)) {
+    colorCache.set(color, new Map());
+  }
+  const sizeCache = colorCache.get(color);
+
+  if (sizeCache.has(pixelSize)) {
+    return sizeCache.get(pixelSize);
+  }
+
+  // Create new offscreen canvas
+  const rows = sprite.length;
+  const cols = sprite[0].length;
+  const offscreenCanvas = document.createElement("canvas");
+  offscreenCanvas.width = cols * pixelSize;
+  offscreenCanvas.height = rows * pixelSize;
+  const offCtx = offscreenCanvas.getContext("2d");
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
       const pixel = sprite[r][c];
       if (pixel !== 0) {
         if (typeof color === "object") {
-          ctx.fillStyle = color[pixel];
+          offCtx.fillStyle = color[pixel];
         } else {
-          ctx.fillStyle = color;
+          offCtx.fillStyle = color;
         }
-        ctx.fillRect(
-          x + c * pixelSize,
-          y + r * pixelSize,
-          pixelSize,
-          pixelSize,
-        );
+        offCtx.fillRect(c * pixelSize, r * pixelSize, pixelSize, pixelSize);
       }
     }
   }
+
+  sizeCache.set(pixelSize, offscreenCanvas);
+  return offscreenCanvas;
+}
+
+function drawPixelArt(sprite, x, y, color, pixelSize) {
+  const cachedCanvas = getCachedSprite(sprite, color, pixelSize);
+  ctx.drawImage(cachedCanvas, x, y);
 }
 
 function draw() {
