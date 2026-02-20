@@ -362,7 +362,7 @@ function keyDown(e) {
     userInputSequence.shift();
   }
 
-  if (JSON.stringify(userInputSequence) === JSON.stringify(konamiCode)) {
+  if (arraysEqual(userInputSequence, konamiCode)) {
     squidStormActive = true;
     squidStormMessageTimer = 120; // 2 seconds at 60fps
     squidStormSound.play();
@@ -1280,4 +1280,12 @@ function initGame(config) {
   }
 
   gameLoop();
+}
+
+function arraysEqual(a, b) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
 }
