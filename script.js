@@ -939,8 +939,25 @@ function update() {
   }
 
   // Filter out inactive projectiles
-  playerProjectiles = playerProjectiles.filter((p) => p.status === 1);
-  alienProjectiles = alienProjectiles.filter((p) => p.status === 1);
+  let i = 0;
+  while (i < playerProjectiles.length) {
+    if (playerProjectiles[i].status !== 1) {
+      playerProjectiles[i] = playerProjectiles[playerProjectiles.length - 1];
+      playerProjectiles.pop();
+    } else {
+      i++;
+    }
+  }
+
+  i = 0;
+  while (i < alienProjectiles.length) {
+    if (alienProjectiles[i].status !== 1) {
+      alienProjectiles[i] = alienProjectiles[alienProjectiles.length - 1];
+      alienProjectiles.pop();
+    } else {
+      i++;
+    }
+  }
 
   // Update explosions
   explosions.forEach((explosion, index) => {
