@@ -818,19 +818,6 @@ function update() {
             });
           }
           explosionSound.play();
-
-          // Spawn power-up
-          if (Math.random() < 0.05) {
-            // 5% chance
-            powerups.push({
-              x: alien.x + alienWidth / 2,
-              y: alien.y + alienHeight / 2,
-              width: JULES_LOGO_SPRITE[0].length * PIXEL_SIZE,
-              height: JULES_LOGO_SPRITE.length * PIXEL_SIZE,
-              speed: 2,
-              status: 1,
-            });
-          }
         }
       });
 
