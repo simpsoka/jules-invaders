@@ -1268,3 +1268,12 @@ function initGame(config) {
 
   gameLoop();
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const mode = document.body.dataset.gamemode;
+  if (mode === 'demo') {
+    initGame({ isDemo: true });
+  } else if (mode === 'play') {
+    initGame({ isDemo: false });
+  }
+});

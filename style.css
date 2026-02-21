@@ -70,7 +70,7 @@ h1 {
   width: 100%;
   background-color: #111;
   padding: 10px 0;
-  display: flex;
+  display: none;
   justify-content: space-around;
   align-items: center;
   user-select: none; /* Prevent text selection on buttons */
@@ -106,6 +106,7 @@ h1 {
 }
 
 .title {
+  display: block;
   font-size: 50px;
   margin-bottom: 20px;
 }

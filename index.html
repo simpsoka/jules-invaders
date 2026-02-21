@@ -1,21 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self'; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
   <title>Jules Invaders</title>
   <link rel="icon" type="image/png" href="images/favicon.png">
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
-<body>
+<body data-gamemode="demo">
   <canvas id="gameCanvas" width="800" height="600"></canvas>
   <div class="overlay">
     <h1 class="title">Jules Invaders</h1>
     <a href="game.html" class="play-button">Play</a>
   </div>
   <script src="script.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      initGame({ isDemo: true });
-    });
-  </script>
 </body>
 </html>
