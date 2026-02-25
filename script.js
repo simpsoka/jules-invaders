@@ -134,6 +134,13 @@ const colors = {
   squidExplosion: "#FF8C00",
 };
 
+// --- Sprite Cache ---
+const spriteCache = new Map();
+
+function clearSpriteCache() {
+  spriteCache.clear();
+}
+
 /**
  * Converts an HSL color value to HEX.
  * Assumes h, s, and l are contained in the set [0, 1] and
@@ -387,6 +394,7 @@ if (playAgainBtn) {
 function resetGame() {
   score = 0;
   level = 1;
+  clearSpriteCache();
 
   // Reset colors to default
   Object.assign(colors, {
@@ -463,6 +471,7 @@ function resetGame() {
 
 function resetAliensForNextLevel() {
   updateColorsForLevel(level);
+  clearSpriteCache();
   alienSpeed = 0.5 * Math.pow(1.5, level - 1);
   alienFireRate = 0.0005 + (level - 1) * 0.0005;
 
@@ -977,23 +986,69 @@ function update() {
 
 // --- Drawing Functions ---
 function drawPixelArt(sprite, x, y, color, pixelSize) {
+  // Optimization: Check if we can cache this sprite
+  // We only cache if the color is a hex string (starts with #) or an object (stable reference)
+  // Dynamic colors like rgba(...) used for powerups are excluded
+  const canCache = (typeof color === 'object') || (typeof color === 'string' && color.startsWith('#'));
+
+  if (canCache) {
+    if (!spriteCache.has(sprite)) {
+      spriteCache.set(sprite, new Map());
+    }
+    const colorCache = spriteCache.get(sprite);
+
+    if (colorCache.has(color)) {
+      const cachedCanvas = colorCache.get(color);
+      // Use cached image - much faster than fillRect loop
+      ctx.drawImage(cachedCanvas, x, y);
+      return;
+    }
+  }
+
+  // Prepare to draw (either to cache or directly)
+  let targetCtx = ctx;
+  let targetX = x;
+  let targetY = y;
+  let offscreen = null;
+
+  if (canCache) {
+    const rows = sprite.length;
+    const cols = sprite[0].length;
+    const width = cols * pixelSize;
+    const height = rows * pixelSize;
+
+    offscreen = document.createElement('canvas');
+    offscreen.width = width;
+    offscreen.height = height;
+    targetCtx = offscreen.getContext('2d');
+    targetX = 0;
+    targetY = 0;
+  }
+
+  // Draw the sprite
   for (let r = 0; r < sprite.length; r++) {
     for (let c = 0; c < sprite[r].length; c++) {
       const pixel = sprite[r][c];
       if (pixel !== 0) {
         if (typeof color === "object") {
-          ctx.fillStyle = color[pixel];
+          targetCtx.fillStyle = color[pixel];
         } else {
-          ctx.fillStyle = color;
+          targetCtx.fillStyle = color;
         }
-        ctx.fillRect(
-          x + c * pixelSize,
-          y + r * pixelSize,
+        targetCtx.fillRect(
+          targetX + c * pixelSize,
+          targetY + r * pixelSize,
           pixelSize,
           pixelSize,
         );
       }
     }
+  }
+
+  // If we drew to offscreen canvas, cache it and draw to main canvas
+  if (canCache && offscreen) {
+    spriteCache.get(sprite).set(color, offscreen);
+    ctx.drawImage(offscreen, x, y);
   }
 }
 
