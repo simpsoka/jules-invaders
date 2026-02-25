@@ -174,6 +174,16 @@ function hslToHex(h, s, l) {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
+/**
+ * Generates a cryptographically secure random number between 0 (inclusive) and 1 (exclusive).
+ * Replacement for Math.random() for better security.
+ */
+function secureRandom() {
+  const array = new Uint32Array(1);
+  window.crypto.getRandomValues(array);
+  return array[0] / (0xffffffff + 1);
+}
+
 function updateColorsForLevel(level) {
   const hueShift = (level - 1) * 10; // 10 degrees hue shift per level
 
@@ -310,7 +320,7 @@ for (let c = 0; c < alienColumnCount; c++) {
     if (r === 0) alienType = 1;
     else if (r < 3) alienType = 2;
     else alienType = 3;
-    const isSquid = Math.random() < 1 / 15;
+    const isSquid = secureRandom() < 1 / 15;
     aliens[c][r] = {
       x: alienX,
       y: alienY,
@@ -422,7 +432,7 @@ function resetGame() {
       if (r === 0) alienType = 1;
       else if (r < 3) alienType = 2;
       else alienType = 3;
-      const isSquid = Math.random() < 1 / 15;
+      const isSquid = secureRandom() < 1 / 15;
       aliens[c][r] = {
         x: alienX,
         y: alienY,
@@ -484,7 +494,7 @@ function resetAliensForNextLevel() {
       if (r === 0) alienType = 1;
       else if (r < 3) alienType = 2;
       else alienType = 3;
-      const isSquid = Math.random() < 1 / 15;
+      const isSquid = secureRandom() < 1 / 15;
       aliens[c][r] = {
         x: alienX,
         y: alienY,
@@ -663,10 +673,10 @@ function createExplosion(x, y, color, count = 20) {
       x: x,
       y: y,
       color: color,
-      size: Math.random() * 2 + 1,
-      vx: (Math.random() - 0.5) * 4,
-      vy: (Math.random() - 0.5) * 4,
-      life: Math.random() * 20 + 10, // Lifespan in frames
+      size: secureRandom() * 2 + 1,
+      vx: (secureRandom() - 0.5) * 4,
+      vy: (secureRandom() - 0.5) * 4,
+      life: secureRandom() * 20 + 10, // Lifespan in frames
     });
   }
 }
@@ -729,7 +739,7 @@ function update() {
   });
 
   // UFO Logic
-  if (ufo.status === 0 && Math.random() < 0.0005) {
+  if (ufo.status === 0 && secureRandom() < 0.0005) {
     ufo.status = 1;
     ufo.x = -ufo.width;
   }
@@ -742,7 +752,7 @@ function update() {
   }
 
   // Benevolent UFO Logic
-  if (benevolentUfo.status === 0 && Math.random() < 0.0002) {
+  if (benevolentUfo.status === 0 && secureRandom() < 0.0002) {
     // Lower spawn rate
     benevolentUfo.status = 1;
     benevolentUfo.x = -benevolentUfo.width;
@@ -762,7 +772,7 @@ function update() {
       if (alien.x + alienWidth > canvas.width || alien.x < 0)
         changeDirection = true;
       if (alien.y + alienHeight >= player.y) gameOver = true;
-      if (Math.random() < alienFireRate) fireAlienProjectile(alien);
+      if (secureRandom() < alienFireRate) fireAlienProjectile(alien);
     }
   });
 
@@ -805,7 +815,7 @@ function update() {
           }
 
           // Add a chance to spawn a power-up
-          if (Math.random() < 0.1) {
+          if (secureRandom() < 0.1) {
             // 10% chance
             powerups.push({
               x: alien.x + alienWidth / 2,
