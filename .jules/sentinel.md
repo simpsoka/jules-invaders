@@ -1,0 +1,4 @@
+## 2024-05-24 - Insecure Random Number Generation
+**Vulnerability:** The application was using `Math.random()` for all random number generation, including gameplay mechanics. While not strictly a cryptographic vulnerability in this context, standard `Math.random()` is not cryptographically secure and can be predictable.
+**Learning:** Even in non-critical applications like games, relying on `Math.random()` can be a bad habit. It's a good practice to use `window.crypto.getRandomValues()` for better randomness, especially if the random values could ever influence security-sensitive logic or if fair play is critical (predictable RNG could allow cheating).
+**Prevention:** Always prefer `crypto.getRandomValues()` over `Math.random()` when randomness quality matters. A simple wrapper function can make the API as easy to use as `Math.random()`.
