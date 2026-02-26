@@ -935,33 +935,63 @@ function update() {
   }
 
   // Filter out inactive projectiles
-  playerProjectiles = playerProjectiles.filter((p) => p.status === 1);
-  alienProjectiles = alienProjectiles.filter((p) => p.status === 1);
+  // Optimization: In-place removal to avoid allocation
+  let i = 0;
+  while (i < playerProjectiles.length) {
+    if (playerProjectiles[i].status !== 1) {
+      playerProjectiles[i] = playerProjectiles[playerProjectiles.length - 1];
+      playerProjectiles.pop();
+    } else {
+      i++;
+    }
+  }
+
+  i = 0;
+  while (i < alienProjectiles.length) {
+    if (alienProjectiles[i].status !== 1) {
+      alienProjectiles[i] = alienProjectiles[alienProjectiles.length - 1];
+      alienProjectiles.pop();
+    } else {
+      i++;
+    }
+  }
 
   // Update explosions
-  explosions.forEach((explosion, index) => {
+  i = 0;
+  while (i < explosions.length) {
+    const explosion = explosions[i];
     explosion.timer--;
     if (explosion.timer <= 0) {
-      explosions.splice(index, 1);
+      explosions[i] = explosions[explosions.length - 1];
+      explosions.pop();
+    } else {
+      i++;
     }
-  });
+  }
 
   if (squidStormMessageTimer > 0) {
     squidStormMessageTimer--;
   }
 
   // Update particles
-  particles.forEach((particle, index) => {
+  i = 0;
+  while (i < particles.length) {
+    const particle = particles[i];
     particle.x += particle.vx;
     particle.y += particle.vy;
     particle.life--;
     if (particle.life <= 0) {
-      particles.splice(index, 1);
+      particles[i] = particles[particles.length - 1];
+      particles.pop();
+    } else {
+      i++;
     }
-  });
+  }
 
   // Update powerups
-  powerups.forEach((powerup, index) => {
+  i = 0;
+  while (i < powerups.length) {
+    const powerup = powerups[i];
     if (powerup.status === 1) {
       powerup.y += powerup.speed;
       if (powerup.y > canvas.height) {
@@ -980,8 +1010,14 @@ function update() {
         player.powerupTimer = 300; // 5 seconds at 60fps
       }
     }
-  });
-  powerups = powerups.filter((p) => p.status === 1);
+
+    if (powerup.status !== 1) {
+      powerups[i] = powerups[powerups.length - 1];
+      powerups.pop();
+    } else {
+      i++;
+    }
+  }
 }
 
 // --- Drawing Functions ---
