@@ -1,0 +1,3 @@
+## 2024-05-18 - [Optimizing Arrays in Render Loops]
+**Learning:** Using `Array.prototype.flat()` inside the hot game loop (`update()` and `draw()` functions running 60 times a second) creates severe memory allocation and garbage collection overhead. Since `.flat()` returns a new array, doing it multiple times per frame on a nested structure destroys frame rate stability due to constant GC sweeps.
+**Action:** When a nested array (like a 2D grid of entities) needs to be iterated repeatedly as a single list, it should be initialized as a 1D array (`array.push(...)`) from the start, or flattened once at initialization rather than dynamically in the loop.

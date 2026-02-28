@@ -307,9 +307,9 @@ const alienPadding = 15;
 const alienOffsetTop = 50;
 const alienOffsetLeft = 30;
 
+// Optimization: Using 1D array to prevent GC allocation overhead from .flat() in the game loop
 const aliens = [];
 for (let c = 0; c < alienColumnCount; c++) {
-  aliens[c] = [];
   for (let r = 0; r < alienRowCount; r++) {
     const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
     const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
@@ -318,13 +318,13 @@ for (let c = 0; c < alienColumnCount; c++) {
     else if (r < 3) alienType = 2;
     else alienType = 3;
     const isSquid = Math.random() < 1 / 15;
-    aliens[c][r] = {
+    aliens.push({
       x: alienX,
       y: alienY,
       status: 1,
       type: alienType,
       isSquid: isSquid,
-    };
+    });
   }
 }
 
@@ -420,9 +420,9 @@ function resetGame() {
 
   player.x = canvas.width / 2 - (PLAYER_SPRITE_A[0].length * PIXEL_SIZE) / 2;
 
+  // Optimization: Repopulate as 1D array to avoid .flat() allocations in game loop
   aliens.length = 0;
   for (let c = 0; c < alienColumnCount; c++) {
-    aliens[c] = [];
     for (let r = 0; r < alienRowCount; r++) {
       const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
       const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
@@ -431,13 +431,13 @@ function resetGame() {
       else if (r < 3) alienType = 2;
       else alienType = 3;
       const isSquid = Math.random() < 1 / 15;
-      aliens[c][r] = {
+      aliens.push({
         x: alienX,
         y: alienY,
         status: 1,
         type: alienType,
         isSquid: isSquid,
-      };
+      });
     }
   }
 
@@ -483,9 +483,9 @@ function resetAliensForNextLevel() {
   colors.ground = shiftColor("#FF1493", level);
   canvas.style.borderColor = shiftColor("#FFFFFF", level);
 
+  // Optimization: Repopulate as 1D array to avoid .flat() allocations in game loop
   aliens.length = 0;
   for (let c = 0; c < alienColumnCount; c++) {
-    aliens[c] = [];
     for (let r = 0; r < alienRowCount; r++) {
       const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
       const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
@@ -494,13 +494,13 @@ function resetAliensForNextLevel() {
       else if (r < 3) alienType = 2;
       else alienType = 3;
       const isSquid = Math.random() < 1 / 15;
-      aliens[c][r] = {
+      aliens.push({
         x: alienX,
         y: alienY,
         status: 1,
         type: alienType,
         isSquid: isSquid,
-      };
+      });
     }
   }
   playerProjectiles.length = 0;
@@ -765,7 +765,7 @@ function update() {
   }
 
   let changeDirection = false;
-  aliens.flat().forEach((alien) => {
+  aliens.forEach((alien) => {
     if (alien.status === 1) {
       alien.x += alienSpeed * alienDirection;
       if (alien.x + alienWidth > canvas.width || alien.x < 0)
@@ -778,14 +778,14 @@ function update() {
   if (changeDirection) {
     alienDirection *= -1;
     alienSpeed *= 1.15;
-    aliens.flat().forEach((alien) => (alien.y += alienHeight / 2));
+    aliens.forEach((alien) => (alien.y += alienHeight / 2));
   }
 
   // --- Collision Detection ---
   playerProjectiles.forEach((p) => {
     if (p.status === 1) {
       // Player projectile vs Aliens
-      aliens.flat().forEach((alien) => {
+      aliens.forEach((alien) => {
         if (
           alien.status === 1 &&
           p.x > alien.x &&
@@ -922,7 +922,7 @@ function update() {
     }
   });
 
-  if (aliens.flat().filter((a) => a.status === 1).length <= 10) {
+  if (aliens.filter((a) => a.status === 1).length <= 10) {
     level++;
     resetAliensForNextLevel();
   }
@@ -1132,7 +1132,7 @@ function draw() {
     }
   });
 
-  aliens.flat().forEach((alien) => {
+  aliens.forEach((alien) => {
     if (alien.status === 1) {
       if (alien.isSquid) {
         drawPixelArt(SQUID_SPRITE, alien.x, alien.y, colors.squid, PIXEL_SIZE);
