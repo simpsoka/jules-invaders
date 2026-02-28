@@ -1,0 +1,4 @@
+## 2024-05-18 - [Insecure Local Storage Parsing]
+**Vulnerability:** Untrusted string from localStorage was parsed into integer using `parseInt` without base 10 or validation checks (`isNaN`, `>= 0`), which could corrupt application state if a malicious user manually modified local storage or if there was an invalid save.
+**Learning:** `localStorage` is an untrusted input vector. Any data loaded from local storage must be carefully validated before being used to populate game state variables (such as `highScore`). Without this validation, invalid inputs like "NaN" or negative values could introduce silent logical errors.
+**Prevention:** Always parse untrusted string integers securely by passing the radix to `parseInt(str, 10)` and thoroughly validating the result (`!isNaN(parsed) && parsed >= 0`) before using it in application state logic.
