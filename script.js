@@ -1259,7 +1259,17 @@ function gameLoop() {
 function loadHighScore() {
   const storedHighScore = localStorage.getItem("spaceInvadersHighScore");
   if (storedHighScore) {
-    highScore = parseInt(storedHighScore);
+    // SECURITY: Validate data retrieved from localStorage to prevent application state corruption.
+    // Ensure the value is a valid non-negative integer.
+    const parsed = parseInt(storedHighScore, 10);
+    if (!isNaN(parsed) && parsed >= 0) {
+      highScore = parsed;
+    } else {
+      // If the data is invalid, it might be tampered with or corrupted.
+      // We ignore the invalid value and clear it to prevent further issues.
+      console.warn("Invalid high score found in localStorage. Resetting.");
+      localStorage.removeItem("spaceInvadersHighScore");
+    }
   }
 }
 
