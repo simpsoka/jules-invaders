@@ -935,33 +935,72 @@ function update() {
   }
 
   // Filter out inactive projectiles
-  playerProjectiles = playerProjectiles.filter((p) => p.status === 1);
-  alienProjectiles = alienProjectiles.filter((p) => p.status === 1);
+  // We use swap-and-pop for projectiles instead of filter for O(1) removals
+  let pi = 0;
+  while (pi < playerProjectiles.length) {
+    if (playerProjectiles[pi].status !== 1) {
+      const last = playerProjectiles.pop();
+      if (pi < playerProjectiles.length) {
+        playerProjectiles[pi] = last;
+      }
+    } else {
+      pi++;
+    }
+  }
+
+  let ai = 0;
+  while (ai < alienProjectiles.length) {
+    if (alienProjectiles[ai].status !== 1) {
+      const last = alienProjectiles.pop();
+      if (ai < alienProjectiles.length) {
+        alienProjectiles[ai] = last;
+      }
+    } else {
+      ai++;
+    }
+  }
 
   // Update explosions
-  explosions.forEach((explosion, index) => {
-    explosion.timer--;
-    if (explosion.timer <= 0) {
-      explosions.splice(index, 1);
+  // Use swap-and-pop strategy to prevent skipping elements and improve deletion performance from O(N) to O(1)
+  let ei = 0;
+  while (ei < explosions.length) {
+    explosions[ei].timer--;
+    if (explosions[ei].timer <= 0) {
+      const last = explosions.pop();
+      if (ei < explosions.length) {
+        explosions[ei] = last;
+      }
+    } else {
+      ei++;
     }
-  });
+  }
 
   if (squidStormMessageTimer > 0) {
     squidStormMessageTimer--;
   }
 
   // Update particles
-  particles.forEach((particle, index) => {
-    particle.x += particle.vx;
-    particle.y += particle.vy;
-    particle.life--;
-    if (particle.life <= 0) {
-      particles.splice(index, 1);
+  // Use swap-and-pop strategy to prevent skipping elements and improve deletion performance from O(N) to O(1)
+  let parti = 0;
+  while (parti < particles.length) {
+    particles[parti].x += particles[parti].vx;
+    particles[parti].y += particles[parti].vy;
+    particles[parti].life--;
+    if (particles[parti].life <= 0) {
+      const last = particles.pop();
+      if (parti < particles.length) {
+        particles[parti] = last;
+      }
+    } else {
+      parti++;
     }
-  });
+  }
 
   // Update powerups
-  powerups.forEach((powerup, index) => {
+  // Use swap-and-pop strategy to prevent skipping elements and improve deletion performance from O(N) to O(1)
+  let powi = 0;
+  while (powi < powerups.length) {
+    const powerup = powerups[powi];
     if (powerup.status === 1) {
       powerup.y += powerup.speed;
       if (powerup.y > canvas.height) {
@@ -980,8 +1019,17 @@ function update() {
         player.powerupTimer = 300; // 5 seconds at 60fps
       }
     }
-  });
-  powerups = powerups.filter((p) => p.status === 1);
+
+    // Remove if inactive
+    if (powerup.status !== 1) {
+      const last = powerups.pop();
+      if (powi < powerups.length) {
+        powerups[powi] = last;
+      }
+    } else {
+      powi++;
+    }
+  }
 }
 
 // --- Drawing Functions ---
