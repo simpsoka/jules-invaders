@@ -934,34 +934,61 @@ function update() {
     }
   }
 
-  // Filter out inactive projectiles
-  playerProjectiles = playerProjectiles.filter((p) => p.status === 1);
-  alienProjectiles = alienProjectiles.filter((p) => p.status === 1);
-
-  // Update explosions
-  explosions.forEach((explosion, index) => {
-    explosion.timer--;
-    if (explosion.timer <= 0) {
-      explosions.splice(index, 1);
+  // Filter out inactive projectiles using swap-and-pop for O(1) removal
+  let i = 0;
+  while (i < playerProjectiles.length) {
+    if (playerProjectiles[i].status === 1) {
+      i++;
+    } else {
+      playerProjectiles[i] = playerProjectiles[playerProjectiles.length - 1];
+      playerProjectiles.pop();
     }
-  });
+  }
+
+  i = 0;
+  while (i < alienProjectiles.length) {
+    if (alienProjectiles[i].status === 1) {
+      i++;
+    } else {
+      alienProjectiles[i] = alienProjectiles[alienProjectiles.length - 1];
+      alienProjectiles.pop();
+    }
+  }
+
+  // Update explosions using swap-and-pop
+  i = 0;
+  while (i < explosions.length) {
+    explosions[i].timer--;
+    if (explosions[i].timer <= 0) {
+      explosions[i] = explosions[explosions.length - 1];
+      explosions.pop();
+    } else {
+      i++;
+    }
+  }
 
   if (squidStormMessageTimer > 0) {
     squidStormMessageTimer--;
   }
 
-  // Update particles
-  particles.forEach((particle, index) => {
-    particle.x += particle.vx;
-    particle.y += particle.vy;
-    particle.life--;
-    if (particle.life <= 0) {
-      particles.splice(index, 1);
+  // Update particles using swap-and-pop
+  i = 0;
+  while (i < particles.length) {
+    particles[i].x += particles[i].vx;
+    particles[i].y += particles[i].vy;
+    particles[i].life--;
+    if (particles[i].life <= 0) {
+      particles[i] = particles[particles.length - 1];
+      particles.pop();
+    } else {
+      i++;
     }
-  });
+  }
 
-  // Update powerups
-  powerups.forEach((powerup, index) => {
+  // Update powerups using swap-and-pop
+  i = 0;
+  while (i < powerups.length) {
+    let powerup = powerups[i];
     if (powerup.status === 1) {
       powerup.y += powerup.speed;
       if (powerup.y > canvas.height) {
@@ -980,8 +1007,14 @@ function update() {
         player.powerupTimer = 300; // 5 seconds at 60fps
       }
     }
-  });
-  powerups = powerups.filter((p) => p.status === 1);
+
+    if (powerup.status === 1) {
+      i++;
+    } else {
+      powerups[i] = powerups[powerups.length - 1];
+      powerups.pop();
+    }
+  }
 }
 
 // --- Drawing Functions ---
