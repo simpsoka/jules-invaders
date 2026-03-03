@@ -765,35 +765,44 @@ function update() {
   }
 
   let changeDirection = false;
-  aliens.flat().forEach((alien) => {
-    if (alien.status === 1) {
-      alien.x += alienSpeed * alienDirection;
-      if (alien.x + alienWidth > canvas.width || alien.x < 0)
-        changeDirection = true;
-      if (alien.y + alienHeight >= player.y) gameOver = true;
-      if (Math.random() < alienFireRate) fireAlienProjectile(alien);
+  for (let c = 0; c < alienColumnCount; c++) {
+    for (let r = 0; r < alienRowCount; r++) {
+      const alien = aliens[c][r];
+      if (alien.status === 1) {
+        alien.x += alienSpeed * alienDirection;
+        if (alien.x + alienWidth > canvas.width || alien.x < 0)
+          changeDirection = true;
+        if (alien.y + alienHeight >= player.y) gameOver = true;
+        if (Math.random() < alienFireRate) fireAlienProjectile(alien);
+      }
     }
-  });
+  }
 
   if (changeDirection) {
     alienDirection *= -1;
     alienSpeed *= 1.15;
-    aliens.flat().forEach((alien) => (alien.y += alienHeight / 2));
+    for (let c = 0; c < alienColumnCount; c++) {
+      for (let r = 0; r < alienRowCount; r++) {
+        aliens[c][r].y += alienHeight / 2;
+      }
+    }
   }
 
   // --- Collision Detection ---
   playerProjectiles.forEach((p) => {
     if (p.status === 1) {
       // Player projectile vs Aliens
-      aliens.flat().forEach((alien) => {
-        if (
-          alien.status === 1 &&
-          p.x > alien.x &&
-          p.x < alien.x + alienWidth &&
-          p.y > alien.y &&
-          p.y < alien.y + alienHeight
-        ) {
-          alien.status = 0;
+      for (let c = 0; c < alienColumnCount; c++) {
+        for (let r = 0; r < alienRowCount; r++) {
+          const alien = aliens[c][r];
+          if (
+            alien.status === 1 &&
+            p.x > alien.x &&
+            p.x < alien.x + alienWidth &&
+            p.y > alien.y &&
+            p.y < alien.y + alienHeight
+          ) {
+            alien.status = 0;
           p.status = 0;
           if (alien.isSquid) {
             score += 50;
@@ -828,7 +837,8 @@ function update() {
           }
           explosionSound.play();
         }
-      });
+        }
+      }
 
       // Player projectile vs UFO
       if (
@@ -922,7 +932,13 @@ function update() {
     }
   });
 
-  if (aliens.flat().filter((a) => a.status === 1).length <= 10) {
+  let activeAliens = 0;
+  for (let c = 0; c < alienColumnCount; c++) {
+    for (let r = 0; r < alienRowCount; r++) {
+      if (aliens[c][r].status === 1) activeAliens++;
+    }
+  }
+  if (activeAliens <= 10) {
     level++;
     resetAliensForNextLevel();
   }
@@ -1165,24 +1181,27 @@ function draw() {
     }
   });
 
-  aliens.flat().forEach((alien) => {
-    if (alien.status === 1) {
-      if (alien.isSquid) {
-        drawPixelArt(SQUID_SPRITE, alien.x, alien.y, colors.squid, PIXEL_SIZE);
-      } else {
-        let sprite;
-        const isDancing = Math.floor(animationFrame / 30) % 2 === 0;
-        if (alien.type === 1) {
-          sprite = isDancing ? ALIEN_SPRITE_1_DANCE : ALIEN_SPRITE_1;
-        } else if (alien.type === 2) {
-          sprite = isDancing ? ALIEN_SPRITE_2_DANCE : ALIEN_SPRITE_2;
+  for (let c = 0; c < alienColumnCount; c++) {
+    for (let r = 0; r < alienRowCount; r++) {
+      const alien = aliens[c][r];
+      if (alien.status === 1) {
+        if (alien.isSquid) {
+          drawPixelArt(SQUID_SPRITE, alien.x, alien.y, colors.squid, PIXEL_SIZE);
         } else {
-          sprite = isDancing ? ALIEN_SPRITE_3_DANCE : ALIEN_SPRITE_3;
+          let sprite;
+          const isDancing = Math.floor(animationFrame / 30) % 2 === 0;
+          if (alien.type === 1) {
+            sprite = isDancing ? ALIEN_SPRITE_1_DANCE : ALIEN_SPRITE_1;
+          } else if (alien.type === 2) {
+            sprite = isDancing ? ALIEN_SPRITE_2_DANCE : ALIEN_SPRITE_2;
+          } else {
+            sprite = isDancing ? ALIEN_SPRITE_3_DANCE : ALIEN_SPRITE_3;
+          }
+          drawPixelArt(sprite, alien.x, alien.y, colors.alien, PIXEL_SIZE);
         }
-        drawPixelArt(sprite, alien.x, alien.y, colors.alien, PIXEL_SIZE);
       }
     }
-  });
+  }
 
   bunkers.forEach((bunker) => {
     ctx.fillStyle = colors.bunker;
