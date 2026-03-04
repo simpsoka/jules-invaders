@@ -215,6 +215,17 @@ function updateColorsForLevel(level) {
 }
 
 // --- Game variables ---
+function arraysEqual(a, b) {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (a.length !== b.length) return false;
+
+  for (let i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
 const konamiCode = [
   "ArrowUp",
   "ArrowUp",
@@ -369,7 +380,9 @@ function keyDown(e) {
     userInputSequence.shift();
   }
 
-  if (JSON.stringify(userInputSequence) === JSON.stringify(konamiCode)) {
+  // Optimization: use linear array comparison instead of JSON.stringify to prevent
+  // unnecessary string allocations every time a key is pressed.
+  if (arraysEqual(userInputSequence, konamiCode)) {
     squidStormActive = true;
     squidStormMessageTimer = 120; // 2 seconds at 60fps
     squidStormSound.play();
