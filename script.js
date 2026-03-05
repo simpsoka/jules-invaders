@@ -214,6 +214,15 @@ function updateColorsForLevel(level) {
   );
 }
 
+// --- Utility Functions ---
+function arraysEqual(a, b) {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
 // --- Game variables ---
 const konamiCode = [
   "ArrowUp",
@@ -369,7 +378,7 @@ function keyDown(e) {
     userInputSequence.shift();
   }
 
-  if (JSON.stringify(userInputSequence) === JSON.stringify(konamiCode)) {
+  if (arraysEqual(userInputSequence, konamiCode)) {
     squidStormActive = true;
     squidStormMessageTimer = 120; // 2 seconds at 60fps
     squidStormSound.play();
@@ -909,8 +918,7 @@ function update() {
   }
 
   // Projectiles vs Bunkers
-  const allProjectiles = [...playerProjectiles, ...alienProjectiles];
-  allProjectiles.forEach((p) => {
+  const checkBunkerCollision = (p) => {
     if (p.status === 1) {
       bunkers.forEach((bunker) => {
         const blockWidth = PIXEL_SIZE * 2;
@@ -930,7 +938,10 @@ function update() {
         }
       });
     }
-  });
+  };
+
+  playerProjectiles.forEach(checkBunkerCollision);
+  alienProjectiles.forEach(checkBunkerCollision);
 
   let activeAliens = 0;
   for (let c = 0; c < alienColumnCount; c++) {
