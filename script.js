@@ -1384,6 +1384,14 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // SECURITY: Mitigate clickjacking (UI redressing) vulnerabilities.
+  // Since the application is static and relies on <meta> tags for CSP, the 'frame-ancestors'
+  // directive is ignored by browsers. Client-side framebusting is required to ensure
+  // the game cannot be embedded in an iframe on a malicious site.
+  if (window.top !== window.self) {
+    window.top.location = window.self.location;
+  }
+
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
