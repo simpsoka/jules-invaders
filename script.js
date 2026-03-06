@@ -909,28 +909,35 @@ function update() {
   }
 
   // Projectiles vs Bunkers
-  const allProjectiles = [...playerProjectiles, ...alienProjectiles];
-  allProjectiles.forEach((p) => {
-    if (p.status === 1) {
-      bunkers.forEach((bunker) => {
-        const blockWidth = PIXEL_SIZE * 2;
-        const blockHeight = PIXEL_SIZE * 2;
-        if (
-          p.x > bunker.x &&
-          p.x < bunker.x + bunkerWidth &&
-          p.y > bunker.y &&
-          p.y < bunker.y + bunkerHeight
-        ) {
-          const gridX = Math.floor((p.x - bunker.x) / blockWidth);
-          const gridY = Math.floor((p.y - bunker.y) / blockHeight);
-          if (bunker.grid[gridY] && bunker.grid[gridY][gridX] === 1) {
-            bunker.grid[gridY][gridX] = 0; // Destroy block
-            p.status = 0; // Deactivate projectile
+  // Optimization: Zero-allocation iteration over projectiles avoiding spread and forEach
+  const checkBunkerCollisions = (projectiles) => {
+    const blockWidth = PIXEL_SIZE * 2;
+    const blockHeight = PIXEL_SIZE * 2;
+    for (let i = 0; i < projectiles.length; i++) {
+      const p = projectiles[i];
+      if (p.status === 1) {
+        for (let j = 0; j < bunkers.length; j++) {
+          const bunker = bunkers[j];
+          if (
+            p.x > bunker.x &&
+            p.x < bunker.x + bunkerWidth &&
+            p.y > bunker.y &&
+            p.y < bunker.y + bunkerHeight
+          ) {
+            const gridX = Math.floor((p.x - bunker.x) / blockWidth);
+            const gridY = Math.floor((p.y - bunker.y) / blockHeight);
+            if (bunker.grid[gridY] && bunker.grid[gridY][gridX] === 1) {
+              bunker.grid[gridY][gridX] = 0; // Destroy block
+              p.status = 0; // Deactivate projectile
+              break; // Early return: projectile already destroyed
+            }
           }
         }
-      });
+      }
     }
-  });
+  };
+  checkBunkerCollisions(playerProjectiles);
+  checkBunkerCollisions(alienProjectiles);
 
   let activeAliens = 0;
   for (let c = 0; c < alienColumnCount; c++) {
