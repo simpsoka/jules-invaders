@@ -1,3 +1,10 @@
+// SECURITY: Framebusting logic to mitigate clickjacking (UI redressing) vulnerabilities.
+// Since CSP 'frame-ancestors' cannot be enforced via <meta> tags, we use client-side logic to ensure
+// the application is not embedded within an iframe, protecting users from unintended interactions.
+if (window.top !== window.self) {
+  window.top.location = window.self.location;
+}
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const playAgainBtn = document.getElementById("playAgainBtn");
