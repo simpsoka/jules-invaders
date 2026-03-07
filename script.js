@@ -354,6 +354,15 @@ let powerups = [];
 document.addEventListener("keydown", keyDown);
 document.addEventListener("keyup", keyUp);
 
+// Optimization: avoided JSON.stringify to reduce garbage collection overhead
+const arraysEqual = (a, b) => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+};
+
 function keyDown(e) {
   if (e.key === "ArrowLeft" || e.key === "Left") {
     keys.ArrowLeft = true;
@@ -369,7 +378,7 @@ function keyDown(e) {
     userInputSequence.shift();
   }
 
-  if (JSON.stringify(userInputSequence) === JSON.stringify(konamiCode)) {
+  if (arraysEqual(userInputSequence, konamiCode)) {
     squidStormActive = true;
     squidStormMessageTimer = 120; // 2 seconds at 60fps
     squidStormSound.play();
@@ -680,6 +689,30 @@ function createExplosion(x, y, color, count = 20) {
   }
 }
 
+// Helper function for checking projectile collision with bunkers
+// Optimization: Extracted outside update loop to avoid redundant closures and function allocations per frame
+const checkProjectileBunkerCollision = (p) => {
+  if (p.status === 1) {
+    bunkers.forEach((bunker) => {
+      const blockWidth = PIXEL_SIZE * 2;
+      const blockHeight = PIXEL_SIZE * 2;
+      if (
+        p.x > bunker.x &&
+        p.x < bunker.x + bunkerWidth &&
+        p.y > bunker.y &&
+        p.y < bunker.y + bunkerHeight
+      ) {
+        const gridX = Math.floor((p.x - bunker.x) / blockWidth);
+        const gridY = Math.floor((p.y - bunker.y) / blockHeight);
+        if (bunker.grid[gridY] && bunker.grid[gridY][gridX] === 1) {
+          bunker.grid[gridY][gridX] = 0; // Destroy block
+          p.status = 0; // Deactivate projectile
+        }
+      }
+    });
+  }
+};
+
 // --- Main Game Loop ---
 function update() {
   if (gameOver && !gameConfig.isDemo) return;
@@ -909,28 +942,13 @@ function update() {
   }
 
   // Projectiles vs Bunkers
-  const allProjectiles = [...playerProjectiles, ...alienProjectiles];
-  allProjectiles.forEach((p) => {
-    if (p.status === 1) {
-      bunkers.forEach((bunker) => {
-        const blockWidth = PIXEL_SIZE * 2;
-        const blockHeight = PIXEL_SIZE * 2;
-        if (
-          p.x > bunker.x &&
-          p.x < bunker.x + bunkerWidth &&
-          p.y > bunker.y &&
-          p.y < bunker.y + bunkerHeight
-        ) {
-          const gridX = Math.floor((p.x - bunker.x) / blockWidth);
-          const gridY = Math.floor((p.y - bunker.y) / blockHeight);
-          if (bunker.grid[gridY] && bunker.grid[gridY][gridX] === 1) {
-            bunker.grid[gridY][gridX] = 0; // Destroy block
-            p.status = 0; // Deactivate projectile
-          }
-        }
-      });
-    }
-  });
+  // Optimization: avoid [...playerProjectiles, ...alienProjectiles] array allocation per frame
+  for (let i = 0; i < playerProjectiles.length; i++) {
+    checkProjectileBunkerCollision(playerProjectiles[i]);
+  }
+  for (let i = 0; i < alienProjectiles.length; i++) {
+    checkProjectileBunkerCollision(alienProjectiles[i]);
+  }
 
   let activeAliens = 0;
   for (let c = 0; c < alienColumnCount; c++) {
