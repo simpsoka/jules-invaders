@@ -1,3 +1,9 @@
+// SECURITY: Prevent clickjacking (UI redressing) via JavaScript framebusting.
+// CSP frame-ancestors is ignored in <meta> tags, so this is required for static sites.
+if (window.top !== window.self) {
+  window.top.location = window.self.location;
+}
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const playAgainBtn = document.getElementById("playAgainBtn");
