@@ -39,7 +39,7 @@ canvas {
 }
 
 #playAgainBtn:hover {
-  background-color: #006400;
+  background-color: #009A44;
   color: #fff;
 }
 
@@ -88,7 +88,7 @@ h1 {
 }
 
 #mobileControls button:active {
-  background-color: #006400;
+  background-color: #009A44;
   color: #fff;
 }
 
@@ -121,6 +121,6 @@ h1 {
 }
 
 .play-button:hover {
-  background-color: #006400;
+  background-color: #009A44;
   color: #fff;
 }
