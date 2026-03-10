@@ -301,6 +301,7 @@ const benevolentUfo = {
 // Aliens
 const alienRowCount = 5;
 const alienColumnCount = 11;
+const SQUID_SPAWN_CHANCE = 1 / 15;
 const alienWidth = ALIEN_SPRITE_2[0].length * PIXEL_SIZE;
 const alienHeight = ALIEN_SPRITE_2.length * PIXEL_SIZE;
 const alienPadding = 15;
@@ -317,7 +318,7 @@ for (let c = 0; c < alienColumnCount; c++) {
     if (r === 0) alienType = 1;
     else if (r < 3) alienType = 2;
     else alienType = 3;
-    const isSquid = Math.random() < 1 / 15;
+    const isSquid = Math.random() < SQUID_SPAWN_CHANCE;
     aliens[c][r] = {
       x: alienX,
       y: alienY,
@@ -430,7 +431,7 @@ function resetGame() {
       if (r === 0) alienType = 1;
       else if (r < 3) alienType = 2;
       else alienType = 3;
-      const isSquid = Math.random() < 1 / 15;
+      const isSquid = Math.random() < SQUID_SPAWN_CHANCE;
       aliens[c][r] = {
         x: alienX,
         y: alienY,
@@ -493,7 +494,7 @@ function resetAliensForNextLevel() {
       if (r === 0) alienType = 1;
       else if (r < 3) alienType = 2;
       else alienType = 3;
-      const isSquid = Math.random() < 1 / 15;
+      const isSquid = Math.random() < SQUID_SPAWN_CHANCE;
       aliens[c][r] = {
         x: alienX,
         y: alienY,
