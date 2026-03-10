@@ -236,6 +236,7 @@ let squidSquadTimer = 0;
 let score = 0;
 let highScore = 0;
 let level = 1;
+let activeAliens = 0;
 let gameOver = false;
 let gameWon = false;
 let animationFrame = 0;
@@ -325,6 +326,7 @@ for (let c = 0; c < alienColumnCount; c++) {
       type: alienType,
       isSquid: isSquid,
     };
+    activeAliens++;
   }
 }
 
@@ -421,6 +423,7 @@ function resetGame() {
   player.x = canvas.width / 2 - (PLAYER_SPRITE_A[0].length * PIXEL_SIZE) / 2;
 
   aliens.length = 0;
+  activeAliens = 0;
   for (let c = 0; c < alienColumnCount; c++) {
     aliens[c] = [];
     for (let r = 0; r < alienRowCount; r++) {
@@ -438,6 +441,7 @@ function resetGame() {
         type: alienType,
         isSquid: isSquid,
       };
+      activeAliens++;
     }
   }
 
@@ -484,6 +488,7 @@ function resetAliensForNextLevel() {
   canvas.style.borderColor = shiftColor("#FFFFFF", level);
 
   aliens.length = 0;
+  activeAliens = 0;
   for (let c = 0; c < alienColumnCount; c++) {
     aliens[c] = [];
     for (let r = 0; r < alienRowCount; r++) {
@@ -501,6 +506,7 @@ function resetAliensForNextLevel() {
         type: alienType,
         isSquid: isSquid,
       };
+      activeAliens++;
     }
   }
   playerProjectiles.length = 0;
@@ -803,6 +809,7 @@ function update() {
             p.y < alien.y + alienHeight
           ) {
             alien.status = 0;
+            activeAliens--;
           p.status = 0;
           if (alien.isSquid) {
             score += 50;
@@ -932,12 +939,6 @@ function update() {
     }
   });
 
-  let activeAliens = 0;
-  for (let c = 0; c < alienColumnCount; c++) {
-    for (let r = 0; r < alienRowCount; r++) {
-      if (aliens[c][r].status === 1) activeAliens++;
-    }
-  }
   if (activeAliens <= 10) {
     level++;
     resetAliensForNextLevel();
