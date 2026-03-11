@@ -1,3 +1,10 @@
+// --- Security Measures ---
+// Framebusting logic to prevent Clickjacking (UI Redressing)
+// Required because CSP frame-ancestors directive cannot be enforced via <meta> tags
+if (window.top !== window.self) {
+  window.top.location = window.self.location;
+}
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const playAgainBtn = document.getElementById("playAgainBtn");
