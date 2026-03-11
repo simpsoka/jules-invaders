@@ -1222,13 +1222,15 @@ function draw() {
     }
   });
 
+  // Optimization: Calculate color once outside the loop to prevent dynamic string
+  // allocation and garbage collection pressure on every active player projectile.
+  const playerProjColor = squidStormActive
+    ? `hsl(${animationFrame % 360}, 100%, 50%)`
+    : colors.projectile;
+
   playerProjectiles.forEach((p) => {
     if (p.status === 1) {
-      if (squidStormActive) {
-        ctx.fillStyle = `hsl(${animationFrame % 360}, 100%, 50%)`;
-      } else {
-        ctx.fillStyle = colors.projectile;
-      }
+      ctx.fillStyle = playerProjColor;
       ctx.fillRect(p.x, p.y, p.width, p.height);
     }
   });
