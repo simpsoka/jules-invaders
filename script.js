@@ -309,25 +309,34 @@ const alienOffsetTop = 50;
 const alienOffsetLeft = 30;
 
 const aliens = [];
-for (let c = 0; c < alienColumnCount; c++) {
-  aliens[c] = [];
-  for (let r = 0; r < alienRowCount; r++) {
-    const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
-    const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
-    let alienType;
-    if (r === 0) alienType = 1;
-    else if (r < 3) alienType = 2;
-    else alienType = 3;
-    const isSquid = Math.random() < SQUID_SPAWN_CHANCE;
-    aliens[c][r] = {
-      x: alienX,
-      y: alienY,
-      status: 1,
-      type: alienType,
-      isSquid: isSquid,
-    };
+let activeAliens = 0;
+
+function generateAliens() {
+  aliens.length = 0;
+  activeAliens = 0;
+  for (let c = 0; c < alienColumnCount; c++) {
+    aliens[c] = [];
+    for (let r = 0; r < alienRowCount; r++) {
+      const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
+      const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
+      let alienType;
+      if (r === 0) alienType = 1;
+      else if (r < 3) alienType = 2;
+      else alienType = 3;
+      const isSquid = Math.random() < SQUID_SPAWN_CHANCE;
+      aliens[c][r] = {
+        x: alienX,
+        y: alienY,
+        status: 1,
+        type: alienType,
+        isSquid: isSquid,
+      };
+      activeAliens++;
+    }
   }
 }
+
+generateAliens();
 
 // Bunkers
 const bunkerCount = 3;
@@ -421,26 +430,7 @@ function resetGame() {
 
   player.x = canvas.width / 2 - (PLAYER_SPRITE_A[0].length * PIXEL_SIZE) / 2;
 
-  aliens.length = 0;
-  for (let c = 0; c < alienColumnCount; c++) {
-    aliens[c] = [];
-    for (let r = 0; r < alienRowCount; r++) {
-      const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
-      const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
-      let alienType;
-      if (r === 0) alienType = 1;
-      else if (r < 3) alienType = 2;
-      else alienType = 3;
-      const isSquid = Math.random() < SQUID_SPAWN_CHANCE;
-      aliens[c][r] = {
-        x: alienX,
-        y: alienY,
-        status: 1,
-        type: alienType,
-        isSquid: isSquid,
-      };
-    }
-  }
+  generateAliens();
 
   bunkers.length = 0;
   for (let i = 0; i < bunkerCount; i++) {
@@ -484,26 +474,7 @@ function resetAliensForNextLevel() {
   colors.ground = shiftColor("#FF1493", level);
   canvas.style.borderColor = shiftColor("#FFFFFF", level);
 
-  aliens.length = 0;
-  for (let c = 0; c < alienColumnCount; c++) {
-    aliens[c] = [];
-    for (let r = 0; r < alienRowCount; r++) {
-      const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
-      const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
-      let alienType;
-      if (r === 0) alienType = 1;
-      else if (r < 3) alienType = 2;
-      else alienType = 3;
-      const isSquid = Math.random() < SQUID_SPAWN_CHANCE;
-      aliens[c][r] = {
-        x: alienX,
-        y: alienY,
-        status: 1,
-        type: alienType,
-        isSquid: isSquid,
-      };
-    }
-  }
+  generateAliens();
   playerProjectiles.length = 0;
   alienProjectiles.length = 0;
   explosions.length = 0;
@@ -804,6 +775,7 @@ function update() {
             p.y < alien.y + alienHeight
           ) {
             alien.status = 0;
+            activeAliens--; // O(1) optimization: track active aliens decrementally
           p.status = 0;
           if (alien.isSquid) {
             score += 50;
@@ -933,12 +905,7 @@ function update() {
     }
   });
 
-  let activeAliens = 0;
-  for (let c = 0; c < alienColumnCount; c++) {
-    for (let r = 0; r < alienRowCount; r++) {
-      if (aliens[c][r].status === 1) activeAliens++;
-    }
-  }
+  // O(1) optimization: using global activeAliens instead of frame-by-frame loop counting
   if (activeAliens <= 10) {
     level++;
     resetAliensForNextLevel();
