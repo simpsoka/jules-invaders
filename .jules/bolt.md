@@ -5,3 +5,7 @@
 ## 2024-05-18 - [Optimize High-Frequency Loops by Removing Array.flat()]
 **Learning:** In the game's `update()` loop, `aliens.flat().forEach(...)` and `aliens.flat().filter(...)` were used multiple times per frame. Calling `.flat()` creates a new array every time, resulting in significant garbage collection pressure and CPU overhead (O(N) operations) during a high-frequency (60fps) update loop.
 **Action:** Replaced instances of `aliens.flat()` with nested `for` loops iterating over columns and rows. Always prefer zero-allocation iteration methods (like nested `for` loops or index tracking) over methods that allocate new arrays (like `.flat()`, `.filter()`, or `.map()`) in critical rendering paths.
+
+## 2024-05-18 - [Optimize High-Frequency Counting loops using O(1) state variables]
+**Learning:** In the game's `update()` loop, the active aliens count was derived every frame using a nested loop (`O(N*M)`) iterating over the `aliens` grid. As this count is only modified during alien spawning and collision detection, recalculating it every frame creates unnecessary CPU overhead.
+**Action:** Replaced the frame-by-frame counting loops with an `activeAliens` counter initialized during alien generation, and decremented upon collision. Tracking state incrementally brings the condition checking down to `O(1)`. This pattern can be applied to any high-frequency path checking dynamic element counts where creation/deletion occurs less frequently than render updates.
