@@ -43,6 +43,11 @@ canvas {
   color: #fff;
 }
 
+#playAgainBtn:focus-visible {
+  outline: 2px dashed #FFFFFF;
+  outline-offset: 4px;
+}
+
 h1 {
   display: none;
 }
@@ -92,6 +97,11 @@ h1 {
   color: #fff;
 }
 
+#mobileControls button:focus-visible {
+  outline: 2px dashed #FFFFFF;
+  outline-offset: 4px;
+}
+
 .overlay {
   position: absolute;
   top: 0;
@@ -123,4 +133,9 @@ h1 {
 .play-button:hover {
   background-color: #006400;
   color: #fff;
+}
+
+.play-button:focus-visible {
+  outline: 2px dashed #FFFFFF;
+  outline-offset: 4px;
 }
