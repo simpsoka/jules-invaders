@@ -1,3 +1,9 @@
+// --- Security: Framebusting to prevent Clickjacking ---
+// Necessary because CSP frame-ancestors is ignored when delivered via <meta> tags
+if (window.top !== window.self) {
+  window.top.location = window.self.location;
+}
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const playAgainBtn = document.getElementById("playAgainBtn");
