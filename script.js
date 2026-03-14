@@ -910,12 +910,16 @@ function update() {
   }
 
   // Projectiles vs Bunkers
-  const allProjectiles = [...playerProjectiles, ...alienProjectiles];
-  allProjectiles.forEach((p) => {
+  const blockWidth = PIXEL_SIZE * 2;
+  const blockHeight = PIXEL_SIZE * 2;
+
+  // Optimized: Use explicit for loops instead of array spreading and forEach
+  // This prevents allocating a new array every frame and allows early loop termination (break)
+  for (let i = 0; i < playerProjectiles.length; i++) {
+    const p = playerProjectiles[i];
     if (p.status === 1) {
-      bunkers.forEach((bunker) => {
-        const blockWidth = PIXEL_SIZE * 2;
-        const blockHeight = PIXEL_SIZE * 2;
+      for (let j = 0; j < bunkers.length; j++) {
+        const bunker = bunkers[j];
         if (
           p.x > bunker.x &&
           p.x < bunker.x + bunkerWidth &&
@@ -927,11 +931,35 @@ function update() {
           if (bunker.grid[gridY] && bunker.grid[gridY][gridX] === 1) {
             bunker.grid[gridY][gridX] = 0; // Destroy block
             p.status = 0; // Deactivate projectile
+            break; // Projectile is destroyed, stop checking other bunkers
           }
         }
-      });
+      }
     }
-  });
+  }
+
+  for (let i = 0; i < alienProjectiles.length; i++) {
+    const p = alienProjectiles[i];
+    if (p.status === 1) {
+      for (let j = 0; j < bunkers.length; j++) {
+        const bunker = bunkers[j];
+        if (
+          p.x > bunker.x &&
+          p.x < bunker.x + bunkerWidth &&
+          p.y > bunker.y &&
+          p.y < bunker.y + bunkerHeight
+        ) {
+          const gridX = Math.floor((p.x - bunker.x) / blockWidth);
+          const gridY = Math.floor((p.y - bunker.y) / blockHeight);
+          if (bunker.grid[gridY] && bunker.grid[gridY][gridX] === 1) {
+            bunker.grid[gridY][gridX] = 0; // Destroy block
+            p.status = 0; // Deactivate projectile
+            break; // Projectile is destroyed, stop checking other bunkers
+          }
+        }
+      }
+    }
+  }
 
   let activeAliens = 0;
   for (let c = 0; c < alienColumnCount; c++) {
