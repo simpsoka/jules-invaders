@@ -14,6 +14,11 @@ body {
   text-align: center;
 }
 
+button:focus-visible, a:focus-visible {
+  outline: 2px dashed #FFFFFF;
+  outline-offset: 4px;
+}
+
 canvas {
   background-color: #000;
   border: 2px solid #FFD700;
