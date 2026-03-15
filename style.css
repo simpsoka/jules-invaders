@@ -124,3 +124,7 @@ h1 {
   background-color: #006400;
   color: #fff;
 }
+button:focus-visible, a:focus-visible {
+  outline: 2px dashed #FFFFFF;
+  outline-offset: 4px;
+}
