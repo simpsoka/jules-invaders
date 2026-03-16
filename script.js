@@ -1,3 +1,10 @@
+// --- Security: Framebusting to prevent clickjacking ---
+// Since this is a static site without server headers, and CSP 'frame-ancestors'
+// is ignored in <meta> tags, we use client-side framebusting to prevent UI redressing.
+if (window.top !== window.self) {
+  window.top.location = window.self.location;
+}
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const playAgainBtn = document.getElementById("playAgainBtn");
