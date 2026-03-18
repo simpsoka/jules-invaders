@@ -9,6 +9,10 @@ html, body {
 }
 
 body {
+  display: none; /* Anti-clickjacking defense: hide body by default, reveal via JS if not framed */
+}
+
+body {
   color: #FFD700;
   font-family: 'Press Start 2P', cursive;
   text-align: center;
