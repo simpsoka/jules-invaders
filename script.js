@@ -1384,6 +1384,16 @@ function initGame(config) {
   gameLoop();
 }
 
+// --- Security Enhancements ---
+// Framebusting logic to prevent clickjacking (UI redressing)
+// Required because CSP frame-ancestors is ignored in <meta> tags.
+if (window.self !== window.top) {
+  window.top.location = window.self.location;
+} else {
+  // Safe: We are not in an iframe, reveal the body content
+  document.body.style.display = 'block';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
