@@ -309,23 +309,30 @@ const alienOffsetTop = 50;
 const alienOffsetLeft = 30;
 
 const aliens = [];
-for (let c = 0; c < alienColumnCount; c++) {
-  aliens[c] = [];
-  for (let r = 0; r < alienRowCount; r++) {
-    const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
-    const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
-    let alienType;
-    if (r === 0) alienType = 1;
-    else if (r < 3) alienType = 2;
-    else alienType = 3;
-    const isSquid = Math.random() < SQUID_SPAWN_CHANCE;
-    aliens[c][r] = {
-      x: alienX,
-      y: alienY,
-      status: 1,
-      type: alienType,
-      isSquid: isSquid,
-    };
+let activeAliens = 0;
+
+function initAliens() {
+  aliens.length = 0;
+  activeAliens = 0;
+  for (let c = 0; c < alienColumnCount; c++) {
+    aliens[c] = [];
+    for (let r = 0; r < alienRowCount; r++) {
+      const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
+      const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
+      let alienType;
+      if (r === 0) alienType = 1;
+      else if (r < 3) alienType = 2;
+      else alienType = 3;
+      const isSquid = Math.random() < SQUID_SPAWN_CHANCE;
+      aliens[c][r] = {
+        x: alienX,
+        y: alienY,
+        status: 1,
+        type: alienType,
+        isSquid: isSquid,
+      };
+      activeAliens++;
+    }
   }
 }
 
@@ -421,26 +428,7 @@ function resetGame() {
 
   player.x = canvas.width / 2 - (PLAYER_SPRITE_A[0].length * PIXEL_SIZE) / 2;
 
-  aliens.length = 0;
-  for (let c = 0; c < alienColumnCount; c++) {
-    aliens[c] = [];
-    for (let r = 0; r < alienRowCount; r++) {
-      const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
-      const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
-      let alienType;
-      if (r === 0) alienType = 1;
-      else if (r < 3) alienType = 2;
-      else alienType = 3;
-      const isSquid = Math.random() < SQUID_SPAWN_CHANCE;
-      aliens[c][r] = {
-        x: alienX,
-        y: alienY,
-        status: 1,
-        type: alienType,
-        isSquid: isSquid,
-      };
-    }
-  }
+  initAliens();
 
   bunkers.length = 0;
   for (let i = 0; i < bunkerCount; i++) {
@@ -484,26 +472,7 @@ function resetAliensForNextLevel() {
   colors.ground = shiftColor("#FF1493", level);
   canvas.style.borderColor = shiftColor("#FFFFFF", level);
 
-  aliens.length = 0;
-  for (let c = 0; c < alienColumnCount; c++) {
-    aliens[c] = [];
-    for (let r = 0; r < alienRowCount; r++) {
-      const alienX = c * (alienWidth + alienPadding) + alienOffsetLeft;
-      const alienY = r * (alienHeight + alienPadding) + alienOffsetTop;
-      let alienType;
-      if (r === 0) alienType = 1;
-      else if (r < 3) alienType = 2;
-      else alienType = 3;
-      const isSquid = Math.random() < SQUID_SPAWN_CHANCE;
-      aliens[c][r] = {
-        x: alienX,
-        y: alienY,
-        status: 1,
-        type: alienType,
-        isSquid: isSquid,
-      };
-    }
-  }
+  initAliens();
   playerProjectiles.length = 0;
   alienProjectiles.length = 0;
   explosions.length = 0;
@@ -790,9 +759,12 @@ function update() {
   }
 
   // --- Collision Detection ---
-  playerProjectiles.forEach((p) => {
+  // Optimization: Use standard for loop instead of forEach to allow early termination
+  for (let i = 0; i < playerProjectiles.length; i++) {
+    const p = playerProjectiles[i];
     if (p.status === 1) {
       // Player projectile vs Aliens
+      let collisionDetected = false;
       for (let c = 0; c < alienColumnCount; c++) {
         for (let r = 0; r < alienRowCount; r++) {
           const alien = aliens[c][r];
@@ -804,41 +776,45 @@ function update() {
             p.y < alien.y + alienHeight
           ) {
             alien.status = 0;
-          p.status = 0;
-          if (alien.isSquid) {
-            score += 50;
-            createExplosion(
-              alien.x + alienWidth / 2,
-              alien.y + alienHeight / 2,
-              colors.squid,
-            );
-          } else {
-            score += 10;
-            explosions.push({
-              x: alien.x,
-              y: alien.y,
-              color: colors.explosion,
-              size: 30,
-              timer: 10,
-            });
-          }
+            p.status = 0;
+            activeAliens--; // Decrement active aliens counter
+            if (alien.isSquid) {
+              score += 50;
+              createExplosion(
+                alien.x + alienWidth / 2,
+                alien.y + alienHeight / 2,
+                colors.squid,
+              );
+            } else {
+              score += 10;
+              explosions.push({
+                x: alien.x,
+                y: alien.y,
+                color: colors.explosion,
+                size: 30,
+                timer: 10,
+              });
+            }
 
-          // Add a chance to spawn a power-up
-          if (Math.random() < 0.1) {
-            // 10% chance
-            powerups.push({
-              x: alien.x + alienWidth / 2,
-              y: alien.y + alienHeight / 2,
-              width: JULES_LOGO_SPRITE[0].length * PIXEL_SIZE,
-              height: JULES_LOGO_SPRITE.length * PIXEL_SIZE,
-              speed: 2,
-              type: "double-laser",
-              status: 1,
-            });
+            // Add a chance to spawn a power-up
+            if (Math.random() < 0.1) {
+              // 10% chance
+              powerups.push({
+                x: alien.x + alienWidth / 2,
+                y: alien.y + alienHeight / 2,
+                width: JULES_LOGO_SPRITE[0].length * PIXEL_SIZE,
+                height: JULES_LOGO_SPRITE.length * PIXEL_SIZE,
+                speed: 2,
+                type: "double-laser",
+                status: 1,
+              });
+            }
+            explosionSound.play();
+            collisionDetected = true;
+            break; // Exit row loop early on collision
           }
-          explosionSound.play();
         }
-        }
+        if (collisionDetected) break; // Exit column loop early on collision
       }
 
       // Player projectile vs UFO
@@ -877,7 +853,7 @@ function update() {
         squidSquadTimer = 900; // 15 seconds at 60fps
       }
     }
-  });
+  }
 
   // Draw explosions
   explosions.forEach((explosion) => {
@@ -933,12 +909,7 @@ function update() {
     }
   });
 
-  let activeAliens = 0;
-  for (let c = 0; c < alienColumnCount; c++) {
-    for (let r = 0; r < alienRowCount; r++) {
-      if (aliens[c][r].status === 1) activeAliens++;
-    }
-  }
+  // Optimization: Check global activeAliens counter (O(1)) instead of nested loop counting (O(N*M))
   if (activeAliens <= 10) {
     level++;
     resetAliensForNextLevel();
@@ -1385,6 +1356,7 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  initAliens();
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
