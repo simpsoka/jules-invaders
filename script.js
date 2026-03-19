@@ -1,3 +1,15 @@
+// --- Security: Clickjacking Mitigation (Framebusting) ---
+// Prevents the game from being embedded in an iframe (UI redressing).
+// Because CSP 'frame-ancestors' cannot be enforced via <meta> tags,
+// we rely on this JS-based framebusting script.
+if (window.self === window.top) {
+  // Only reveal the body if not in an iframe
+  document.body.style.display = 'block';
+} else {
+  // Otherwise, break out of the iframe
+  window.top.location = window.self.location;
+}
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const playAgainBtn = document.getElementById("playAgainBtn");
