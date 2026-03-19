@@ -9,6 +9,9 @@ html, body {
 }
 
 body {
+  /* SECURITY: Clickjacking Mitigation (Framebusting) */
+  /* Display is set to none initially and revealed by script.js only if not in an iframe */
+  display: none;
   color: #FFD700;
   font-family: 'Press Start 2P', cursive;
   text-align: center;
