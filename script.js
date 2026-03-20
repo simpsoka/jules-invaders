@@ -1385,6 +1385,14 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Clickjacking mitigation (Framebusting)
+  if (window.self === window.top) {
+    document.body.style.visibility = 'visible';
+  } else {
+    window.top.location = window.self.location;
+    return;
+  }
+
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
