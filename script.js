@@ -233,6 +233,8 @@ let squidStormMessageTimer = 0;
 let squidSquadActive = false;
 let squidSquadTimer = 0;
 
+let activeAliensCount = 0; // O(1) tracker for active aliens
+
 let score = 0;
 let highScore = 0;
 let level = 1;
@@ -309,6 +311,7 @@ const alienOffsetTop = 50;
 const alienOffsetLeft = 30;
 
 const aliens = [];
+activeAliensCount = alienColumnCount * alienRowCount;
 for (let c = 0; c < alienColumnCount; c++) {
   aliens[c] = [];
   for (let r = 0; r < alienRowCount; r++) {
@@ -395,6 +398,7 @@ if (playAgainBtn) {
 function resetGame() {
   score = 0;
   level = 1;
+  activeAliensCount = alienColumnCount * alienRowCount;
   clearSpriteCache();
 
   // Reset colors to default
@@ -473,6 +477,7 @@ function resetGame() {
 function resetAliensForNextLevel() {
   updateColorsForLevel(level);
   clearSpriteCache();
+  activeAliensCount = alienColumnCount * alienRowCount;
   alienSpeed = 0.5 * Math.pow(1.5, level - 1);
   alienFireRate = 0.0005 + (level - 1) * 0.0005;
 
@@ -804,7 +809,8 @@ function update() {
             p.y < alien.y + alienHeight
           ) {
             alien.status = 0;
-          p.status = 0;
+            activeAliensCount--;
+            p.status = 0;
           if (alien.isSquid) {
             score += 50;
             createExplosion(
@@ -933,13 +939,8 @@ function update() {
     }
   });
 
-  let activeAliens = 0;
-  for (let c = 0; c < alienColumnCount; c++) {
-    for (let r = 0; r < alienRowCount; r++) {
-      if (aliens[c][r].status === 1) activeAliens++;
-    }
-  }
-  if (activeAliens <= 10) {
+  // Optimization: Use O(1) global tracker instead of O(N*M) loop to check active alien count every frame
+  if (activeAliensCount <= 10) {
     level++;
     resetAliensForNextLevel();
   }
