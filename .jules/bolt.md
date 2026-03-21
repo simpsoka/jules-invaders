@@ -5,3 +5,7 @@
 ## 2024-05-18 - [Optimize High-Frequency Loops by Removing Array.flat()]
 **Learning:** In the game's `update()` loop, `aliens.flat().forEach(...)` and `aliens.flat().filter(...)` were used multiple times per frame. Calling `.flat()` creates a new array every time, resulting in significant garbage collection pressure and CPU overhead (O(N) operations) during a high-frequency (60fps) update loop.
 **Action:** Replaced instances of `aliens.flat()` with nested `for` loops iterating over columns and rows. Always prefer zero-allocation iteration methods (like nested `for` loops or index tracking) over methods that allocate new arrays (like `.flat()`, `.filter()`, or `.map()`) in critical rendering paths.
+
+## 2024-05-18 - [Optimize High-Frequency Rendering Loops by Hoisting String Allocation]
+**Learning:** In the game's `draw()` loop, iterating over projectiles involved calculating `ctx.fillStyle` strings like `hsl(...)` and setting them for every active projectile. Repeatedly generating complex strings inside high-frequency render loops (e.g. 60 FPS) leads to noticeable garbage collection pressure and CPU overhead from string allocations.
+**Action:** When working in high-frequency paths like rendering loops, hoist dynamic string calculations (like `hsl()` template literals) and static assignments out of iteration blocks wherever possible. By calculating the style once and using zero-allocation standard `for` loops, rendering performance can significantly improve.
