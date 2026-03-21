@@ -1222,19 +1222,27 @@ function draw() {
     }
   });
 
-  playerProjectiles.forEach((p) => {
+  // Optimization: Calculate dynamic styles outside the loop
+  // This avoids allocating new strings and creating garbage every frame for every projectile
+  const playerProjectileColor = squidStormActive
+    ? `hsl(${animationFrame % 360}, 100%, 50%)`
+    : colors.projectile;
+
+  ctx.fillStyle = playerProjectileColor;
+  for (let i = 0; i < playerProjectiles.length; i++) {
+    const p = playerProjectiles[i];
     if (p.status === 1) {
-      if (squidStormActive) {
-        ctx.fillStyle = `hsl(${animationFrame % 360}, 100%, 50%)`;
-      } else {
-        ctx.fillStyle = colors.projectile;
-      }
       ctx.fillRect(p.x, p.y, p.width, p.height);
     }
-  });
-  alienProjectiles.forEach((p) => {
-    if (p.status === 1) ctx.fillRect(p.x, p.y, p.width, p.height);
-  });
+  }
+
+  ctx.fillStyle = colors.projectile;
+  for (let i = 0; i < alienProjectiles.length; i++) {
+    const p = alienProjectiles[i];
+    if (p.status === 1) {
+      ctx.fillRect(p.x, p.y, p.width, p.height);
+    }
+  }
 
   // Draw Ground Line
   ctx.fillStyle = colors.ground;
