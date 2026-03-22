@@ -681,6 +681,35 @@ function createExplosion(x, y, color, count = 20) {
   }
 }
 
+// --- Collision Helpers ---
+/**
+ * Checks if a given projectile collides with any bunker and updates the bunker state if so.
+ * Optimized for zero-allocation and early loop termination.
+ * @param {Object} p - The projectile to check.
+ * @returns {boolean} - True if a collision occurred, false otherwise.
+ */
+function checkBunkerCollision(p) {
+  const blockWidth = PIXEL_SIZE * 2;
+  const blockHeight = PIXEL_SIZE * 2;
+  for (let i = 0; i < bunkers.length; i++) {
+    const bunker = bunkers[i];
+    if (
+      p.x > bunker.x &&
+      p.x < bunker.x + bunkerWidth &&
+      p.y > bunker.y &&
+      p.y < bunker.y + bunkerHeight
+    ) {
+      const gridX = Math.floor((p.x - bunker.x) / blockWidth);
+      const gridY = Math.floor((p.y - bunker.y) / blockHeight);
+      if (bunker.grid[gridY] && bunker.grid[gridY][gridX] === 1) {
+        bunker.grid[gridY][gridX] = 0; // Destroy block
+        return true; // Collision detected, terminate early
+      }
+    }
+  }
+  return false;
+}
+
 // --- Main Game Loop ---
 function update() {
   if (gameOver && !gameConfig.isDemo) return;
@@ -910,28 +939,19 @@ function update() {
   }
 
   // Projectiles vs Bunkers
-  const allProjectiles = [...playerProjectiles, ...alienProjectiles];
-  allProjectiles.forEach((p) => {
-    if (p.status === 1) {
-      bunkers.forEach((bunker) => {
-        const blockWidth = PIXEL_SIZE * 2;
-        const blockHeight = PIXEL_SIZE * 2;
-        if (
-          p.x > bunker.x &&
-          p.x < bunker.x + bunkerWidth &&
-          p.y > bunker.y &&
-          p.y < bunker.y + bunkerHeight
-        ) {
-          const gridX = Math.floor((p.x - bunker.x) / blockWidth);
-          const gridY = Math.floor((p.y - bunker.y) / blockHeight);
-          if (bunker.grid[gridY] && bunker.grid[gridY][gridX] === 1) {
-            bunker.grid[gridY][gridX] = 0; // Destroy block
-            p.status = 0; // Deactivate projectile
-          }
-        }
-      });
+  for (let i = 0; i < playerProjectiles.length; i++) {
+    const p = playerProjectiles[i];
+    if (p.status === 1 && checkBunkerCollision(p)) {
+      p.status = 0;
     }
-  });
+  }
+
+  for (let i = 0; i < alienProjectiles.length; i++) {
+    const p = alienProjectiles[i];
+    if (p.status === 1 && checkBunkerCollision(p)) {
+      p.status = 0;
+    }
+  }
 
   let activeAliens = 0;
   for (let c = 0; c < alienColumnCount; c++) {
