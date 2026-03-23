@@ -1385,6 +1385,11 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  if (window.self === window.top) {
+    document.body.style.display = 'block';
+  } else {
+    return; // Stop initialization if framed
+  }
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
