@@ -181,6 +181,34 @@ function hslToHex(h, s, l) {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
+// --- Optimization: Projectile Collision ---
+// Defined outside high-frequency update loop for true zero-allocation execution
+// Uses standard for loops to avoid Array.forEach overhead and enable early termination
+function checkBunkerCollision(p) {
+  if (p.status !== 1) return;
+  const blockWidth = PIXEL_SIZE * 2;
+  const blockHeight = PIXEL_SIZE * 2;
+
+  for (let i = 0; i < bunkers.length; i++) {
+    const bunker = bunkers[i];
+    if (
+      p.x > bunker.x &&
+      p.x < bunker.x + bunkerWidth &&
+      p.y > bunker.y &&
+      p.y < bunker.y + bunkerHeight
+    ) {
+      const gridX = Math.floor((p.x - bunker.x) / blockWidth);
+      const gridY = Math.floor((p.y - bunker.y) / blockHeight);
+
+      if (bunker.grid[gridY] && bunker.grid[gridY][gridX] === 1) {
+        bunker.grid[gridY][gridX] = 0; // Destroy block
+        p.status = 0; // Deactivate projectile
+        return; // Early termination on collision
+      }
+    }
+  }
+}
+
 function updateColorsForLevel(level) {
   const hueShift = (level - 1) * 10; // 10 degrees hue shift per level
 
@@ -910,28 +938,13 @@ function update() {
   }
 
   // Projectiles vs Bunkers
-  const allProjectiles = [...playerProjectiles, ...alienProjectiles];
-  allProjectiles.forEach((p) => {
-    if (p.status === 1) {
-      bunkers.forEach((bunker) => {
-        const blockWidth = PIXEL_SIZE * 2;
-        const blockHeight = PIXEL_SIZE * 2;
-        if (
-          p.x > bunker.x &&
-          p.x < bunker.x + bunkerWidth &&
-          p.y > bunker.y &&
-          p.y < bunker.y + bunkerHeight
-        ) {
-          const gridX = Math.floor((p.x - bunker.x) / blockWidth);
-          const gridY = Math.floor((p.y - bunker.y) / blockHeight);
-          if (bunker.grid[gridY] && bunker.grid[gridY][gridX] === 1) {
-            bunker.grid[gridY][gridX] = 0; // Destroy block
-            p.status = 0; // Deactivate projectile
-          }
-        }
-      });
-    }
-  });
+  // Optimization: Zero-allocation iteration instead of [...a, ...b].forEach()
+  for (let i = 0; i < playerProjectiles.length; i++) {
+    checkBunkerCollision(playerProjectiles[i]);
+  }
+  for (let i = 0; i < alienProjectiles.length; i++) {
+    checkBunkerCollision(alienProjectiles[i]);
+  }
 
   let activeAliens = 0;
   for (let c = 0; c < alienColumnCount; c++) {
