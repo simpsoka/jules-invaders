@@ -1,3 +1,12 @@
+// --- Security: Clickjacking Mitigation ---
+if (window.self === window.top) {
+  // Not in an iframe, safe to show
+  document.body.style.display = 'block';
+} else {
+  // In an iframe, break out!
+  window.top.location = window.self.location;
+}
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const playAgainBtn = document.getElementById("playAgainBtn");
