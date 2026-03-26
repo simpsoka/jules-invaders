@@ -1385,6 +1385,11 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // SECURITY: Prevent clickjacking (UI redressing) by enforcing framebusting.
+  // Only reveal the body if the page is loaded directly, not within an iframe.
+  if (window.self === window.top) {
+    document.body.style.display = 'block';
+  }
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
