@@ -9,6 +9,8 @@ html, body {
 }
 
 body {
+  /* SECURITY: Hide body by default to prevent clickjacking (UI redressing) when loaded in an iframe. Revealed by JS if window.self === window.top. */
+  display: none;
   color: #FFD700;
   font-family: 'Press Start 2P', cursive;
   text-align: center;

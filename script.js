@@ -1385,6 +1385,14 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // SECURITY: Client-side framebusting to mitigate clickjacking
+  // CSP 'frame-ancestors' is ignored in <meta> tags, so we must rely on JS.
+  // We only reveal the body if the window is the top-level window.
+  if (window.self === window.top) {
+    document.body.style.display = 'block';
+  } else {
+    return;
+  }
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
