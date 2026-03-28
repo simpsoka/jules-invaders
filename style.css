@@ -9,6 +9,7 @@ html, body {
 }
 
 body {
+  display: none; /* Anti-clickjacking */
   color: #FFD700;
   font-family: 'Press Start 2P', cursive;
   text-align: center;

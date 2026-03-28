@@ -1384,6 +1384,11 @@ function initGame(config) {
   gameLoop();
 }
 
+// Anti-clickjacking framebusting
+if (window.self === window.top) {
+  document.body.style.display = 'block';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
