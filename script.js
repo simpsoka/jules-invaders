@@ -1385,6 +1385,12 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // SECURITY: Mitigate Clickjacking by ensuring the game is only visible
+  // when loaded as the top-level window (framebusting).
+  if (window.self === window.top) {
+    document.body.style.display = 'block';
+  }
+
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
