@@ -5,3 +5,7 @@
 ## 2024-05-18 - [Optimize High-Frequency Loops by Removing Array.flat()]
 **Learning:** In the game's `update()` loop, `aliens.flat().forEach(...)` and `aliens.flat().filter(...)` were used multiple times per frame. Calling `.flat()` creates a new array every time, resulting in significant garbage collection pressure and CPU overhead (O(N) operations) during a high-frequency (60fps) update loop.
 **Action:** Replaced instances of `aliens.flat()` with nested `for` loops iterating over columns and rows. Always prefer zero-allocation iteration methods (like nested `for` loops or index tracking) over methods that allocate new arrays (like `.flat()`, `.filter()`, or `.map()`) in critical rendering paths.
+
+## 2024-05-18 - [Optimize High-Frequency Physics Logic by Removing Array Spreads and JSON Stringification]
+**Learning:** In the `update()` loop of `script.js` and input handling, `[...playerProjectiles, ...alienProjectiles]` and `JSON.stringify` on inputs were causing unneeded array and string allocations every frame and key press. This increases garbage collection pressure, negatively impacting performance. By looping over both projectile arrays sequentially without merging, and writing a simple `arraysEqual` instead of stringifying for array value comparison, memory allocation was minimized.
+**Action:** Avoid spreading arrays (e.g. `[...a, ...b]`) inside `update` or `draw` loops when sequential iteration is sufficient. Replace `JSON.stringify` logic for simple comparison tasks with linear custom equality functions.
