@@ -1,3 +1,8 @@
+// SECURITY: Mitigate clickjacking by enforcing framebusting.
+if (window.self === window.top) {
+  document.body.style.display = "block";
+}
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const playAgainBtn = document.getElementById("playAgainBtn");
