@@ -1,0 +1,3 @@
+## 2024-04-02 - Dark Mode Focus States
+**Learning:** Custom interactive elements in the game UI (e.g., buttons, links) require explicit focus indicators because default browser outlines are often invisible against the #000 background.
+**Action:** Added a reusable pattern (`2px dashed #FFFFFF` with `4px` offset) on `:focus-visible` to ensure keyboard accessibility and visibility for all interactive elements.
