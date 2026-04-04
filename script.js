@@ -1,3 +1,10 @@
+// SECURITY: Client-side framebusting to mitigate clickjacking
+if (window.self === window.top) {
+  document.body.style.display = 'block';
+} else {
+  window.top.location = window.self.location;
+}
+
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const playAgainBtn = document.getElementById("playAgainBtn");
