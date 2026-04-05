@@ -1385,6 +1385,11 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // SECURITY: Client-side framebusting to mitigate clickjacking (UI redressing) vulnerabilities
+  if (window.self === window.top) {
+    document.body.style.display = 'block';
+  }
+
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
