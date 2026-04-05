@@ -308,6 +308,9 @@ const alienPadding = 15;
 const alienOffsetTop = 50;
 const alienOffsetLeft = 30;
 
+// ⚡ Bolt: Global state variable to track active aliens in O(1) time
+let activeAliensCount = alienColumnCount * alienRowCount;
+
 const aliens = [];
 for (let c = 0; c < alienColumnCount; c++) {
   aliens[c] = [];
@@ -421,6 +424,7 @@ function resetGame() {
 
   player.x = canvas.width / 2 - (PLAYER_SPRITE_A[0].length * PIXEL_SIZE) / 2;
 
+  activeAliensCount = alienColumnCount * alienRowCount;
   aliens.length = 0;
   for (let c = 0; c < alienColumnCount; c++) {
     aliens[c] = [];
@@ -484,6 +488,7 @@ function resetAliensForNextLevel() {
   colors.ground = shiftColor("#FF1493", level);
   canvas.style.borderColor = shiftColor("#FFFFFF", level);
 
+  activeAliensCount = alienColumnCount * alienRowCount;
   aliens.length = 0;
   for (let c = 0; c < alienColumnCount; c++) {
     aliens[c] = [];
@@ -804,6 +809,7 @@ function update() {
             p.y < alien.y + alienHeight
           ) {
             alien.status = 0;
+            activeAliensCount--;
           p.status = 0;
           if (alien.isSquid) {
             score += 50;
@@ -933,13 +939,9 @@ function update() {
     }
   });
 
-  let activeAliens = 0;
-  for (let c = 0; c < alienColumnCount; c++) {
-    for (let r = 0; r < alienRowCount; r++) {
-      if (aliens[c][r].status === 1) activeAliens++;
-    }
-  }
-  if (activeAliens <= 10) {
+  // ⚡ Bolt: Replace O(N*M) loop with O(1) global counter
+  // By using activeAliensCount, we avoid iterating over the entire alien array every frame.
+  if (activeAliensCount <= 10) {
     level++;
     resetAliensForNextLevel();
   }
