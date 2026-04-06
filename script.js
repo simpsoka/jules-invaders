@@ -1385,6 +1385,11 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // SECURITY: Mitigate clickjacking by revealing body only if not in an iframe
+  if (window.self === window.top) {
+    document.body.style.display = 'block';
+  }
+
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
