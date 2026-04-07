@@ -1385,6 +1385,14 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // SECURITY: Mitigate clickjacking by preventing iframe embedding (framebusting).
+  // This ensures the game cannot be wrapped in a hidden iframe by a malicious site.
+  if (window.self === window.top) {
+    document.body.style.display = 'block';
+  } else {
+    return;
+  }
+
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
