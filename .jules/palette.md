@@ -1,0 +1,3 @@
+## 2024-05-20 - High-Contrast Focus Indicators for Dark Themes
+**Learning:** In dark-themed applications, default browser focus rings are often invisible or have low contrast, making keyboard navigation difficult for visually impaired or power users.
+**Action:** Always implement explicit, high-contrast `:focus-visible` styles (e.g., `2px dashed #FFFFFF` with an offset) on all custom interactive elements (buttons, links) to ensure accessibility and compliance.
