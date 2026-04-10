@@ -1385,10 +1385,31 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const mode = document.body.dataset.gamemode;
-  if (mode === 'demo') {
-    initGame({ isDemo: true });
-  } else if (mode === 'play') {
-    initGame({ isDemo: false });
+  // SECURITY: Prevent clickjacking by ensuring the game is only framed by allowed origins
+  let isAllowedFrame = false;
+  try {
+    if (window.self === window.top) {
+      isAllowedFrame = true;
+    } else if (document.referrer) {
+      const refUrl = new URL(document.referrer);
+      if (refUrl.hostname === 'itch.io' || refUrl.hostname.endsWith('.itch.io')) {
+        isAllowedFrame = true;
+      }
+    }
+  } catch (e) {
+    // Fail securely on cross-origin access errors or malformed referrers
+    isAllowedFrame = false;
+  }
+
+  if (isAllowedFrame) {
+    document.body.style.display = 'block';
+    const mode = document.body.dataset.gamemode;
+    if (mode === 'demo') {
+      initGame({ isDemo: true });
+    } else if (mode === 'play') {
+      initGame({ isDemo: false });
+    }
+  } else {
+    console.warn("Embedding this page is not allowed.");
   }
 });
