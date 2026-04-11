@@ -681,6 +681,30 @@ function createExplosion(x, y, color, count = 20) {
   }
 }
 
+// ⚡ Bolt: Optimize collision by using early return and avoiding array allocations
+function checkBunkerCollision(p) {
+  if (p.status !== 1) return;
+  const blockWidth = PIXEL_SIZE * 2;
+  const blockHeight = PIXEL_SIZE * 2;
+  for (let i = 0; i < bunkers.length; i++) {
+    const bunker = bunkers[i];
+    if (
+      p.x > bunker.x &&
+      p.x < bunker.x + bunkerWidth &&
+      p.y > bunker.y &&
+      p.y < bunker.y + bunkerHeight
+    ) {
+      const gridX = Math.floor((p.x - bunker.x) / blockWidth);
+      const gridY = Math.floor((p.y - bunker.y) / blockHeight);
+      if (bunker.grid[gridY] && bunker.grid[gridY][gridX] === 1) {
+        bunker.grid[gridY][gridX] = 0; // Destroy block
+        p.status = 0; // Deactivate projectile
+        return; // Early termination upon impact
+      }
+    }
+  }
+}
+
 // --- Main Game Loop ---
 function update() {
   if (gameOver && !gameConfig.isDemo) return;
@@ -910,28 +934,13 @@ function update() {
   }
 
   // Projectiles vs Bunkers
-  const allProjectiles = [...playerProjectiles, ...alienProjectiles];
-  allProjectiles.forEach((p) => {
-    if (p.status === 1) {
-      bunkers.forEach((bunker) => {
-        const blockWidth = PIXEL_SIZE * 2;
-        const blockHeight = PIXEL_SIZE * 2;
-        if (
-          p.x > bunker.x &&
-          p.x < bunker.x + bunkerWidth &&
-          p.y > bunker.y &&
-          p.y < bunker.y + bunkerHeight
-        ) {
-          const gridX = Math.floor((p.x - bunker.x) / blockWidth);
-          const gridY = Math.floor((p.y - bunker.y) / blockHeight);
-          if (bunker.grid[gridY] && bunker.grid[gridY][gridX] === 1) {
-            bunker.grid[gridY][gridX] = 0; // Destroy block
-            p.status = 0; // Deactivate projectile
-          }
-        }
-      });
-    }
-  });
+  // ⚡ Bolt: Use separate loops instead of array spread [...arr1, ...arr2] to prevent O(N) allocation per frame
+  for (let i = 0; i < playerProjectiles.length; i++) {
+    checkBunkerCollision(playerProjectiles[i]);
+  }
+  for (let i = 0; i < alienProjectiles.length; i++) {
+    checkBunkerCollision(alienProjectiles[i]);
+  }
 
   let activeAliens = 0;
   for (let c = 0; c < alienColumnCount; c++) {
@@ -1204,10 +1213,11 @@ function draw() {
     }
   }
 
+  // ⚡ Bolt: Hoist constant canvas state assignments and block calculations
+  ctx.fillStyle = colors.bunker;
+  const blockWidth = PIXEL_SIZE * 2;
+  const blockHeight = PIXEL_SIZE * 2;
   bunkers.forEach((bunker) => {
-    ctx.fillStyle = colors.bunker;
-    const blockWidth = PIXEL_SIZE * 2;
-    const blockHeight = PIXEL_SIZE * 2;
     for (let r = 0; r < bunker.grid.length; r++) {
       for (let c = 0; c < bunker.grid[r].length; c++) {
         if (bunker.grid[r][c] === 1) {
