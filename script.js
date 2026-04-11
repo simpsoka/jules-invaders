@@ -1385,6 +1385,28 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // SECURITY: Client-side framebusting to mitigate clickjacking.
+  // We allow iframing from trusted gaming portals (e.g., itch.io).
+  let isFramed = window.self !== window.top;
+  let isTrusted = false;
+
+  if (isFramed) {
+    try {
+      const referrerUrl = new URL(document.referrer);
+      if (referrerUrl.hostname === 'itch.io' || referrerUrl.hostname.endsWith('.itch.io')) {
+        isTrusted = true;
+      }
+    } catch (e) {
+      // Ignore URL parsing errors
+    }
+  }
+
+  if (!isFramed || isTrusted) {
+    document.body.style.display = 'block';
+  } else {
+    return; // Block game initialization if framed and untrusted
+  }
+
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
