@@ -1385,6 +1385,22 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // SECURITY: Clickjacking mitigation (framebusting)
+  let isAllowed = window.self === window.top;
+  if (!isAllowed && document.referrer) {
+    try {
+      const url = new URL(document.referrer);
+      if (url.hostname === 'itch.io' || url.hostname.endsWith('.itch.io')) {
+        isAllowed = true;
+      }
+    } catch (e) {
+      // Invalid referrer
+    }
+  }
+  if (isAllowed) {
+    document.body.style.display = 'block';
+  }
+
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
