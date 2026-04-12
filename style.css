@@ -43,6 +43,13 @@ canvas {
   color: #fff;
 }
 
+.play-button:focus-visible,
+#playAgainBtn:focus-visible,
+#mobileControls button:focus-visible {
+  outline: 2px dashed #FFFFFF;
+  outline-offset: 4px;
+}
+
 h1 {
   display: none;
 }
