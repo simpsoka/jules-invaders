@@ -1391,4 +1391,25 @@ document.addEventListener('DOMContentLoaded', () => {
   } else if (mode === 'play') {
     initGame({ isDemo: false });
   }
+
+  // SECURITY: Anti-clickjacking framebusting logic
+  let isAllowed = false;
+  if (window.self === window.top) {
+    isAllowed = true;
+  } else {
+    try {
+      const referrerUrl = new URL(document.referrer);
+      if (referrerUrl.hostname === 'itch.io' || referrerUrl.hostname.endsWith('.itch.io')) {
+        isAllowed = true;
+      }
+    } catch (e) {
+      // Invalid or empty referrer
+    }
+  }
+
+  if (isAllowed) {
+    document.body.style.display = 'block';
+  } else {
+    console.warn('Security: Embedded in unauthorized iframe. Display blocked.');
+  }
 });
