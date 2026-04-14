@@ -43,6 +43,11 @@ canvas {
   color: #fff;
 }
 
+button:focus-visible, a:focus-visible {
+  outline: 2px dashed #FFFFFF;
+  outline-offset: 4px;
+}
+
 h1 {
   display: none;
 }
