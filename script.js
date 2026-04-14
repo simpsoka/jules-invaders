@@ -1385,10 +1385,31 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const mode = document.body.dataset.gamemode;
-  if (mode === 'demo') {
-    initGame({ isDemo: true });
-  } else if (mode === 'play') {
-    initGame({ isDemo: false });
+  // SECURITY: Clickjacking mitigation (Framebusting)
+  // Ensure the game is not embedded in an unauthorized iframe
+  let isAllowed = false;
+  try {
+    if (window.self === window.top) {
+      isAllowed = true;
+    } else if (document.referrer) {
+      const referrerUrl = new URL(document.referrer);
+      if (referrerUrl.hostname === 'itch.io' || referrerUrl.hostname.endsWith('.itch.io')) {
+        isAllowed = true;
+      }
+    }
+  } catch (e) {
+    // Cross-origin error indicates embedding, block by default
+  }
+
+  if (isAllowed) {
+    document.body.style.display = 'block';
+    const mode = document.body.dataset.gamemode;
+    if (mode === 'demo') {
+      initGame({ isDemo: true });
+    } else if (mode === 'play') {
+      initGame({ isDemo: false });
+    }
+  } else {
+    console.error("Game cannot be run in an iframe outside allowed domains.");
   }
 });
