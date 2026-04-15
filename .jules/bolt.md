@@ -5,3 +5,7 @@
 ## 2024-05-18 - [Optimize High-Frequency Loops by Removing Array.flat()]
 **Learning:** In the game's `update()` loop, `aliens.flat().forEach(...)` and `aliens.flat().filter(...)` were used multiple times per frame. Calling `.flat()` creates a new array every time, resulting in significant garbage collection pressure and CPU overhead (O(N) operations) during a high-frequency (60fps) update loop.
 **Action:** Replaced instances of `aliens.flat()` with nested `for` loops iterating over columns and rows. Always prefer zero-allocation iteration methods (like nested `for` loops or index tracking) over methods that allocate new arrays (like `.flat()`, `.filter()`, or `.map()`) in critical rendering paths.
+
+## 2024-05-18 - [Optimize High-Frequency Rendering Loops]
+**Learning:** Using array spread syntax (`[...arr1, ...arr2]`) and `forEach` inside high-frequency functions like `update()` creates a new array and multiple closure scopes every frame. This triggers continuous O(N) memory allocation and garbage collection. Also, defining constants like `const blockWidth = PIXEL_SIZE * 2;` inside these loops results in redundant computations.
+**Action:** Replace array spread syntax and `.forEach()` with direct `for` loops. Move constant dimension calculations and context assignments (`ctx.fillStyle`) to the global scope or outside the loops. Extract loop bodies into standalone functions to prevent anonymous function recreation.
