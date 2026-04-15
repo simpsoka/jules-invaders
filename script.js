@@ -1385,10 +1385,24 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const mode = document.body.dataset.gamemode;
-  if (mode === 'demo') {
-    initGame({ isDemo: true });
-  } else if (mode === 'play') {
-    initGame({ isDemo: false });
+  // SECURITY: Mitigate clickjacking by enforcing framebusting, allowing only itch.io embeds
+  let isAllowed = window.self === window.top;
+  if (!isAllowed && document.referrer) {
+    try {
+      const refUrl = new URL(document.referrer);
+      if (refUrl.hostname === 'itch.io' || refUrl.hostname.endsWith('.itch.io')) {
+        isAllowed = true;
+      }
+    } catch (e) {}
+  }
+
+  if (isAllowed) {
+    document.body.style.display = 'block';
+    const mode = document.body.dataset.gamemode;
+    if (mode === 'demo') {
+      initGame({ isDemo: true });
+    } else if (mode === 'play') {
+      initGame({ isDemo: false });
+    }
   }
 });
