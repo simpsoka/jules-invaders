@@ -5,3 +5,7 @@
 ## 2024-05-18 - [Optimize High-Frequency Loops by Removing Array.flat()]
 **Learning:** In the game's `update()` loop, `aliens.flat().forEach(...)` and `aliens.flat().filter(...)` were used multiple times per frame. Calling `.flat()` creates a new array every time, resulting in significant garbage collection pressure and CPU overhead (O(N) operations) during a high-frequency (60fps) update loop.
 **Action:** Replaced instances of `aliens.flat()` with nested `for` loops iterating over columns and rows. Always prefer zero-allocation iteration methods (like nested `for` loops or index tracking) over methods that allocate new arrays (like `.flat()`, `.filter()`, or `.map()`) in critical rendering paths.
+
+## 2024-05-18 - [Optimize Projectile-Bunker Collision and Draw Loops]
+**Learning:** Combining arrays with `[...arr1, ...arr2]` every frame inside `update()` causes O(N) allocation and garbage collection overhead. Redundant context state setting like `ctx.fillStyle` and constant size recalculations within high-frequency loops (e.g., iterating bunkers in `draw()`) increase CPU overhead.
+**Action:** Replaced array spreads in `update()` with direct loops that call a standalone `checkBunkerCollision()` function to avoid closures and allow early termination (`break`). Hoisted `ctx.fillStyle` and block dimensions outside the iteration loops in `draw()`.
