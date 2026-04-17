@@ -1385,6 +1385,28 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // SECURITY: Client-side clickjacking mitigation (framebusting)
+  // Reveal body if not in iframe or if framed by allowed origins (e.g., itch.io)
+  let allowed = false;
+  if (window.self === window.top) {
+    allowed = true;
+  } else if (document.referrer) {
+    try {
+      const referrerUrl = new URL(document.referrer);
+      if (referrerUrl.hostname === 'itch.io' || referrerUrl.hostname.endsWith('.itch.io')) {
+        allowed = true;
+      }
+    } catch (e) {
+      // Ignore invalid URL
+    }
+  }
+
+  if (allowed) {
+    document.body.style.display = 'block';
+  } else {
+    console.warn('Embedding game on this domain is not allowed.');
+  }
+
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
