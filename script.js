@@ -1204,10 +1204,11 @@ function draw() {
     }
   }
 
+  // ⚡ Bolt: Hoist constant values and state assignments outside rendering loops
+  ctx.fillStyle = colors.bunker;
+  const blockWidth = PIXEL_SIZE * 2;
+  const blockHeight = PIXEL_SIZE * 2;
   bunkers.forEach((bunker) => {
-    ctx.fillStyle = colors.bunker;
-    const blockWidth = PIXEL_SIZE * 2;
-    const blockHeight = PIXEL_SIZE * 2;
     for (let r = 0; r < bunker.grid.length; r++) {
       for (let c = 0; c < bunker.grid[r].length; c++) {
         if (bunker.grid[r][c] === 1) {
@@ -1222,16 +1223,20 @@ function draw() {
     }
   });
 
+  // ⚡ Bolt: Hoist player projectile fill style
+  if (squidStormActive) {
+    ctx.fillStyle = `hsl(${animationFrame % 360}, 100%, 50%)`;
+  } else {
+    ctx.fillStyle = colors.projectile;
+  }
   playerProjectiles.forEach((p) => {
     if (p.status === 1) {
-      if (squidStormActive) {
-        ctx.fillStyle = `hsl(${animationFrame % 360}, 100%, 50%)`;
-      } else {
-        ctx.fillStyle = colors.projectile;
-      }
       ctx.fillRect(p.x, p.y, p.width, p.height);
     }
   });
+
+  // ⚡ Bolt: Set missing alien projectile style and draw
+  ctx.fillStyle = colors.projectile;
   alienProjectiles.forEach((p) => {
     if (p.status === 1) ctx.fillRect(p.x, p.y, p.width, p.height);
   });
