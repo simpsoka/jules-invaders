@@ -1385,10 +1385,31 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const mode = document.body.dataset.gamemode;
-  if (mode === 'demo') {
-    initGame({ isDemo: true });
-  } else if (mode === 'play') {
-    initGame({ isDemo: false });
+  // SECURITY: Framebusting mitigation for clickjacking
+  // Only allow framing from authorized domains (e.g. itch.io) or if not framed.
+  let isAllowedFrame = false;
+  try {
+    if (window.self === window.top) {
+      isAllowedFrame = true; // Not framed
+    } else if (document.referrer) {
+      const refUrl = new URL(document.referrer);
+      if (refUrl.hostname === 'itch.io' || refUrl.hostname.endsWith('.itch.io')) {
+        isAllowedFrame = true; // Framed by allowed domain
+      }
+    }
+  } catch (e) {
+    // If accessing window.top throws due to cross-origin, or URL parsing fails, default to false
+  }
+
+  if (isAllowedFrame) {
+    document.body.style.display = 'block';
+    const mode = document.body.dataset.gamemode;
+    if (mode === 'demo') {
+      initGame({ isDemo: true });
+    } else if (mode === 'play') {
+      initGame({ isDemo: false });
+    }
+  } else {
+    console.error('Framing this game is not allowed.');
   }
 });
