@@ -9,6 +9,8 @@ html, body {
 }
 
 body {
+  /* SECURITY: Default hidden to prevent clickjacking until framebusting checks pass */
+  display: none;
   color: #FFD700;
   font-family: 'Press Start 2P', cursive;
   text-align: center;
