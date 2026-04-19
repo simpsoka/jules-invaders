@@ -6,6 +6,25 @@ const leftBtn = document.getElementById("leftBtn");
 const rightBtn = document.getElementById("rightBtn");
 const fireBtn = document.getElementById("fireBtn");
 
+document.addEventListener("DOMContentLoaded", () => {
+  // SECURITY: Mitigate clickjacking (framebusting) while allowing legitimate embeds on itch.io
+  const isTopLevel = window.self === window.top;
+  let isAllowedReferrer = false;
+
+  if (!isTopLevel && document.referrer) {
+    try {
+      const referrerHost = new URL(document.referrer).hostname;
+      isAllowedReferrer = referrerHost === 'itch.io' || referrerHost.endsWith('.itch.io');
+    } catch (e) {
+      // Invalid URL
+    }
+  }
+
+  if (isTopLevel || isAllowedReferrer) {
+    document.body.style.display = 'block';
+  }
+});
+
 // --- Sprite & Asset Definitions ---
 const PIXEL_SIZE = 4;
 
