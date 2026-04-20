@@ -5,3 +5,6 @@
 ## 2024-05-18 - [Optimize High-Frequency Loops by Removing Array.flat()]
 **Learning:** In the game's `update()` loop, `aliens.flat().forEach(...)` and `aliens.flat().filter(...)` were used multiple times per frame. Calling `.flat()` creates a new array every time, resulting in significant garbage collection pressure and CPU overhead (O(N) operations) during a high-frequency (60fps) update loop.
 **Action:** Replaced instances of `aliens.flat()` with nested `for` loops iterating over columns and rows. Always prefer zero-allocation iteration methods (like nested `for` loops or index tracking) over methods that allocate new arrays (like `.flat()`, `.filter()`, or `.map()`) in critical rendering paths.
+## 2025-02-28 - Array Spread GC Overhead in High-Frequency Loops
+**Learning:** Using array spread syntax (`[...arr1, ...arr2]`) in `requestAnimationFrame` update loops causes a new array to be created on every frame, generating O(N) memory allocation and subsequent garbage collection pauses. Iterating nested logic with `forEach` inside also causes closure allocations.
+**Action:** Replace spread arrays and `forEach` loops with dedicated functions that use zero-allocation standard `for` loops, allowing for `return` early exits upon state changes.
