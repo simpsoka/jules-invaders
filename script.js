@@ -7,6 +7,18 @@ const rightBtn = document.getElementById("rightBtn");
 const fireBtn = document.getElementById("fireBtn");
 
 // --- Sprite & Asset Definitions ---
+// SECURITY: Use buffered window.crypto.getRandomValues for cryptographically secure randomness
+// for core game mechanics (spawns, firing) while keeping Math.random() for visuals.
+let _randomBuffer = new Uint32Array(1024);
+let _randomIndex = 1024;
+function getSecureRandom() {
+  if (_randomIndex >= 1024) {
+    window.crypto.getRandomValues(_randomBuffer);
+    _randomIndex = 0;
+  }
+  return _randomBuffer[_randomIndex++] / (0xffffffff + 1);
+}
+
 const PIXEL_SIZE = 4;
 
 const PLAYER_SPRITE_A = [
@@ -318,7 +330,7 @@ for (let c = 0; c < alienColumnCount; c++) {
     if (r === 0) alienType = 1;
     else if (r < 3) alienType = 2;
     else alienType = 3;
-    const isSquid = Math.random() < SQUID_SPAWN_CHANCE;
+    const isSquid = getSecureRandom() < SQUID_SPAWN_CHANCE;
     aliens[c][r] = {
       x: alienX,
       y: alienY,
@@ -431,7 +443,7 @@ function resetGame() {
       if (r === 0) alienType = 1;
       else if (r < 3) alienType = 2;
       else alienType = 3;
-      const isSquid = Math.random() < SQUID_SPAWN_CHANCE;
+      const isSquid = getSecureRandom() < SQUID_SPAWN_CHANCE;
       aliens[c][r] = {
         x: alienX,
         y: alienY,
@@ -494,7 +506,7 @@ function resetAliensForNextLevel() {
       if (r === 0) alienType = 1;
       else if (r < 3) alienType = 2;
       else alienType = 3;
-      const isSquid = Math.random() < SQUID_SPAWN_CHANCE;
+      const isSquid = getSecureRandom() < SQUID_SPAWN_CHANCE;
       aliens[c][r] = {
         x: alienX,
         y: alienY,
@@ -739,7 +751,7 @@ function update() {
   });
 
   // UFO Logic
-  if (ufo.status === 0 && Math.random() < 0.0005) {
+  if (ufo.status === 0 && getSecureRandom() < 0.0005) {
     ufo.status = 1;
     ufo.x = -ufo.width;
   }
@@ -752,7 +764,7 @@ function update() {
   }
 
   // Benevolent UFO Logic
-  if (benevolentUfo.status === 0 && Math.random() < 0.0002) {
+  if (benevolentUfo.status === 0 && getSecureRandom() < 0.0002) {
     // Lower spawn rate
     benevolentUfo.status = 1;
     benevolentUfo.x = -benevolentUfo.width;
@@ -774,7 +786,7 @@ function update() {
         if (alien.x + alienWidth > canvas.width || alien.x < 0)
           changeDirection = true;
         if (alien.y + alienHeight >= player.y) gameOver = true;
-        if (Math.random() < alienFireRate) fireAlienProjectile(alien);
+        if (getSecureRandom() < alienFireRate) fireAlienProjectile(alien);
       }
     }
   }
@@ -824,7 +836,7 @@ function update() {
           }
 
           // Add a chance to spawn a power-up
-          if (Math.random() < 0.1) {
+          if (getSecureRandom() < 0.1) {
             // 10% chance
             powerups.push({
               x: alien.x + alienWidth / 2,
