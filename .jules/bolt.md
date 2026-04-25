@@ -5,3 +5,7 @@
 ## 2024-05-18 - [Optimize High-Frequency Loops by Removing Array.flat()]
 **Learning:** In the game's `update()` loop, `aliens.flat().forEach(...)` and `aliens.flat().filter(...)` were used multiple times per frame. Calling `.flat()` creates a new array every time, resulting in significant garbage collection pressure and CPU overhead (O(N) operations) during a high-frequency (60fps) update loop.
 **Action:** Replaced instances of `aliens.flat()` with nested `for` loops iterating over columns and rows. Always prefer zero-allocation iteration methods (like nested `for` loops or index tracking) over methods that allocate new arrays (like `.flat()`, `.filter()`, or `.map()`) in critical rendering paths.
+
+## 2024-05-24 - [Optimize High-Frequency Loop Allocations and Canvas State]
+**Learning:** In high-frequency paths like the `update()` and `draw()` loops, combining arrays with spread syntax (`[...arr1, ...arr2]`) and using nested `.forEach()` creates O(N) memory allocation and closure overhead per frame. Redundant `ctx.fillStyle` assignments and constant dimension calculations inside rendering loops also cause CPU overhead.
+**Action:** Removed array spread in favor of distinct `for` loops. Extracted collision logic into a standalone function (`checkBunkerCollision`) for zero-allocation iteration and early termination. Hoisted `ctx.fillStyle` assignments and dimension calculations outside of rendering loops.
