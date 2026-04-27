@@ -1385,6 +1385,29 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Anti-clickjacking mitigation (Framebusting with allowed origins)
+  let allowed = false;
+  try {
+    if (window.self === window.top) {
+      allowed = true;
+    } else {
+      const referrerURL = new URL(document.referrer);
+      const host = referrerURL.hostname;
+      if (host === 'itch.io' || host.endsWith('.itch.io')) {
+        allowed = true;
+      }
+    }
+  } catch (e) {
+    // If an error occurs (e.g. invalid URL or cross-origin issues), default to not allowed
+  }
+
+  if (allowed) {
+    document.body.style.display = 'block';
+  } else {
+    console.warn("Unauthorized embedding blocked.");
+    return;
+  }
+
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
