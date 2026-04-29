@@ -5,3 +5,7 @@
 ## 2024-05-18 - [Optimize High-Frequency Loops by Removing Array.flat()]
 **Learning:** In the game's `update()` loop, `aliens.flat().forEach(...)` and `aliens.flat().filter(...)` were used multiple times per frame. Calling `.flat()` creates a new array every time, resulting in significant garbage collection pressure and CPU overhead (O(N) operations) during a high-frequency (60fps) update loop.
 **Action:** Replaced instances of `aliens.flat()` with nested `for` loops iterating over columns and rows. Always prefer zero-allocation iteration methods (like nested `for` loops or index tracking) over methods that allocate new arrays (like `.flat()`, `.filter()`, or `.map()`) in critical rendering paths.
+
+## 2024-05-18 - [Zero-Allocation Iteration for High-Frequency Collisions]
+**Learning:** Using array spread syntax (`[...arr1, ...arr2]`) and nested `.forEach()` loops in the high-frequency 60fps `update()` loop (e.g., for Projectile vs Bunker collision) creates a new array and multiple closures every frame. This results in significant garbage collection overhead and memory allocation pressure. Furthermore, `.forEach()` does not allow early loop termination upon collision detection, wasting CPU cycles on unnecessary checks.
+**Action:** Extracted the bunker collision logic into a standalone `checkBunkerCollision(p)` function defined outside `update()` and replaced the array spread and nested `.forEach()` calls with standard `for` loops. This achieves zero-allocation iteration and enables early termination via `return` upon impact.
