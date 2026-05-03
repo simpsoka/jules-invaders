@@ -12,6 +12,7 @@ body {
   color: #FFD700;
   font-family: 'Press Start 2P', cursive;
   text-align: center;
+  display: none; /* Clickjacking mitigation */
 }
 
 canvas {
