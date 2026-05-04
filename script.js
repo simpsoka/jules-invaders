@@ -236,6 +236,25 @@ let squidSquadTimer = 0;
 let score = 0;
 let highScore = 0;
 let level = 1;
+let scoreText = "Score: 0";
+let highScoreText = "High Score: 0";
+let levelText = "Level: 1";
+
+function updateScore(newScore) {
+  score = newScore;
+  scoreText = "Score: " + score;
+}
+
+function updateHighScore(newHighScore) {
+  highScore = newHighScore;
+  highScoreText = "High Score: " + highScore;
+}
+
+function updateLevel(newLevel) {
+  level = newLevel;
+  levelText = "Level: " + level;
+}
+
 let gameOver = false;
 let gameWon = false;
 let animationFrame = 0;
@@ -393,8 +412,8 @@ if (playAgainBtn) {
 }
 
 function resetGame() {
-  score = 0;
-  level = 1;
+  updateScore(0);
+  updateLevel(1);
   clearSpriteCache();
 
   // Reset colors to default
@@ -804,40 +823,40 @@ function update() {
             p.y < alien.y + alienHeight
           ) {
             alien.status = 0;
-          p.status = 0;
-          if (alien.isSquid) {
-            score += 50;
-            createExplosion(
-              alien.x + alienWidth / 2,
-              alien.y + alienHeight / 2,
-              colors.squid,
-            );
-          } else {
-            score += 10;
-            explosions.push({
-              x: alien.x,
-              y: alien.y,
-              color: colors.explosion,
-              size: 30,
-              timer: 10,
-            });
-          }
+            p.status = 0;
+            if (alien.isSquid) {
+              updateScore(score + 50);
+              createExplosion(
+                alien.x + alienWidth / 2,
+                alien.y + alienHeight / 2,
+                colors.squid,
+              );
+            } else {
+              updateScore(score + 10);
+              explosions.push({
+                x: alien.x,
+                y: alien.y,
+                color: colors.explosion,
+                size: 30,
+                timer: 10,
+              });
+            }
 
-          // Add a chance to spawn a power-up
-          if (Math.random() < 0.1) {
-            // 10% chance
-            powerups.push({
-              x: alien.x + alienWidth / 2,
-              y: alien.y + alienHeight / 2,
-              width: JULES_LOGO_SPRITE[0].length * PIXEL_SIZE,
-              height: JULES_LOGO_SPRITE.length * PIXEL_SIZE,
-              speed: 2,
-              type: "double-laser",
-              status: 1,
-            });
+            // Add a chance to spawn a power-up
+            if (Math.random() < 0.1) {
+              // 10% chance
+              powerups.push({
+                x: alien.x + alienWidth / 2,
+                y: alien.y + alienHeight / 2,
+                width: JULES_LOGO_SPRITE[0].length * PIXEL_SIZE,
+                height: JULES_LOGO_SPRITE.length * PIXEL_SIZE,
+                speed: 2,
+                type: "double-laser",
+                status: 1,
+              });
+            }
+            explosionSound.play();
           }
-          explosionSound.play();
-        }
         }
       }
 
@@ -851,7 +870,7 @@ function update() {
       ) {
         ufo.status = 0;
         p.status = 0;
-        score += 100;
+        updateScore(score + 100);
         explosionSound.play();
       }
 
@@ -865,7 +884,7 @@ function update() {
       ) {
         benevolentUfo.status = 0;
         p.status = 0;
-        score += 200;
+        updateScore(score + 200);
         benevolentHitSound.play();
         createExplosion(
           benevolentUfo.x + benevolentUfo.width / 2,
@@ -940,13 +959,13 @@ function update() {
     }
   }
   if (activeAliens <= 10) {
-    level++;
+    updateLevel(level + 1);
     resetAliensForNextLevel();
   }
 
   if (gameOver && !gameConfig.isDemo) {
     if (score > highScore) {
-      highScore = score;
+      updateHighScore(score);
       localStorage.setItem("spaceInvadersHighScore", highScore);
     }
   }
@@ -1039,7 +1058,9 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
   // Optimization: Check if we can cache this sprite
   // We only cache if the color is a hex string (starts with #) or an object (stable reference)
   // Dynamic colors like rgba(...) used for powerups are excluded
-  const canCache = (typeof color === 'object') || (typeof color === 'string' && color.startsWith('#'));
+  const canCache =
+    typeof color === "object" ||
+    (typeof color === "string" && color.startsWith("#"));
 
   if (canCache) {
     if (!spriteCache.has(sprite)) {
@@ -1067,10 +1088,10 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
     const width = cols * pixelSize;
     const height = rows * pixelSize;
 
-    offscreen = document.createElement('canvas');
+    offscreen = document.createElement("canvas");
     offscreen.width = width;
     offscreen.height = height;
-    targetCtx = offscreen.getContext('2d');
+    targetCtx = offscreen.getContext("2d");
     targetX = 0;
     targetY = 0;
   }
@@ -1187,7 +1208,13 @@ function draw() {
       const alien = aliens[c][r];
       if (alien.status === 1) {
         if (alien.isSquid) {
-          drawPixelArt(SQUID_SPRITE, alien.x, alien.y, colors.squid, PIXEL_SIZE);
+          drawPixelArt(
+            SQUID_SPRITE,
+            alien.x,
+            alien.y,
+            colors.squid,
+            PIXEL_SIZE,
+          );
         } else {
           let sprite;
           const isDancing = Math.floor(animationFrame / 30) % 2 === 0;
@@ -1242,11 +1269,11 @@ function draw() {
 
   ctx.fillStyle = colors.text;
   ctx.font = '20px "Press Start 2P"';
-  ctx.fillText("Score: " + score, 10, 25);
+  ctx.fillText(scoreText, 10, 25);
   ctx.textAlign = "center";
-  ctx.fillText("Level: " + level, canvas.width / 2, 25);
+  ctx.fillText(levelText, canvas.width / 2, 25);
   ctx.textAlign = "right";
-  ctx.fillText("High Score: " + highScore, canvas.width - 10, 25);
+  ctx.fillText(highScoreText, canvas.width - 10, 25);
   ctx.textAlign = "left";
 
   if (squidStormMessageTimer > 0) {
@@ -1315,7 +1342,7 @@ function loadHighScore() {
     // SECURITY: Validate localStorage input to prevent state corruption via NaN or negative values
     const parsed = parseInt(storedHighScore, 10);
     if (!isNaN(parsed) && parsed >= 0) {
-      highScore = parsed;
+      updateHighScore(parsed);
     } else {
       // Discard invalid data and clean up storage
       localStorage.removeItem("spaceInvadersHighScore");
@@ -1384,11 +1411,11 @@ function initGame(config) {
   gameLoop();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   const mode = document.body.dataset.gamemode;
-  if (mode === 'demo') {
+  if (mode === "demo") {
     initGame({ isDemo: true });
-  } else if (mode === 'play') {
+  } else if (mode === "play") {
     initGame({ isDemo: false });
   }
 });

@@ -5,3 +5,7 @@
 ## 2024-05-18 - [Optimize High-Frequency Loops by Removing Array.flat()]
 **Learning:** In the game's `update()` loop, `aliens.flat().forEach(...)` and `aliens.flat().filter(...)` were used multiple times per frame. Calling `.flat()` creates a new array every time, resulting in significant garbage collection pressure and CPU overhead (O(N) operations) during a high-frequency (60fps) update loop.
 **Action:** Replaced instances of `aliens.flat()` with nested `for` loops iterating over columns and rows. Always prefer zero-allocation iteration methods (like nested `for` loops or index tracking) over methods that allocate new arrays (like `.flat()`, `.filter()`, or `.map()`) in critical rendering paths.
+
+## 2024-05-18 - [Cache UI Text Strings to Prevent Garbage Collection Overhead]
+**Learning:** In the high-frequency `draw()` loop, building strings inline (e.g., `"Score: " + score`) for UI rendering creates a new string object every single frame, causing unnecessary garbage collection overhead and potential minor frame drops.
+**Action:** Extract string building into helper functions that only execute when the underlying state changes (e.g., `updateScore(newScore)`), and cache the resulting formatted strings in top-level variables. Use these cached variables directly inside the `draw()` loop to reduce overhead to O(1).
