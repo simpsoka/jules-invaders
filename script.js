@@ -1385,6 +1385,28 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // SECURITY: Client-side clickjacking mitigation (framebusting)
+  let isAllowed = false;
+  if (window.self === window.top) {
+    isAllowed = true;
+  } else {
+    try {
+      const referrerUrl = new URL(document.referrer);
+      if (referrerUrl.hostname === 'itch.io' || referrerUrl.hostname.endsWith('.itch.io')) {
+        isAllowed = true;
+      }
+    } catch (e) {
+      // Invalid referrer or cross-origin error
+    }
+  }
+
+  if (isAllowed) {
+    document.body.style.display = 'block';
+  } else {
+    console.warn('Security: This application is not allowed to be framed by this origin.');
+    return; // Prevent game initialization if framed by unauthorized origin
+  }
+
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
