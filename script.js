@@ -1385,6 +1385,17 @@ function initGame(config) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const referrerHostname = document.referrer ? new URL(document.referrer).hostname : '';
+    if (window.self === window.top || referrerHostname === 'itch.io' || referrerHostname.endsWith('.itch.io')) {
+      document.body.style.display = 'block';
+    } else {
+      console.error('Clickjacking mitigation: Application cannot be framed.');
+    }
+  } catch (e) {
+    console.error('Error during clickjacking check:', e);
+  }
+
   const mode = document.body.dataset.gamemode;
   if (mode === 'demo') {
     initGame({ isDemo: true });
