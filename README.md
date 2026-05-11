@@ -27,11 +27,13 @@ The game is a static website and does not require a build step. To run the game 
 For development, you will need to have Node.js and npm installed. The project uses Playwright for frontend verification. To set up the development environment, follow these steps:
 
 1. **Install Dependencies:**
+
    ```bash
    npm install
    ```
 
 2. **Install Playwright Browsers:**
+
    ```bash
    npx playwright install --with-deps
    ```
