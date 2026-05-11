@@ -124,3 +124,9 @@ h1 {
   background-color: #006400;
   color: #fff;
 }
+.play-button:focus-visible,
+#playAgainBtn:focus-visible,
+#mobileControls button:focus-visible {
+  outline: 2px dashed #FFFFFF;
+  outline-offset: 4px;
+}
