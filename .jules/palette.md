@@ -1,0 +1,3 @@
+## 2026-05-16 - Focus Visible Styles and Dynamic Game Loops
+**Learning:** When implementing `:focus-visible` styles for interactive elements, relying on programmatic `focus()` during automated testing (like Playwright) often fails to trigger keyboard-specific outlines. Furthermore, attempting to manually test dynamic in-game elements (like `#playAgainBtn`) can be unreliable due to continuous `display` state overrides by the active game loop.
+**Action:** Use `page.keyboard.press('Tab')` in Playwright tests to accurately simulate keyboard navigation and trigger `:focus-visible` states. Prefer testing static UI elements when verifying layout and focus styles to avoid conflicts with dynamic game loops.
