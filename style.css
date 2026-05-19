@@ -1,6 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -9,14 +10,14 @@ html, body {
 }
 
 body {
-  color: #FFD700;
-  font-family: 'Press Start 2P', cursive;
+  color: #ffd700;
+  font-family: "Press Start 2P", cursive;
   text-align: center;
 }
 
 canvas {
   background-color: #000;
-  border: 2px solid #FFD700;
+  border: 2px solid #ffd700;
   image-rendering: -moz-crisp-edges;
   image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
@@ -30,10 +31,10 @@ canvas {
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: #000;
-  color: #FFD700;
-  border: 2px solid #FFD700;
+  color: #ffd700;
+  border: 2px solid #ffd700;
   padding: 15px 30px;
-  font-family: 'Press Start 2P', cursive;
+  font-family: "Press Start 2P", cursive;
   cursor: pointer;
   font-size: 20px;
 }
@@ -78,9 +79,9 @@ h1 {
 
 #mobileControls button {
   background-color: transparent;
-  border: 2px solid #FFD700;
-  color: #FFD700;
-  font-family: 'Press Start 2P', cursive;
+  border: 2px solid #ffd700;
+  color: #ffd700;
+  font-family: "Press Start 2P", cursive;
   font-size: 18px;
   padding: 15px 20px;
   cursor: pointer;
@@ -114,8 +115,8 @@ h1 {
 .play-button {
   font-size: 30px;
   padding: 15px 30px;
-  border: 2px solid #FFD700;
-  color: #FFD700;
+  border: 2px solid #ffd700;
+  color: #ffd700;
   text-decoration: none;
   cursor: pointer;
 }
@@ -123,4 +124,10 @@ h1 {
 .play-button:hover {
   background-color: #006400;
   color: #fff;
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline: 2px dashed #ffffff;
+  outline-offset: 4px;
 }
