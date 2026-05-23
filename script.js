@@ -723,20 +723,24 @@ function update() {
       player.x = canvas.width - player.width;
   }
 
-  playerProjectiles.forEach((p) => {
+  // Optimization: Replace .forEach with for loops to prevent closure overhead in high-frequency loop
+  for (let i = 0; i < playerProjectiles.length; i++) {
+    const p = playerProjectiles[i];
     if (p.status === 1) {
       p.y -= p.speed;
       p.x += p.vx; // Horizontal movement
       if (p.y < 0 || p.x < 0 || p.x > canvas.width) p.status = 0;
     }
-  });
+  }
 
-  alienProjectiles.forEach((p) => {
+  // Optimization: Replace .forEach with for loop to prevent closure overhead
+  for (let i = 0; i < alienProjectiles.length; i++) {
+    const p = alienProjectiles[i];
     if (p.status === 1) {
       p.y += p.speed;
       if (p.y > canvas.height) p.status = 0;
     }
-  });
+  }
 
   // UFO Logic
   if (ufo.status === 0 && Math.random() < 0.0005) {
@@ -790,7 +794,9 @@ function update() {
   }
 
   // --- Collision Detection ---
-  playerProjectiles.forEach((p) => {
+  // Optimization: Use standard for loop to avoid .forEach closure overhead
+  for (let i = 0; i < playerProjectiles.length; i++) {
+    const p = playerProjectiles[i];
     if (p.status === 1) {
       // Player projectile vs Aliens
       for (let c = 0; c < alienColumnCount; c++) {
@@ -804,40 +810,40 @@ function update() {
             p.y < alien.y + alienHeight
           ) {
             alien.status = 0;
-          p.status = 0;
-          if (alien.isSquid) {
-            score += 50;
-            createExplosion(
-              alien.x + alienWidth / 2,
-              alien.y + alienHeight / 2,
-              colors.squid,
-            );
-          } else {
-            score += 10;
-            explosions.push({
-              x: alien.x,
-              y: alien.y,
-              color: colors.explosion,
-              size: 30,
-              timer: 10,
-            });
-          }
+            p.status = 0;
+            if (alien.isSquid) {
+              score += 50;
+              createExplosion(
+                alien.x + alienWidth / 2,
+                alien.y + alienHeight / 2,
+                colors.squid,
+              );
+            } else {
+              score += 10;
+              explosions.push({
+                x: alien.x,
+                y: alien.y,
+                color: colors.explosion,
+                size: 30,
+                timer: 10,
+              });
+            }
 
-          // Add a chance to spawn a power-up
-          if (Math.random() < 0.1) {
-            // 10% chance
-            powerups.push({
-              x: alien.x + alienWidth / 2,
-              y: alien.y + alienHeight / 2,
-              width: JULES_LOGO_SPRITE[0].length * PIXEL_SIZE,
-              height: JULES_LOGO_SPRITE.length * PIXEL_SIZE,
-              speed: 2,
-              type: "double-laser",
-              status: 1,
-            });
+            // Add a chance to spawn a power-up
+            if (Math.random() < 0.1) {
+              // 10% chance
+              powerups.push({
+                x: alien.x + alienWidth / 2,
+                y: alien.y + alienHeight / 2,
+                width: JULES_LOGO_SPRITE[0].length * PIXEL_SIZE,
+                height: JULES_LOGO_SPRITE.length * PIXEL_SIZE,
+                speed: 2,
+                type: "double-laser",
+                status: 1,
+              });
+            }
+            explosionSound.play();
           }
-          explosionSound.play();
-        }
         }
       }
 
@@ -877,10 +883,12 @@ function update() {
         squidSquadTimer = 900; // 15 seconds at 60fps
       }
     }
-  });
+  }
 
   // Draw explosions
-  explosions.forEach((explosion) => {
+  // Optimization: Use standard for loop to avoid .forEach closure overhead
+  for (let i = 0; i < explosions.length; i++) {
+    const explosion = explosions[i];
     ctx.fillStyle = explosion.color;
     ctx.beginPath();
     ctx.arc(
@@ -891,11 +899,13 @@ function update() {
       Math.PI * 2,
     );
     ctx.fill();
-  });
+  }
 
   // Alien projectiles vs Player
   if (!gameConfig.isDemo) {
-    alienProjectiles.forEach((p) => {
+    // Optimization: Use standard for loop to avoid .forEach closure overhead
+    for (let i = 0; i < alienProjectiles.length; i++) {
+      const p = alienProjectiles[i];
       if (
         p.status === 1 &&
         p.x > player.x &&
@@ -906,14 +916,16 @@ function update() {
         p.status = 0;
         gameOver = true;
       }
-    });
+    }
   }
 
   // Projectiles vs Bunkers
-  const allProjectiles = [...playerProjectiles, ...alienProjectiles];
-  allProjectiles.forEach((p) => {
+  // Optimization: Remove array spread and .forEach to eliminate per-frame allocations and closures
+  for (let i = 0; i < playerProjectiles.length; i++) {
+    const p = playerProjectiles[i];
     if (p.status === 1) {
-      bunkers.forEach((bunker) => {
+      for (let j = 0; j < bunkers.length; j++) {
+        const bunker = bunkers[j];
         const blockWidth = PIXEL_SIZE * 2;
         const blockHeight = PIXEL_SIZE * 2;
         if (
@@ -929,9 +941,33 @@ function update() {
             p.status = 0; // Deactivate projectile
           }
         }
-      });
+      }
     }
-  });
+  }
+
+  for (let i = 0; i < alienProjectiles.length; i++) {
+    const p = alienProjectiles[i];
+    if (p.status === 1) {
+      for (let j = 0; j < bunkers.length; j++) {
+        const bunker = bunkers[j];
+        const blockWidth = PIXEL_SIZE * 2;
+        const blockHeight = PIXEL_SIZE * 2;
+        if (
+          p.x > bunker.x &&
+          p.x < bunker.x + bunkerWidth &&
+          p.y > bunker.y &&
+          p.y < bunker.y + bunkerHeight
+        ) {
+          const gridX = Math.floor((p.x - bunker.x) / blockWidth);
+          const gridY = Math.floor((p.y - bunker.y) / blockHeight);
+          if (bunker.grid[gridY] && bunker.grid[gridY][gridX] === 1) {
+            bunker.grid[gridY][gridX] = 0; // Destroy block
+            p.status = 0; // Deactivate projectile
+          }
+        }
+      }
+    }
+  }
 
   let activeAliens = 0;
   for (let c = 0; c < alienColumnCount; c++) {
@@ -1039,7 +1075,9 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
   // Optimization: Check if we can cache this sprite
   // We only cache if the color is a hex string (starts with #) or an object (stable reference)
   // Dynamic colors like rgba(...) used for powerups are excluded
-  const canCache = (typeof color === 'object') || (typeof color === 'string' && color.startsWith('#'));
+  const canCache =
+    typeof color === "object" ||
+    (typeof color === "string" && color.startsWith("#"));
 
   if (canCache) {
     if (!spriteCache.has(sprite)) {
@@ -1067,10 +1105,10 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
     const width = cols * pixelSize;
     const height = rows * pixelSize;
 
-    offscreen = document.createElement('canvas');
+    offscreen = document.createElement("canvas");
     offscreen.width = width;
     offscreen.height = height;
-    targetCtx = offscreen.getContext('2d');
+    targetCtx = offscreen.getContext("2d");
     targetX = 0;
     targetY = 0;
   }
@@ -1187,7 +1225,13 @@ function draw() {
       const alien = aliens[c][r];
       if (alien.status === 1) {
         if (alien.isSquid) {
-          drawPixelArt(SQUID_SPRITE, alien.x, alien.y, colors.squid, PIXEL_SIZE);
+          drawPixelArt(
+            SQUID_SPRITE,
+            alien.x,
+            alien.y,
+            colors.squid,
+            PIXEL_SIZE,
+          );
         } else {
           let sprite;
           const isDancing = Math.floor(animationFrame / 30) % 2 === 0;
@@ -1384,11 +1428,11 @@ function initGame(config) {
   gameLoop();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   const mode = document.body.dataset.gamemode;
-  if (mode === 'demo') {
+  if (mode === "demo") {
     initGame({ isDemo: true });
-  } else if (mode === 'play') {
+  } else if (mode === "play") {
     initGame({ isDemo: false });
   }
 });
