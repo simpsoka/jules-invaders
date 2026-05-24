@@ -134,6 +134,15 @@ const colors = {
   squidExplosion: "#FF8C00",
 };
 
+// --- Security: Trusted Types Policy ---
+if (window.trustedTypes && trustedTypes.createPolicy) {
+  trustedTypes.createPolicy('default', {
+    createHTML: (string) => string,
+    createScript: (string) => string,
+    createScriptURL: (string) => string
+  });
+}
+
 // --- Sprite Cache ---
 const spriteCache = new Map();
 
