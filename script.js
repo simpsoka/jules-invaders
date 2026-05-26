@@ -910,10 +910,16 @@ function update() {
   }
 
   // Projectiles vs Bunkers
-  const allProjectiles = [...playerProjectiles, ...alienProjectiles];
-  allProjectiles.forEach((p) => {
+  // Optimization: avoid array spread syntax and nested forEach in high-frequency update loop
+  // to prevent per-frame O(N) memory allocation and closure-related garbage collection overhead.
+  const totalProjectiles = playerProjectiles.length + alienProjectiles.length;
+  for (let i = 0; i < totalProjectiles; i++) {
+    const p = i < playerProjectiles.length
+      ? playerProjectiles[i]
+      : alienProjectiles[i - playerProjectiles.length];
     if (p.status === 1) {
-      bunkers.forEach((bunker) => {
+      for (let j = 0; j < bunkers.length; j++) {
+        const bunker = bunkers[j];
         const blockWidth = PIXEL_SIZE * 2;
         const blockHeight = PIXEL_SIZE * 2;
         if (
@@ -929,9 +935,9 @@ function update() {
             p.status = 0; // Deactivate projectile
           }
         }
-      });
+      }
     }
-  });
+  }
 
   let activeAliens = 0;
   for (let c = 0; c < alienColumnCount; c++) {
