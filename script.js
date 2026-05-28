@@ -804,40 +804,40 @@ function update() {
             p.y < alien.y + alienHeight
           ) {
             alien.status = 0;
-          p.status = 0;
-          if (alien.isSquid) {
-            score += 50;
-            createExplosion(
-              alien.x + alienWidth / 2,
-              alien.y + alienHeight / 2,
-              colors.squid,
-            );
-          } else {
-            score += 10;
-            explosions.push({
-              x: alien.x,
-              y: alien.y,
-              color: colors.explosion,
-              size: 30,
-              timer: 10,
-            });
-          }
+            p.status = 0;
+            if (alien.isSquid) {
+              score += 50;
+              createExplosion(
+                alien.x + alienWidth / 2,
+                alien.y + alienHeight / 2,
+                colors.squid,
+              );
+            } else {
+              score += 10;
+              explosions.push({
+                x: alien.x,
+                y: alien.y,
+                color: colors.explosion,
+                size: 30,
+                timer: 10,
+              });
+            }
 
-          // Add a chance to spawn a power-up
-          if (Math.random() < 0.1) {
-            // 10% chance
-            powerups.push({
-              x: alien.x + alienWidth / 2,
-              y: alien.y + alienHeight / 2,
-              width: JULES_LOGO_SPRITE[0].length * PIXEL_SIZE,
-              height: JULES_LOGO_SPRITE.length * PIXEL_SIZE,
-              speed: 2,
-              type: "double-laser",
-              status: 1,
-            });
+            // Add a chance to spawn a power-up
+            if (Math.random() < 0.1) {
+              // 10% chance
+              powerups.push({
+                x: alien.x + alienWidth / 2,
+                y: alien.y + alienHeight / 2,
+                width: JULES_LOGO_SPRITE[0].length * PIXEL_SIZE,
+                height: JULES_LOGO_SPRITE.length * PIXEL_SIZE,
+                speed: 2,
+                type: "double-laser",
+                status: 1,
+              });
+            }
+            explosionSound.play();
           }
-          explosionSound.play();
-        }
         }
       }
 
@@ -910,10 +910,21 @@ function update() {
   }
 
   // Projectiles vs Bunkers
-  const allProjectiles = [...playerProjectiles, ...alienProjectiles];
-  allProjectiles.forEach((p) => {
+  // Optimization: Removed array spread allocation and nested forEach loops
+  // to prevent per-frame memory allocation and GC overhead in the update loop
+  for (
+    let pIdx = 0;
+    pIdx < playerProjectiles.length + alienProjectiles.length;
+    pIdx++
+  ) {
+    const p =
+      pIdx < playerProjectiles.length
+        ? playerProjectiles[pIdx]
+        : alienProjectiles[pIdx - playerProjectiles.length];
+
     if (p.status === 1) {
-      bunkers.forEach((bunker) => {
+      for (let bIdx = 0; bIdx < bunkers.length; bIdx++) {
+        const bunker = bunkers[bIdx];
         const blockWidth = PIXEL_SIZE * 2;
         const blockHeight = PIXEL_SIZE * 2;
         if (
@@ -929,9 +940,9 @@ function update() {
             p.status = 0; // Deactivate projectile
           }
         }
-      });
+      }
     }
-  });
+  }
 
   let activeAliens = 0;
   for (let c = 0; c < alienColumnCount; c++) {
@@ -1039,7 +1050,9 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
   // Optimization: Check if we can cache this sprite
   // We only cache if the color is a hex string (starts with #) or an object (stable reference)
   // Dynamic colors like rgba(...) used for powerups are excluded
-  const canCache = (typeof color === 'object') || (typeof color === 'string' && color.startsWith('#'));
+  const canCache =
+    typeof color === "object" ||
+    (typeof color === "string" && color.startsWith("#"));
 
   if (canCache) {
     if (!spriteCache.has(sprite)) {
@@ -1067,10 +1080,10 @@ function drawPixelArt(sprite, x, y, color, pixelSize) {
     const width = cols * pixelSize;
     const height = rows * pixelSize;
 
-    offscreen = document.createElement('canvas');
+    offscreen = document.createElement("canvas");
     offscreen.width = width;
     offscreen.height = height;
-    targetCtx = offscreen.getContext('2d');
+    targetCtx = offscreen.getContext("2d");
     targetX = 0;
     targetY = 0;
   }
@@ -1187,7 +1200,13 @@ function draw() {
       const alien = aliens[c][r];
       if (alien.status === 1) {
         if (alien.isSquid) {
-          drawPixelArt(SQUID_SPRITE, alien.x, alien.y, colors.squid, PIXEL_SIZE);
+          drawPixelArt(
+            SQUID_SPRITE,
+            alien.x,
+            alien.y,
+            colors.squid,
+            PIXEL_SIZE,
+          );
         } else {
           let sprite;
           const isDancing = Math.floor(animationFrame / 30) % 2 === 0;
@@ -1384,11 +1403,11 @@ function initGame(config) {
   gameLoop();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   const mode = document.body.dataset.gamemode;
-  if (mode === 'demo') {
+  if (mode === "demo") {
     initGame({ isDemo: true });
-  } else if (mode === 'play') {
+  } else if (mode === "play") {
     initGame({ isDemo: false });
   }
 });
