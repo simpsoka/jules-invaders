@@ -1,0 +1,3 @@
+## 2026-06-17 - Custom Focus Indicators and Discoverability
+**Learning:** Canvas-based arcade games lack innate interaction discoverability, and custom "retro" buttons often lose default browser focus rings when styled heavily. It is crucial to explicitly define `:focus-visible` styles for these elements to maintain keyboard accessibility, and to provide explicit on-screen text hints for controls since canvas elements cannot surface them naturally.
+**Action:** Always provide explicit text hints for core interactions outside the canvas, and implement high-contrast `:focus-visible` states (e.g., dashed outlines) for any custom-styled UI elements.
