@@ -1357,6 +1357,8 @@ function initGame(config) {
     "ontouchstart" in window || navigator.maxTouchPoints > 0;
   if (isTouchDevice) {
     mobileControls.style.display = "flex";
+    const controlsHint = document.getElementById("controlsHint");
+    if (controlsHint) controlsHint.style.display = "none";
 
     leftBtn.addEventListener("touchstart", (e) => {
       e.preventDefault();
