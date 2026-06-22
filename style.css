@@ -43,6 +43,25 @@ canvas {
   color: #fff;
 }
 
+.play-button:focus-visible {
+  outline: 3px solid #FFF;
+  outline-offset: 4px;
+}
+
+.controls-hint {
+  position: absolute;
+  bottom: 5px;
+  font-size: 10px;
+  color: rgba(255, 215, 0, 0.5);
+  pointer-events: none;
+  user-select: none;
+}
+
+#playAgainBtn:focus-visible {
+  outline: 3px solid #FFF;
+  outline-offset: 4px;
+}
+
 h1 {
   display: none;
 }
