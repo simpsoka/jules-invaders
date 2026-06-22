@@ -23,6 +23,7 @@ test.describe('CSP and Basic Loading', () => {
     const cspMeta = await page.$('meta[http-equiv="Content-Security-Policy"]');
     expect(cspMeta).not.toBeNull();
     const content = await cspMeta.getAttribute('content');
+    expect(content).toContain("upgrade-insecure-requests");
     expect(content).toContain("default-src 'self'");
     expect(content).toContain("script-src 'self'");
     expect(content).not.toContain("'unsafe-inline'");
@@ -51,6 +52,7 @@ test.describe('CSP and Basic Loading', () => {
     const cspMeta = await page.$('meta[http-equiv="Content-Security-Policy"]');
     expect(cspMeta).not.toBeNull();
     const content = await cspMeta.getAttribute('content');
+    expect(content).toContain("upgrade-insecure-requests");
     expect(content).toContain("default-src 'self'");
     expect(content).toContain("script-src 'self'");
     expect(content).not.toContain("'unsafe-inline'");
