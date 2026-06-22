@@ -910,8 +910,7 @@ function update() {
   }
 
   // Projectiles vs Bunkers
-  const allProjectiles = [...playerProjectiles, ...alienProjectiles];
-  allProjectiles.forEach((p) => {
+  const checkBunkerCollision = (p) => {
     if (p.status === 1) {
       bunkers.forEach((bunker) => {
         const blockWidth = PIXEL_SIZE * 2;
@@ -931,7 +930,9 @@ function update() {
         }
       });
     }
-  });
+  };
+  playerProjectiles.forEach(checkBunkerCollision);
+  alienProjectiles.forEach(checkBunkerCollision);
 
   let activeAliens = 0;
   for (let c = 0; c < alienColumnCount; c++) {
