@@ -10,7 +10,8 @@
 <body data-gamemode="play">
   <div id="gameContainer">
     <h1>Jules Invaders</h1>
-    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="desktopHints" aria-hidden="true">CONTROLS: LEFT/RIGHT TO MOVE, SPACE TO SHOOT</div>
+    <canvas id="gameCanvas" role="application" aria-label="Jules Invaders game. Use left and right arrow keys to move, spacebar to shoot." width="800" height="600"></canvas>
     <button id="playAgainBtn">Play Again</button>
   </div>
   <div id="mobileControls">

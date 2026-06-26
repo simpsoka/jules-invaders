@@ -38,9 +38,20 @@ canvas {
   font-size: 20px;
 }
 
-#playAgainBtn:hover {
+#playAgainBtn:hover,
+#playAgainBtn:focus-visible {
   background-color: #006400;
   color: #fff;
+}
+
+#desktopHints {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  pointer-events: none;
+  font-size: 10px;
+  text-align: left;
+  z-index: 10;
 }
 
 h1 {
@@ -120,7 +131,8 @@ h1 {
   cursor: pointer;
 }
 
-.play-button:hover {
+.play-button:hover,
+.play-button:focus-visible {
   background-color: #006400;
   color: #fff;
 }
