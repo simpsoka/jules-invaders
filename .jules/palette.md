@@ -1,0 +1,3 @@
+## 2024-06-26 - [Canvas Game Accessibility and Discoverability]
+**Learning:** Canvas-based games lack innate interaction discoverability. Screen readers need `<canvas>` elements to explicitly include `role="application"` and an `aria-label` to pass keystrokes. Visual users also benefit from explicit text hints for core controls outside the `<canvas>` element. Using `pointer-events: none` ensures these overlays don't block interaction.
+**Action:** Always add `role="application"` and an descriptive `aria-label` to interactive canvases. Add visual text hints for controls and ensure focus indicators exist with `:focus-visible` for keyboard accessibility.
