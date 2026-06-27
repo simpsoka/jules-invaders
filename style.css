@@ -38,9 +38,19 @@ canvas {
   font-size: 20px;
 }
 
-#playAgainBtn:hover {
+#playAgainBtn:hover,
+#playAgainBtn:focus-visible {
   background-color: #006400;
   color: #fff;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+.controls-hint {
+  margin-top: 20px;
+  font-size: 12px;
+  color: #FFD700;
+  pointer-events: none;
 }
 
 h1 {
@@ -87,9 +97,12 @@ h1 {
   touch-action: manipulation; /* Improve touch responsiveness */
 }
 
-#mobileControls button:active {
+#mobileControls button:active,
+#mobileControls button:focus-visible {
   background-color: #006400;
   color: #fff;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }
 
 .overlay {
@@ -120,7 +133,10 @@ h1 {
   cursor: pointer;
 }
 
-.play-button:hover {
+.play-button:hover,
+.play-button:focus-visible {
   background-color: #006400;
   color: #fff;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
 }

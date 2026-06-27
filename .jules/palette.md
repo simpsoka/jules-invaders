@@ -1,0 +1,3 @@
+## 2024-05-24 - Accessibility focus styles and discovery
+**Learning:** Canvas-based games lack innate interaction discoverability for keyboard users, and relying purely on hover states excludes keyboard navigators. Adding `:focus-visible` to interactive elements and `role="application"` with an `aria-label` to the canvas dramatically improves keyboard navigation and screen reader support without breaking visual styling.
+**Action:** Always ensure canvas elements have `role="application"` and `aria-label` attributes, append `:focus-visible` styles alongside existing hover/active styles for custom controls, and add explicit textual interaction hints overlaid on the canvas (with `pointer-events: none`) to enhance discoverability.
