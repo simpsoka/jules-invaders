@@ -38,9 +38,15 @@ canvas {
   font-size: 20px;
 }
 
-#playAgainBtn:hover {
+#playAgainBtn:hover, #playAgainBtn:focus-visible {
   background-color: #006400;
   color: #fff;
+}
+
+.controls-hint {
+  margin-top: 30px;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 h1 {
@@ -87,7 +93,7 @@ h1 {
   touch-action: manipulation; /* Improve touch responsiveness */
 }
 
-#mobileControls button:active {
+#mobileControls button:active, #mobileControls button:focus-visible {
   background-color: #006400;
   color: #fff;
 }
@@ -120,7 +126,7 @@ h1 {
   cursor: pointer;
 }
 
-.play-button:hover {
+.play-button:hover, .play-button:focus-visible {
   background-color: #006400;
   color: #fff;
 }
