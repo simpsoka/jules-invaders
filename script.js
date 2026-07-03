@@ -910,8 +910,9 @@ function update() {
   }
 
   // Projectiles vs Bunkers
-  const allProjectiles = [...playerProjectiles, ...alienProjectiles];
-  allProjectiles.forEach((p) => {
+  // Bolt Optimization: Avoid per-frame array allocation with spread operator
+  // Sequential iteration prevents garbage collection pressure during the update loop
+  const checkProjectileBunkerCollision = (p) => {
     if (p.status === 1) {
       bunkers.forEach((bunker) => {
         const blockWidth = PIXEL_SIZE * 2;
@@ -931,7 +932,9 @@ function update() {
         }
       });
     }
-  });
+  };
+  playerProjectiles.forEach(checkProjectileBunkerCollision);
+  alienProjectiles.forEach(checkProjectileBunkerCollision);
 
   let activeAliens = 0;
   for (let c = 0; c < alienColumnCount; c++) {
